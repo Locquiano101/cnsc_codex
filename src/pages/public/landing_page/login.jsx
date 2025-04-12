@@ -35,9 +35,13 @@ export default function LoginSection() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg("");
+
     try {
       await handleLogin(username, password, (user) => {
-        console.log("User's organization:", user.position);
+        // Log the organization information instead of position for clarity
+        console.log("User's organization:", user.organization);
+
+        // Extract role from user's position
         const role = user.position.toLowerCase();
         if (role === "admin") {
           navigate("/admin");

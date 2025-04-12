@@ -208,7 +208,8 @@ export default function RegisterSection() {
       </div>
 
       {/* Progress Bar */}
-      <div className="relative container mx-auto py-8 w-[80%] pb-7">
+      <div></div>
+      <div className="relative container mx-auto py-8 w-[90%] ">
         {/* Base horizontal line */}
         <div className="absolute top-1/2 left-0 right-0 h-2 bg-gray-300"></div>
         {/* Completed portion overlay */}
@@ -217,7 +218,7 @@ export default function RegisterSection() {
           style={{ width: `${(registrationStep / (steps.length - 1)) * 100}%` }}
         ></div>
         {/* Circles with icons */}
-        <div className="relative flex justify-between items-center">
+        <div className="relative flex w-full justify-around items-center">
           {steps.map((step, index) => {
             const isCompleted = index < registrationStep;
             const isActive = index === registrationStep;

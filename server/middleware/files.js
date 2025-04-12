@@ -119,55 +119,7 @@ export const UploadSingleFile = (req, res, next) => {
     next();
   });
 };
-
-export const getOrgFiles = async (req, res) => {
-  const { orgFolder, orgDocumentClassification, type } = req.query;
-
-  if (!orgFolder || !orgDocumentClassification || !type) {
-    return res.status(400).json({ error: "Missing query parameters" });
-  }
-
-  let subDir = "";
-  if (type === "document") {
-    subDir = "documents";
-  } else if (type === "photo") {
-    subDir = "photos";
-  } else {
-    subDir = "others";
-  }
-
-  const directory = path.join(
-    process.cwd(),
-    "../public",
-    orgFolder,
-    orgDocumentClassification,
-    subDir
-  );
-
-  async function getFilesRecursively(dir) {
-    let results = [];
-    const list = await fsPromises.readdir(dir, { withFileTypes: true });
-    for (const file of list) {
-      const fullPath = path.join(dir, file.name);
-      if (file.isDirectory()) {
-        results = results.concat(await getFilesRecursively(fullPath));
-      } else {
-        results.push(fullPath);
-      }
-    }
-    return results;
-  }
-
-  try {
-    await fsPromises.access(directory);
-    const files = await getFilesRecursively(directory);
-    return res.json({ files });
-  } catch (error) {
-    console.error("Error reading files:", error);
-    return res.status(500).json({ error: "Could not read files" });
-  }
-};
-
+ 
 export const getAllFile = async (req, res) => {
   const baseDir = path.join(process.cwd(), "../public");
 

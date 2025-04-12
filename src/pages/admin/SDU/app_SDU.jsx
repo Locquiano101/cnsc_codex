@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { handleLogout } from "../../../api/login_api";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -10,7 +9,8 @@ import {
   faGears,
   faHome,
 } from "@fortawesome/free-solid-svg-icons";
-import OverviewContent from "./overview_headboard";
+import OverviewContent from "./overview";
+import AccreditationList from "./accreditation";
 
 export default function StudentDevelopmentUnitSection() {
   const navigate = useNavigate();
@@ -22,11 +22,10 @@ export default function StudentDevelopmentUnitSection() {
       navigate("/login");
     } else {
       const storedUser = JSON.parse(localStorage.getItem("user"));
-      console.log(storedUser.organization);
     }
   }, [navigate]);
 
-  const [activeContent, setActiveContent] = useState("documents");
+  const [activeContent, setActiveContent] = useState("accreditation");
 
   const renderContent = () => {
     switch (activeContent) {
@@ -35,7 +34,7 @@ export default function StudentDevelopmentUnitSection() {
       case "documents":
         return <> this is documents content</>;
       case "accreditation":
-        return <> this is accreditation content</>;
+        return <AccreditationList />;
       case "post":
         return <> this is posts content</>;
       case "settings":

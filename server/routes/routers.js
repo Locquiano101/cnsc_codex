@@ -11,6 +11,7 @@ import {
   getAllImageFile,
   UploadMultipleFiles,
 } from "../middleware/files.js";
+import { getOrganizations } from "../controllers/organization.js";
 
 const router = express.Router();
 
@@ -22,7 +23,10 @@ router.get("/get-all-files", getAllFile);
 router.get("/get-all-images", getAllImageFile);
 
 router.post("/accredit", UploadMultipleFiles, ProcessAccreditation);
-router.get("/accredit", GetAllAccreditations);
+router.put("/edit-accreditation/:id", ProcessAccreditation);
+router.get("/get-accreditation", GetAllAccreditations);
+// router.get("/get-accreditation", getOrganizations);
+
 router.get("/generate-otp", ConfirmAccreditation);
 
 export default router;

@@ -48,7 +48,7 @@ export const OrganizationComponent = ({ formData, onChange, handleSubmit }) => {
         <div className="w-[90%]">
           <div className="w-full h-10 flex">
             <div className="w-[20%]">
-              <div className="w-20 ml-14 h-full bg-white [clip-path:polygon(50%_0%,0%_100%,100%_100%)] shadow-2xl"></div>
+              <div className="w-20 ml-16 h-full bg-white [clip-path:polygon(50%_0%,0%_100%,100%_100%)] shadow-2xl"></div>
             </div>
             <div className="w-[20%] h-full"></div>
 
