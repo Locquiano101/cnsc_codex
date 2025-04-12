@@ -225,7 +225,7 @@ export default function RegisterSection() {
                 {/* Step (circle + label + triangle) */}
                 <div className="relative flex flex-col items-center w-fit">
                   <div
-                    className={`w-18 h-18 rounded-full flex items-center justify-center text-white border-4 border-white ${circleColor}`}
+                    className={`w-12 h-12 rounded-full flex items-center justify-center text-white ${circleColor}`}
                   >
                     <FontAwesomeIcon
                       icon={stepIcons[index]}
@@ -256,7 +256,7 @@ export default function RegisterSection() {
                 </div>
                 {/* Connecting line (if not the last step) */}
                 {index < steps.length - 1 && (
-                  <div className={`w-30 h-1 -mt-5 ${lineColor}`} />
+                  <div className={`w-20 h-1  ${lineColor}`} />
                 )}
               </div>
             );

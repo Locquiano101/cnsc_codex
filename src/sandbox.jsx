@@ -1,20 +1,17 @@
+import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faClipboard,
   faEye,
+  faEyeSlash,
   faMagnifyingGlass,
   faSearch,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function Sandbox() {
-  //   return (
-  //     <>
-  //       <div className="h-screen w-screen bg-cnsc-primary-color ">
-  //         <div className="h-24  bg-cnsc-secondary-color"></div>
-  //         <div className="h-full bg-blue-600"></div>
-  //       </div>
-  //     </>
-  //   );
+  // Local state for toggling password visibility
+  const [showPassword, setShowPassword] = useState(false);
+
   return (
     <div className="bg-[url('/general/cnscsch.png')] bg-cover bg-center h-screen flex flex-col">
       <div id="parent" className="flex flex-col h-full">
@@ -23,7 +20,7 @@ export default function Sandbox() {
             <img
               className="h-[3rem] w-auto"
               src="/general/cnsc_codex.png"
-              alt=""
+              alt="CNSC Codex Logo"
             />
             <span className="text-sm text-white font-bold font-sans">
               CNSC CODEX
@@ -62,8 +59,8 @@ export default function Sandbox() {
         </header>
 
         <section className="w-screen h-full flex items-center justify-end px-20 pl-25 pr-24">
-          <div className=" h-full w-5 flex justify-center items-start pt-5 pb-5">
-            <div className=" bg-cnsc-white-color h-2/3 w-0.5"></div>
+          <div className="h-full w-5 flex justify-center items-start pt-5 pb-5">
+            <div className="bg-cnsc-white-color h-2/3 w-0.5"></div>
           </div>
           <div className="w-2/3 h-[17rem] rounded-2xl text-8xl pl-22 ">
             <h1
@@ -76,7 +73,7 @@ export default function Sandbox() {
               CNSC
             </h1>
             <h1
-              className=" text-cnsc-secondary-color font-bold"
+              className="text-cnsc-secondary-color font-bold"
               style={{
                 textShadow:
                   "1px 1px 0 maroon, -1px -1px 0 maroon, 1px -1px 0 maroon, -1px 1px 0 maroon",
@@ -84,10 +81,10 @@ export default function Sandbox() {
             >
               CODEX
             </h1>
-            <h1 className=" text-xs text-cnsc-white-color italic">
-              Document Tracking and{" "}
+            <h1 className="text-xs text-cnsc-white-color italic">
+              Document Tracking and
             </h1>
-            <h1 className=" text-xs text-cnsc-white-color italic ">
+            <h1 className="text-xs text-cnsc-white-color italic">
               Data Management for Student Organizations
             </h1>
           </div>
@@ -96,31 +93,35 @@ export default function Sandbox() {
             <input
               type="text"
               placeholder="Username"
-              className=" bg-white  text-black-800 w-full px-4 py-2 rounded-lg border-1  "
+              className="bg-white text-black-800 w-full px-4 py-2 rounded-lg border-1"
             />
-            <div className=" bg-white mt-2 text-black-800 w-full  rounded-lg border-1 relative">
+            <div className="bg-white mt-2 text-black-800 w-full rounded-lg border-1 relative">
               <input
-                type="text"
+                type={showPassword ? "text" : "password"}
                 placeholder="Password"
-                className=" bg-white  text-black-800 w-full px-4 py-2 rounded-lg   "
+                className={`bg-white w-full px-4 py-2 rounded-lg outline-none ${
+                  showPassword ? "text-base" : "text-sm"
+                }`}
               />
               <FontAwesomeIcon
-                icon={faEye}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2"
+                icon={showPassword ? faEyeSlash : faEye}
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 cursor-pointer"
               />
             </div>
-            <button className="bg-cnsc-primary-color mt-2 text-cnsc-white-color -800 w-full px-4 py-2 rounded-lg border-1 ">
+
+            <button className="bg-cnsc-primary-color mt-2 text-cnsc-white-color w-full px-4 py-2 rounded-lg border-1">
               Login
             </button>
-            <div className="w-full h-10 flex justify-center text-xs items-center ">
+            <div className="w-full h-10 flex justify-center text-xs items-center">
               <hr className="flex-1" />
-              <button className=" px-2"> Register</button>
+              <button className="px-2">Register</button>
               <hr className="flex-1" />
               <hr />
             </div>
           </div>
-          <div className=" h-full w-5 flex justify-center items-end pt-5 pb-5">
-            <div className=" bg-cnsc-white-color h-2/3 w-0.5"></div>
+          <div className="h-full w-5 flex justify-center items-end pt-5 pb-5">
+            <div className="bg-cnsc-white-color h-2/3 w-0.5"></div>
           </div>
         </section>
       </div>

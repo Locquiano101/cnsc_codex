@@ -46,19 +46,7 @@ export const OrganizationComponent = ({ formData, onChange, handleSubmit }) => {
         onSubmit={handleSubmit}
       >
         <div className="w-[90%]">
-          <div className="w-full h-10 flex">
-            <div className="w-[20%]">
-              <div className="w-20 ml-14 h-full bg-white [clip-path:polygon(50%_0%,0%_100%,100%_100%)] shadow-2xl"></div>
-            </div>
-            <div className="w-[20%] h-full"></div>
-
-            <div className="w-[20%] h-full"></div>
-
-            <div className="w-[20%] h-full"></div>
-
-            <div className="w-[20%] h-full"></div>
-          </div>
-          <div className=" pt-10  pl-10 pr-10 bg-white">
+          <div className=" pt-10  pl-10 pr-10 bg-white mt-2">
             {/* Organization Section */}
             <section>
               <div className="mb-4 font-semibold text-lg flex items-center">
@@ -283,18 +271,7 @@ export const AdviserComponent = ({
         onSubmit={handleSubmit}
       >
         <div className="w-[90%]">
-          <div className="w-full h-10 flex">
-            <div className="w-[20%] h-full"></div>
-            <div className="w-[20%]">
-              <div className="w-20 ml-16 h-full bg-white [clip-path:polygon(50%_0%,0%_100%,100%_100%)] shadow-2xl"></div>
-            </div>
-            <div className="w-[20%] h-full"></div>
-
-            <div className="w-[20%] h-full"></div>
-
-            <div className="w-[20%] h-full"></div>
-          </div>
-          <div className=" pt-10  pl-10 pr-10 bg-white shadow-2xl">
+          <div className=" pt-10  pl-10 pr-10 bg-white shadow-2xl mt-2">
             {/* Adviser Section */}
             <section className="mt-4">
               <div className="mb-2 font-semibold text-lg flex items-center">
@@ -411,18 +388,6 @@ export const FileUploadComponent = ({
         className=" space-y-4 flex  flex-col items-center my-5"
       >
         <div className="w-[90%]">
-          <div className="w-full h-10 flex">
-            <div className="w-[20%] h-full"></div>
-
-            <div className="w-[20%] h-full"></div>
-            <div className="w-[20%]">
-              <div className="w-20 ml-19 h-full bg-white [clip-path:polygon(50%_0%,0%_100%,100%_100%)] shadow-2xl"></div>
-            </div>
-            <div className="w-[20%] h-full"></div>
-
-            <div className="w-[20%] h-full"></div>
-          </div>
-
           {/* New container div for file uploads */}
           <div className="p-4  bg-white shadow-2xl">
             <ReusableFileUpload
@@ -459,18 +424,6 @@ export const ReviewComponent = ({
   return (
     <div className="w-full min-h-full flex justify-center mt-5">
       <div className="w-[90%]  ">
-        <div className="w-full h-10 flex">
-          <div className="w-[20%] h-full"></div>
-
-          <div className="w-[20%] h-full"></div>
-
-          <div className="w-[20%] h-full"></div>
-          <div className="w-[20%]">
-            <div className="w-20 ml-21 h-full bg-white [clip-path:polygon(50%_0%,0%_100%,100%_100%)] shadow-2xl"></div>
-          </div>
-
-          <div className="w-[20%] h-full"></div>
-        </div>
         <div className="container mx-auto p-10 bg-white shadow-2xl">
           <section className="mt-4 ">
             {/* Header */}
@@ -641,42 +594,46 @@ export const EmailConfirmationComponent = ({ email, onConfirm, onResend }) => {
   };
 
   return (
-    <section className="mt-4">
-      <div className="font-semibold text-lg flex items-center mb-4">
-        <h1 className="w-2/5 max-w-fit mr-3">Email Confirmation</h1>
+    <div className="w-full min-h-full flex justify-center ">
+      <div className="w-[90%] mt-2 ">
+        <section className="mt-4 p-4 bg-white">
+          <div className="font-semibold text-lg flex items-center mb-4">
+            <h1 className="w-2/5 max-w-fit mr-3">Email Confirmation</h1>
+          </div>
+          <p className="text-sm mb-4">
+            A confirmation code has been sent to <strong>{email}</strong>.
+            Please enter the code below to verify your email address.
+          </p>
+          <form onSubmit={handleSubmit} className="p-4 space-y-4">
+            <div className="flex flex-col gap-1">
+              <label htmlFor="confirmationCode">Confirmation Code</label>
+              <input
+                type="text"
+                id="confirmationCode"
+                name="confirmationCode"
+                className="border py-2 px-4 rounded-2xl"
+                value={code}
+                onChange={handleCodeChange}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <button
+                type="button"
+                onClick={onResend}
+                className="text-blue-600 text-sm underline"
+              >
+                Resend Code
+              </button>
+              <button
+                type="submit"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-2xl"
+              >
+                Confirm Email
+              </button>
+            </div>
+          </form>
+        </section>
       </div>
-      <p className="text-sm mb-4">
-        A confirmation code has been sent to <strong>{email}</strong>. Please
-        enter the code below to verify your email address.
-      </p>
-      <form onSubmit={handleSubmit} className="p-4 space-y-4">
-        <div className="flex flex-col gap-1">
-          <label htmlFor="confirmationCode">Confirmation Code</label>
-          <input
-            type="text"
-            id="confirmationCode"
-            name="confirmationCode"
-            className="border py-2 px-4 rounded-2xl"
-            value={code}
-            onChange={handleCodeChange}
-          />
-        </div>
-        <div className="flex items-center justify-between">
-          <button
-            type="button"
-            onClick={onResend}
-            className="text-blue-600 text-sm underline"
-          >
-            Resend Code
-          </button>
-          <button
-            type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-2xl"
-          >
-            Confirm Email
-          </button>
-        </div>
-      </form>
-    </section>
+    </div>
   );
 };
