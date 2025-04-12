@@ -1,17 +1,25 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faUsers,
+  faUserTie,
+  faCloudUploadAlt,
+  faClipboardCheck,
+  faEnvelope,
+} from "@fortawesome/free-solid-svg-icons";
 import { useState } from "react";
 import {
   FileUploadComponent,
   OrganizationComponent,
   ReviewComponent,
   EmailConfirmationComponent,
+  AdviserComponent,
 } from "./register_components";
-
 import { API_ROUTER } from "/src/App.jsx";
 import axios from "axios";
 
+// Define accepted file types for each file field
 const fileFields = {
   "org logo": { label: "Organization Logo", accept: "photos/*" },
-
   "Constitution & By-laws": {
     label: "Constitution & By-laws",
     accept: ".pdf,.doc,.docx",
@@ -20,7 +28,6 @@ const fileFields = {
     label: "Pledge Against Hazing",
     accept: ".pdf,.doc,.docx",
   },
-
   Rosters: { label: "Rosters", accept: ".pdf,.doc,.docx" },
   "President Info Sheet": {
     label: "President Info Sheet",
@@ -37,51 +44,54 @@ const fileFields = {
 };
 
 export default function RegisterSection() {
-  const steps = ["Organization", "File Upload", "Review", "Email confirmation"];
+  // Define the step labels
+  const steps = [
+    "Organization",
+    "Adviser",
+    "File Upload",
+    "Review",
+    "Email confirmation",
+  ];
+
+  // Define state for the current registration step, organization form, and documents.
   const [registrationStep, setRegistrationStep] = useState(0);
   const [orgFormData, setOrgFormData] = useState({});
   const [documentFormData, setDocumentFormData] = useState({});
 
-  // Move to the next step
+  // Handlers for advancing steps in the registration process.
   const handleNext = () => {
     if (registrationStep < steps.length - 1) {
       setRegistrationStep((prev) => prev + 1);
     }
   };
 
-  // Organization Info submission
+  // Handle organization information form submission.
   const handleOrgInfoSubmit = (e) => {
     e.preventDefault();
     console.log("Organization Data:", orgFormData);
     handleNext();
   };
 
-  // File Upload submission
-  const handleFileUploadSubmit = (uploadedFiles, key) => {
+  // Handle file upload submission.
+  const handleFileUploadSubmit = (uploadedFiles) => {
     setDocumentFormData(uploadedFiles);
     console.log("Uploaded files:", uploadedFiles);
     handleNext();
   };
 
-  // Allow returning to the Organization form for edits
+  // Allow editing organization information.
   const handleEdit = () => setRegistrationStep(0);
 
-  // Handler to update file names (if needed in your workflow)
+  // Stub for file name update logic.
   const handleFileNameUpdate = (key, fileName) => {
-    setOrgRegistrationDataLoad((prev) => ({
-      ...prev,
-      org_documents: {
-        ...prev.org_documents,
-        [key]: fileName,
-      },
-    }));
+    // Your implementation if the file name needs to be updated.
   };
 
-  // Final submission function (unchanged)
+  // Final submission function after email confirmation.
   const handleFinalSubmit = async () => {
     const formDataToSubmit = new FormData();
 
-    // Append text fields from orgFormData
+    // Append organization and adviser text fields.
     formDataToSubmit.append("org_username", orgFormData.organizationUsername);
     formDataToSubmit.append("org_password", orgFormData.organizationPassword);
     formDataToSubmit.append("adviser_username", orgFormData.adviserUsername);
@@ -92,7 +102,7 @@ export default function RegisterSection() {
     formDataToSubmit.append("org_class", orgFormData.classification);
     formDataToSubmit.append("org_president", orgFormData.organizationPresident);
 
-    // Append classification-specific fields
+    // Classification-specific fields.
     if (orgFormData.classification === "Local") {
       formDataToSubmit.append("department", orgFormData.department);
       formDataToSubmit.append("course", orgFormData.course);
@@ -107,7 +117,6 @@ export default function RegisterSection() {
       orgFormData.adviserDepartment
     );
 
-    // Optionally append accreditation type if it exists
     if (orgFormData.accreditation_type) {
       formDataToSubmit.append(
         "accreditation_type",
@@ -115,14 +124,13 @@ export default function RegisterSection() {
       );
     }
 
-    // Additional fields for folder and document classification
+    // Additional fields.
     formDataToSubmit.append("orgFolder", orgFormData.organizationName);
     formDataToSubmit.append("orgDocumentClassification", "Accreditation");
 
-    // Append file fields from documentFormData
+    // Append files from documentFormData.
     Object.entries(documentFormData).forEach(([key, file]) => {
       if (file && file.type) {
-        // Append based on file type
         if (file.type.startsWith("image/")) {
           formDataToSubmit.append("photo", file);
           console.log("Photo appended:", key);
@@ -135,30 +143,27 @@ export default function RegisterSection() {
           formDataToSubmit.append("document", file);
           console.log("Document appended:", key);
         } else {
-          // Fallback: append with the original key
           formDataToSubmit.append(key, file);
           console.log("Other file appended:", key);
         }
-        // Optionally send file name along with the file
+        // Optionally include the file name.
         formDataToSubmit.append(`${key}`, file.name);
       }
     });
 
-    // Debug: log each FormData entry (for development purposes)
+    // Debug log for form data entries.
     for (let [key, value] of formDataToSubmit.entries()) {
       console.log(key, value);
     }
     console.log("Final Org Form Data:", orgFormData);
 
-    // Submit the data using axios
+    // Submit the data using axios.
     try {
       const response = await axios.post(
         `${API_ROUTER}/accredit`,
         formDataToSubmit,
         {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+          headers: { "Content-Type": "multipart/form-data" },
         }
       );
       if (response.status === 200) {
@@ -172,82 +177,114 @@ export default function RegisterSection() {
     }
   };
 
-  // New Email Confirmation handlers
+  // Handle email confirmation and proceed with final submission.
   const handleEmailConfirmation = (code) => {
     console.log("Entered confirmation code:", code);
-    // Once email is confirmed, you can trigger the final submission
-    // Here, we assume the code is valid and proceed with the final API call.
+    // Assume confirmation is successful and then submit final data.
     handleFinalSubmit();
   };
 
+  // Handler to re-send the confirmation email.
   const handleResendEmail = () => {
     console.log("Resending confirmation email...");
-    // Implement your logic to re-send the confirmation code (e.g., call an API endpoint)
+    // Implement your email re-send logic (API call, etc.)
   };
 
+  // Define the icons for each registration step.
+  const stepIcons = [
+    <FontAwesomeIcon icon={faUsers} className="text-2xl" />,
+    <FontAwesomeIcon icon={faUserTie} className="text-2xl" />,
+    <FontAwesomeIcon icon={faCloudUploadAlt} className="text-2xl" />,
+    <FontAwesomeIcon icon={faClipboardCheck} className="text-2xl" />,
+    <FontAwesomeIcon icon={faEnvelope} className="text-2xl" />,
+  ];
+
   return (
-    <div className="h-screen">
+    <div className="min-h-screen bg-[#E6E6E6] ">
       {/* Header */}
       <div className="h-auto px-8 flex items-center bg-cnsc-primary-color">
         <img src="/general/cnsc_codex_ver_2.png" className="h-16" alt="logo" />
         <p className="text-white text-xl ml-4">Register Organization</p>
       </div>
 
-      {/* Steps Indicator */}
-      <div className="container mx-auto flex flex-col">
-        <div className="flex h-auto p-4 justify-around items-center gap-4 mb-4">
-          {steps.map((step, index) => (
-            <div
-              key={index}
-              className={`h-24 w-24 rounded-full transition-all duration-500 flex items-center justify-center text-center text-sm font-semibold ${
-                registrationStep === index
-                  ? "h-32 w-32 bg-cnsc-secondary-color text-white"
-                  : "bg-gray-300 text-black"
-              }`}
-              title={step}
-            >
-              {step}
-            </div>
-          ))}
+      {/* Progress Bar */}
+      <div className="relative container mx-auto py-8 w-[80%] pb-7">
+        {/* Base horizontal line */}
+        <div className="absolute top-1/2 left-0 right-0 h-2 bg-gray-300"></div>
+        {/* Completed portion overlay */}
+        <div
+          className="absolute top-1/2 left-0 h-2 bg-green-500"
+          style={{ width: `${(registrationStep / (steps.length - 1)) * 100}%` }}
+        ></div>
+        {/* Circles with icons */}
+        <div className="relative flex justify-between items-center">
+          {steps.map((step, index) => {
+            const isCompleted = index < registrationStep;
+            const isActive = index === registrationStep;
+            let circleColor = "bg-gray-400";
+            if (isCompleted) {
+              circleColor = "bg-green-500";
+            } else if (isActive) {
+              circleColor = "bg-teal-500";
+            }
+            return (
+              <div key={index} className="flex flex-col relative items-center">
+                {/* Circle with Font Awesome icon */}
+                <div
+                  className={`h-15 w-15 rounded-full flex items-center justify-center text-white font-semibold border-2 border-white ${circleColor}`}
+                >
+                  {stepIcons[index]}
+                </div>
+                {/* Label shown below the circle */}
+                <span className="absolute -bottom-8 w-100 mt-2 text-xs text-center font-bold">
+                  {step}
+                </span>
+              </div>
+            );
+          })}
         </div>
-
-        {/* Step Components */}
-        {registrationStep === 0 && (
-          <OrganizationComponent
-            formData={orgFormData}
-            onChange={setOrgFormData}
-            handleSubmit={handleOrgInfoSubmit}
-          />
-        )}
-
-        {registrationStep === 1 && (
-          <FileUploadComponent
-            fields={fileFields}
-            initialFiles={documentFormData}
-            handleSubmit={handleFileUploadSubmit}
-            onReturn={() => setRegistrationStep(0)}
-          />
-        )}
-
-        {registrationStep === 2 && (
-          <ReviewComponent
-            formData={orgFormData}
-            uploadedFiles={documentFormData}
-            onEdit={handleEdit}
-            onFileNameUpdate={handleFileNameUpdate}
-            // Instead of directly calling final submission here, move to email confirmation step.
-            onFinalSubmit={() => setRegistrationStep(3)}
-          />
-        )}
-
-        {registrationStep === 3 && (
-          <EmailConfirmationComponent
-            email={orgFormData.organizationEmail}
-            onConfirm={handleEmailConfirmation}
-            onResend={handleResendEmail}
-          />
-        )}
       </div>
+
+      {/* Render the component for the current registration step */}
+      {registrationStep === 0 && (
+        <OrganizationComponent
+          formData={orgFormData}
+          onChange={setOrgFormData}
+          handleSubmit={handleOrgInfoSubmit}
+        />
+      )}
+      {registrationStep === 1 && (
+        <AdviserComponent
+          formData={orgFormData}
+          onChange={setOrgFormData}
+          handleSubmit={handleOrgInfoSubmit}
+          onReturn={() => setRegistrationStep(0)}
+        />
+      )}
+      {registrationStep === 2 && (
+        <FileUploadComponent
+          fields={fileFields}
+          initialFiles={documentFormData}
+          handleSubmit={handleFileUploadSubmit}
+          onReturn={() => setRegistrationStep(1)}
+        />
+      )}
+      {registrationStep === 3 && (
+        <ReviewComponent
+          formData={orgFormData}
+          uploadedFiles={documentFormData}
+          onEdit={handleEdit}
+          onFileNameUpdate={handleFileNameUpdate}
+          onFinalSubmit={() => setRegistrationStep(4)}
+        />
+      )}
+      {registrationStep === 4 && (
+        <EmailConfirmationComponent
+          email={orgFormData.organizationEmail}
+          onConfirm={handleEmailConfirmation}
+          onResend={handleResendEmail}
+        />
+      )}
     </div>
   );
 }

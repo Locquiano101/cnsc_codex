@@ -8,6 +8,9 @@ import LoginSection from "./pages/public/landing_page/login";
 import StudentDevelopmentUnitSection from "./pages/admin/SDU/app_SDU";
 import { LandingPage } from "./pages/public/landing_page/app_main";
 import RegisterSection from "./pages/public/landing_page/register";
+import Sandbox from "./sandbox";
+import Register from "./sandbox2";
+import RegisterSectionSandbox from "./sandbox2";
 export const API_ROUTER = "http://localhost:8080/api";
 
 const ProtectedRoute = () => {
@@ -53,7 +56,8 @@ export default function App() {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/register" element={<RegisterSection />} />
-
+      <Route path="/sandbox" element={<Sandbox />} />
+      <Route path="/random" element={<RegisterSectionSandbox />} />
       <Route element={<ProtectedRoute />}>
         <Route path="/admin/adviser" element={<AdminSection />} />
         <Route path="/admin/student-leader" element={<StudentAdminSection />} />
