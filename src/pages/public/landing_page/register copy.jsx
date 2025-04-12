@@ -199,21 +199,6 @@ export default function RegisterSection() {
         <p className="text-white text-xl ml-4">Register Organization</p>
       </div>
 
-<<<<<<< HEAD
-      {/* Progress Bar */}
-      <div></div>
-      <div className="relative container mx-auto py-8 w-[90%] ">
-        {/* Base horizontal line */}
-        <div className="absolute top-1/2 left-0 right-0 h-2 bg-gray-300"></div>
-        {/* Completed portion overlay */}
-        <div
-          className="absolute top-1/2 left-0 h-2 bg-green-500"
-          style={{ width: `${(registrationStep / (steps.length - 1)) * 100}%` }}
-        ></div>
-        {/* Circles with icons */}
-        <div className="relative flex w-full justify-around items-center">
-          {steps.map((step, index) => {
-=======
       {/* ────────── PROGRESS BAR ────────── */}
       <div className="flex justify-center mt-8">
         {/* 
@@ -222,7 +207,6 @@ export default function RegisterSection() {
         */}
         <div className="flex items-center justify-center">
           {steps.map((stepLabel, index) => {
->>>>>>> 9393401922ed741644b1e084c1305cdc482d6640
             const isCompleted = index < registrationStep;
             const isActive = index === registrationStep;
 
@@ -241,7 +225,7 @@ export default function RegisterSection() {
                 {/* Step (circle + label + triangle) */}
                 <div className="relative flex flex-col items-center w-fit">
                   <div
-                    className={`w-18 h-18 rounded-full flex items-center justify-center text-white border-4 border-white ${circleColor}`}
+                    className={`w-12 h-12 rounded-full flex items-center justify-center text-white ${circleColor}`}
                   >
                     <FontAwesomeIcon
                       icon={stepIcons[index]}
@@ -272,7 +256,7 @@ export default function RegisterSection() {
                 </div>
                 {/* Connecting line (if not the last step) */}
                 {index < steps.length - 1 && (
-                  <div className={`w-30 h-1 -mt-5 ${lineColor}`} />
+                  <div className={`w-20 h-1  ${lineColor}`} />
                 )}
               </div>
             );
