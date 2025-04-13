@@ -1,5 +1,7 @@
+import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_ROUTER } from "../../../App";
 
 export default function ProcessAccreditation({
   selectedAccreditation,
@@ -92,9 +94,29 @@ export default function ProcessAccreditation({
   };
 
   // Save function: for this example, it simply logs the edited accreditation.
-  const handleSave = () => {
+  const handleSave = async () => {
     console.log("Updated Accreditation JSON:", editedAccreditation);
-    // Add API call or further logic to persist data if needed.
+
+    try {
+      const response = await axios.put(
+        `${API_ROUTER}/edit-accreditation/${editedAccreditation._id}`,
+        editedAccreditation // Send the updated object
+      );
+
+      // Log the updated response
+      console.log("Accreditation update response:", response.data);
+
+      // If needed, you can show a success message or move to another step
+      alert("Accreditation updated successfully.");
+
+      // Optional callback if needed
+    } catch (err) {
+      console.error(
+        "Error updating accreditation:",
+        err.response?.data || err.message
+      );
+      alert("Failed to update accreditation.");
+    }
   };
 
   // Use a safe version of the organization name in case it is missing.

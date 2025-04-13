@@ -21,7 +21,7 @@ export default function StudentDevelopmentUnitSection() {
     if (!token) {
       navigate("/login");
     } else {
-      const storedUser = JSON.parse(localStorage.getItem("user"));
+      // const storedUser = JSON.parse(localStorage.getItem("user"));
     }
   }, [navigate]);
 

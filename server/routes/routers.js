@@ -2,9 +2,11 @@ import express from "express";
 import { privateRouteMiddleware } from "../middleware/private_router.js";
 import {
   ConfirmAccreditation,
-  GetAllAccreditations,
   Login,
+  GetAllAccreditations,
   ProcessAccreditation,
+  UpdateAccreditation,
+  GetAccreditationById,
 } from "../controllers/users.js";
 import {
   getAllFile,
@@ -23,8 +25,9 @@ router.get("/get-all-files", getAllFile);
 router.get("/get-all-images", getAllImageFile);
 
 router.post("/accredit", UploadMultipleFiles, ProcessAccreditation);
-router.put("/edit-accreditation/:id", ProcessAccreditation);
+router.put("/edit-accreditation/:id", UpdateAccreditation);
 router.get("/get-accreditation", GetAllAccreditations);
+router.get("/get-accreditation/:id", GetAccreditationById);
 // router.get("/get-accreditation", getOrganizations);
 
 router.get("/generate-otp", ConfirmAccreditation);
