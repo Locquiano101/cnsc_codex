@@ -45,12 +45,16 @@ export default function LoginSection() {
         const role = user.position.toLowerCase();
         if (role === "admin") {
           navigate("/admin");
+          localStorage.set("position", role);
         } else if (role === "student-leader") {
           navigate("/admin/student-leader");
+          localStorage.set("position", role);
         } else if (role === "adviser") {
           navigate("/admin/adviser");
+          localStorage.set("position", role);
         } else if (role === "sdu") {
           navigate("/admin/student-development-unit");
+          localStorage.set("position", role);
         } else {
           // Default or unknown role
           navigate("/unauthorized");

@@ -2,6 +2,11 @@ import React, { useState, useRef, useEffect } from "react";
 import { ReturnButton, Submitbutton } from "../../../components/buttons";
 import { ReusableFileUpload } from "../../../components/reusable_file_upload";
 import SearchableDropdown from "../../../components/searchable_drop_down";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+
+const departments = ["Department A", "Department B", "Department C"];
+const courses = ["Course X", "Course Y", "Course Z"];
 
 // Organization Component with Show/Hide Password indicator
 export const OrganizationComponent = ({ formData, onChange, handleSubmit }) => {
@@ -11,11 +16,13 @@ export const OrganizationComponent = ({ formData, onChange, handleSubmit }) => {
     {
       label: "Organization Username",
       id: "organizationUsername",
+      colSpan: 3,
     },
     {
       label: "Organization Password",
       id: "organizationPassword",
       type: showOrgPassword ? "text" : "password",
+      colSpan: 3,
     },
     {
       label: "Organization Name",
@@ -50,8 +57,6 @@ export const OrganizationComponent = ({ formData, onChange, handleSubmit }) => {
   const toggleOrgPassword = () => setShowOrgPassword((prev) => !prev);
 
   const classification = formData.classification;
-  const departments = ["Department A", "Department B", "Department C"];
-  const courses = ["Course X", "Course Y", "Course Z"];
 
   const handleDepartmentChange = (selected) => {
     onChange({
@@ -73,7 +78,7 @@ export const OrganizationComponent = ({ formData, onChange, handleSubmit }) => {
         className="flex justify-center items-center"
         onSubmit={handleSubmit}
       >
-        <div className="w-[90%]">
+        <div className="w-[95%]">
           <div className="pt-10 pl-10 pr-10 bg-white mt-4">
             <section>
               <div className="mb-4 font-semibold text-lg flex items-center">
@@ -83,7 +88,7 @@ export const OrganizationComponent = ({ formData, onChange, handleSubmit }) => {
               </div>
               <div className="grid grid-cols-6 gap-x-2 gap-y-1">
                 {OrganizationFormData.map(
-                  ({ label, id, colSpan = 3, type = "text" }) => (
+                  ({ label, id, colSpan = 6, type = "text" }) => (
                     <div
                       className={`flex flex-col gap-1 col-span-${colSpan}`}
                       key={id}
@@ -110,13 +115,12 @@ export const OrganizationComponent = ({ formData, onChange, handleSubmit }) => {
                           >
                             {showOrgPassword ? (
                               <>
-                                <i className="fa fa-eye"></i>
+                                <FontAwesomeIcon icon={faEyeSlash} />
                                 <span className="ml-1 text-sm">Hide</span>
                               </>
                             ) : (
                               <>
-                                <i className="fa fa-eye-slash"></i>
-                                <span className="ml-1 text-sm">Show</span>
+                                <FontAwesomeIcon icon={faEye} />
                               </>
                             )}
                           </button>
@@ -237,6 +241,30 @@ export const AdviserComponent = ({
 }) => {
   const [showAdviserPassword, setShowAdviserPassword] = useState(false);
 
+  const AdviserFormData = [
+    {
+      label: "Adviser Username",
+      id: "adviserUsername",
+      colSpan: 3,
+    },
+    {
+      label: "Adviser Password",
+      id: "adviserPassword",
+      type: showAdviserPassword ? "text" : "password",
+      colSpan: 3,
+    },
+    {
+      label: "Adviser Name",
+      id: "adviserName",
+      colSpan: 3,
+    },
+    {
+      label: "Adviser Email",
+      id: "adviserEmail",
+      colSpan: 3,
+    },
+  ];
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     onChange({
@@ -246,8 +274,6 @@ export const AdviserComponent = ({
   };
 
   const toggleAdviserPassword = () => setShowAdviserPassword((prev) => !prev);
-
-  const departments = ["Department A", "Department B", "Department C"];
 
   const handleAdviserDepartmentChange = (selected) => {
     onChange({
@@ -262,97 +288,72 @@ export const AdviserComponent = ({
         className="flex justify-center items-center"
         onSubmit={handleSubmit}
       >
-        <div className="w-[90%]">
-          <div className="pt-10 pl-10 pr-10 bg-white shadow-2xl mt-4">
-            {/* Adviser Section */}
-            <section className="mt-4">
-              <div className="mb-2 font-semibold text-lg flex items-center">
+        <div className="w-[95%]">
+          <div className="pt-10 pl-10 pr-10 bg-white mt-4">
+            <section>
+              <div className="mb-4 font-semibold text-lg flex items-center">
                 <h1 className="w-2/5 max-w-fit mr-3">Adviser Information</h1>
               </div>
               <div className="grid grid-cols-6 gap-x-2 gap-y-1">
-                <div className="flex flex-col gap-1 col-span-3">
-                  <label htmlFor="adviserUsername">
-                    Adviser Username <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="adviserUsername"
-                    name="adviserUsername"
-                    className="border py-2 px-4 rounded-2xl"
-                    value={formData.adviserUsername || ""}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div className="flex flex-col gap-1 col-span-3">
-                  <label htmlFor="adviserPassword">Adviser Password</label>
-                  <label htmlFor="adviserPassword">
-                    Adviser Password <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showAdviserPassword ? "text" : "password"}
-                      id="adviserPassword"
-                      name="adviserPassword"
-                      className="border py-2 px-4 rounded-2xl w-full"
-                      value={formData.adviserPassword || ""}
-                      onChange={handleChange}
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={toggleAdviserPassword}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center focus:outline-none"
+                {AdviserFormData.map(
+                  ({ label, id, colSpan = 6, type = "text" }) => (
+                    <div
+                      className={`flex flex-col gap-1 col-span-${colSpan}`}
+                      key={id}
                     >
-                      {showAdviserPassword ? (
-                        <>
-                          <i className="fa fa-eye"></i>
-                          <span className="ml-1 text-sm">Hide</span>
-                        </>
+                      <label htmlFor={id}>
+                        {label} <span className="text-red-500">*</span>
+                      </label>
+                      {id === "adviserPassword" ? (
+                        <div className="relative">
+                          <input
+                            type={type}
+                            id={id}
+                            name={id}
+                            autoComplete="new-password"
+                            className="border py-2 px-4 rounded-2xl w-full"
+                            value={formData[id] || ""}
+                            onChange={handleChange}
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={toggleAdviserPassword}
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center focus:outline-none"
+                          >
+                            {showAdviserPassword ? (
+                              <>
+                                <FontAwesomeIcon icon={faEyeSlash} />
+                                <span className="ml-1 text-sm">Hide</span>
+                              </>
+                            ) : (
+                              <>
+                                <FontAwesomeIcon icon={faEye} />
+                              </>
+                            )}
+                          </button>
+                        </div>
                       ) : (
-                        <>
-                          <i className="fa fa-eye-slash"></i>
-                          <span className="ml-1 text-sm">Show</span>
-                        </>
+                        <input
+                          type={type}
+                          id={id}
+                          name={id}
+                          className="border py-2 px-4 rounded-2xl"
+                          value={formData[id] || ""}
+                          onChange={handleChange}
+                          required
+                        />
                       )}
-                    </button>
-                  </div>
-                </div>
-                <div className="flex flex-col gap-1 col-span-3">
-                  <label htmlFor="adviserName">
-                    Adviser Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="adviserName"
-                    name="adviserName"
-                    className="border py-2 px-4 rounded-2xl"
-                    value={formData.adviserName || ""}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div className="flex flex-col gap-1 col-span-3">
-                  <label htmlFor="adviserEmail">
-                    Adviser Email <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="adviserEmail"
-                    name="adviserEmail"
-                    className="border py-2 px-4 rounded-2xl"
-                    value={formData.adviserEmail || ""}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div className="flex justify-between col-span-6 gap-4">
+                    </div>
+                  )
+                )}
+                <div className="col-span-6 flex">
                   <div className="flex flex-col gap-1 flex-1">
-                    <label htmlFor="adviserDepartment">
+                    <label>
                       Department <span className="text-red-500">*</span>
                     </label>
                     <SearchableDropdown
-                      label="Department *"
+                      label="Department"
                       options={departments}
                       value={formData.adviserDepartment}
                       onChange={handleAdviserDepartmentChange}
@@ -363,7 +364,6 @@ export const AdviserComponent = ({
               </div>
             </section>
 
-            {/* Submit */}
             <div className="w-full mt-2 gap-4 flex justify-end pt-10 pb-5">
               <ReturnButton onClick={onReturn} text="Return" />
               <Submitbutton />
@@ -434,7 +434,7 @@ export const ReviewComponent = ({
   formData,
   uploadedFiles,
   onEdit,
-  onFinalSubmit,
+  handleReviewSubmit,
 }) => {
   return (
     <div className="min-h-screen bg-[#E6E6E6] flex items-center justify-center py-8 px-4">
@@ -581,7 +581,7 @@ export const ReviewComponent = ({
               </button>
               <button
                 type="button"
-                onClick={onFinalSubmit}
+                onClick={handleReviewSubmit}
                 className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg"
               >
                 Submit Final

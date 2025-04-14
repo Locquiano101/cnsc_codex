@@ -11,11 +11,13 @@ import RegisterSection from "./pages/public/landing_page/register";
 import Sandbox from "./sandbox";
 import RegisterSectionSandbox from "./sandbox2";
 import { Sandbox3 } from "./sandbox3";
+import CollegeCourseDepartments from "./components/programs";
 export const API_ROUTER = "http://localhost:8080/api";
 
 const ProtectedRoute = () => {
   // Get token from localStorage
   const token = localStorage.getItem("token");
+  
   return token ? <Outlet /> : <Navigate to="/Unauthorized" />;
 };
 
@@ -57,6 +59,7 @@ export default function App() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/register" element={<RegisterSection />} />
       <Route path="/sandbox" element={<Sandbox />} />
+      <Route path="/courses" element={<CollegeCourseDepartments />} />
       <Route path="/sandbox3" element={<Sandbox3 />} />
       <Route path="/random" element={<RegisterSectionSandbox />} />
       <Route element={<ProtectedRoute />}>

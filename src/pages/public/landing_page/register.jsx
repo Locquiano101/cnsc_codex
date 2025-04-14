@@ -161,23 +161,23 @@ export default function RegisterSection() {
     console.log("Final Org Form Data:", orgFormData);
 
     // Post with Axios
-    try {
-      const response = await axios.post(
-        `${API_ROUTER}/accredit`,
-        formDataToSubmit,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
-      if (response.status === 200) {
-        console.log("Submitted successfully!");
-        alert("Submission successful!");
-      } else {
-        console.error("Submission error", response);
-      }
-    } catch (error) {
-      console.error("Error submitting data:", error);
-    }
+    // try {
+    //   const response = await axios.post(
+    //     `${API_ROUTER}/accredit`,
+    //     formDataToSubmit,
+    //     {
+    //       headers: { "Content-Type": "multipart/form-data" },
+    //     }
+    //   );
+    //   if (response.status === 200) {
+    //     console.log("Submitted successfully!");
+    //     alert("Submission successful!");
+    //   } else {
+    //     console.error("Submission error", response);
+    //   }
+    // } catch (error) {
+    //   console.error("Error submitting data:", error);
+    // }
   };
 
   const handleEmailConfirmation = (code) => {
