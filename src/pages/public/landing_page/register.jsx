@@ -194,7 +194,7 @@ export default function RegisterSection() {
   return (
     <div className="min-h-screen bg-[#E6E6E6]">
       {/* Header */}
-      <div className="h-auto px-8 flex items-center bg-cnsc-primary-color">
+      <div className="h-auto px-8 flex items-center bg-[#1C4060]">
         <img src="/general/cnsc_codex_ver_2.png" className="h-16" alt="logo" />
         <p className="text-white text-xl ml-4">Register Organization</p>
       </div>
@@ -202,9 +202,9 @@ export default function RegisterSection() {
       {/* ────────── PROGRESS BAR ────────── */}
       <div className="flex justify-center mt-8">
         {/* 
-          Use a simple flex container with some gap 
-          and NO flex-grow or fixed wide classes. 
-        */}
+            Use a simple flex container with some gap 
+            and NO flex-grow or fixed wide classes. 
+          */}
         <div className="flex items-center justify-center">
           {steps.map((stepLabel, index) => {
             const isCompleted = index < registrationStep;
@@ -238,19 +238,19 @@ export default function RegisterSection() {
                   {isActive && (
                     <div
                       className="
-                        absolute
-                        top-full
-                        mt-1
-                        w-0
-                        h-0
-                        rotate-180
-                        border-l-[30px]
-                        border-l-transparent
-                        border-r-[30px]
-                        border-r-transparent
-                        border-t-[30px]
-                        border-t-white
-                      "
+                          absolute
+                          top-full
+                          mt-1
+                          w-0
+                          h-0
+                          rotate-180
+                          border-l-[30px]
+                          border-l-transparent
+                          border-r-[30px]
+                          border-r-transparent
+                          border-t-[30px]
+                          border-t-white
+                        "
                     />
                   )}
                 </div>

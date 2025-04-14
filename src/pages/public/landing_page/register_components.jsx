@@ -283,7 +283,9 @@ export const AdviserComponent = ({
               </div>
               <div className="grid grid-cols-6 gap-x-2 gap-y-1">
                 <div className="flex flex-col gap-1 col-span-3">
-                  <label htmlFor="adviserUsername">Adviser Username</label>
+                  <label htmlFor="adviserUsername">
+                    Adviser Username <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="text"
                     id="adviserUsername"
@@ -291,10 +293,17 @@ export const AdviserComponent = ({
                     className="border py-2 px-4 rounded-2xl"
                     value={formData.adviserUsername || ""}
                     onChange={handleChange}
+                    required
                   />
                 </div>
                 <div className="flex flex-col gap-1 col-span-3">
+<<<<<<< HEAD
                   <label htmlFor="adviserPassword">Adviser Password</label>
+=======
+                  <label htmlFor="adviserPassword">
+                    Adviser Password <span className="text-red-500">*</span>
+                  </label>
+>>>>>>> merge-pr
                   <div className="relative">
                     <input
                       type={showAdviserPassword ? "text" : "password"}
@@ -303,6 +312,10 @@ export const AdviserComponent = ({
                       className="border py-2 px-4 rounded-2xl w-full"
                       value={formData.adviserPassword || ""}
                       onChange={handleChange}
+<<<<<<< HEAD
+=======
+                      required
+>>>>>>> merge-pr
                     />
                     <button
                       type="button"
@@ -324,7 +337,9 @@ export const AdviserComponent = ({
                   </div>
                 </div>
                 <div className="flex flex-col gap-1 col-span-3">
-                  <label htmlFor="adviserName">Adviser Name</label>
+                  <label htmlFor="adviserName">
+                    Adviser Name <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="text"
                     id="adviserName"
@@ -332,10 +347,13 @@ export const AdviserComponent = ({
                     className="border py-2 px-4 rounded-2xl"
                     value={formData.adviserName || ""}
                     onChange={handleChange}
+                    required
                   />
                 </div>
                 <div className="flex flex-col gap-1 col-span-3">
-                  <label htmlFor="adviserEmail">Adviser Email</label>
+                  <label htmlFor="adviserEmail">
+                    Adviser Email <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="text"
                     id="adviserEmail"
@@ -343,13 +361,16 @@ export const AdviserComponent = ({
                     className="border py-2 px-4 rounded-2xl"
                     value={formData.adviserEmail || ""}
                     onChange={handleChange}
+                    required
                   />
                 </div>
                 <div className="flex justify-between col-span-6 gap-4">
                   <div className="flex flex-col gap-1 flex-1">
-                    <label htmlFor="adviserDepartment">Department</label>
+                    <label htmlFor="adviserDepartment">
+                      Department <span className="text-red-500">*</span>
+                    </label>
                     <SearchableDropdown
-                      label="Department"
+                      label="Department *"
                       options={departments}
                       value={formData.adviserDepartment}
                       onChange={handleAdviserDepartmentChange}
@@ -545,6 +566,7 @@ export const ReviewComponent = ({
                   Object.entries(uploadedFiles).map(([key, file]) => (
                     <div
                       key={key}
+<<<<<<< HEAD
                       className="w-40 p-4 bg-white rounded-lg shadow hover:shadow-xl transition duration-200 flex flex-col items-center"
                     >
                       <strong className="mb-3 text-gray-700">{key}</strong>
@@ -559,6 +581,36 @@ export const ReviewComponent = ({
                           📄 {file.name}
                         </div>
                       )}
+=======
+                      className="flex-1 min-w-50 p-4 bg-white rounded-lg shadow hover:shadow-black 
+                      transition duration-200 flex flex-col items-center text-center gap-2"
+                    >
+                      {/* Header text that won't overflow */}
+                      <h3 className="text-gray-800 font-semibold w-full whitespace-normal break-words">
+                        {key}
+                      </h3>
+
+                      {/* Inline SVG icon in the center */}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-10 w-10 text-gray-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M7 7h10M7 11h10m-7 4h7M5 21h14a2 2 0 002-2V7l-7-7H5a2 2 0 00-2 2v14a2 2 0 002 2z"
+                        />
+                      </svg>
+
+                      {/* File name that wraps inside the box */}
+                      <p className="text-sm text-gray-700 w-full whitespace-normal break-words">
+                        {file.name}
+                      </p>
+>>>>>>> merge-pr
                     </div>
                   ))
                 ) : (
