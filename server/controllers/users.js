@@ -256,31 +256,334 @@ export const ProcessAccreditation = async (req, res) => {
 };
 export const UpdateAccreditation = async (req, res) => {
   try {
-    // Extract the accreditation ID from the URL parameter and the update data from the request body
+    // Assume the accreditation record ID is passed as a URL parameter.
     const accreditationId = req.params.id;
-    const updateData = req.body;
 
-    // Look for the existing accreditation record
-    const accreditation = await Organizations.findById(
-      accreditationId
-    ).populate("accreditation_status");
-    if (!accreditation) {
+    // Destructure any relevant fields from the request body.
+    const {
+      adviser_name,
+      adviser_email,
+      adviser_department,
+      org_name,
+      org_acronym,
+      org_president,
+      org_email,
+      org_class,
+      accreditation_type,
+      // other fields as needed
+    } = req.body;
+
+    // Define the fileFields mapping.
+    const fileFields = {
+      "org logo": { label: "Organization Logo", accept: "photos/*" },
+      "Constitution & By-laws": {
+        label: "Constitution & By-laws",
+        accept: ".pdf,.doc,.docx",
+      },
+      "Pledge Against Hazing": {
+        label: "Pledge Against Hazing",
+        accept: ".pdf,.doc,.docx",
+      },
+      Rosters: { label: "Rosters", accept: ".pdf,.doc,.docx" },
+      "President Info Sheet": {
+        label: "President Info Sheet",
+        accept: ".pdf,.doc,.docx",
+      },
+      "Financial Report": {
+        label: "Financial Report",
+        accept: ".pdf,.doc,.docx",
+      },
+      "Collectible Fees": {
+        label: "Collectible Fees",
+        accept: ".pdf,.doc,.docx",
+      },
+      "Commitment Statement": {
+        label: "Commitment Statement",
+        accept: ".pdf,.doc,.docx",
+      },
+      Memorandum: { label: "Memorandum", accept: ".pdf,.doc,.docx" },
+      "Action Plan": { label: "Action Plan", accept: ".pdf,.doc,.docx" },
+    };
+
+    // Process updated file data if provided.
+    const documentFiles = req.files?.document || [];
+    const photoFiles = req.files?.photo || [];
+    let documents_and_status = [];
+
+    for (const key in fileFields) {
+      if (req.body[key]) {
+        const clientFileName = req.body[key];
+        if (fileFields[key].accept.startsWith("photos")) {
+          const matchedFile = photoFiles.find(
+            (p) => p.originalname === clientFileName
+          );
+          if (matchedFile) {
+            documents_and_status.push({
+              label: fileFields[key].label,
+              Status: "pending",
+              file: matchedFile.filename,
+            });
+          }
+        } else {
+          const matchedFile = documentFiles.find(
+            (d) => d.originalname === clientFileName
+          );
+          if (matchedFile) {
+            documents_and_status.push({
+              label: fileFields[key].label,
+              Status: "pending",
+              file: matchedFile.filename,
+            });
+          }
+        }
+      }
+    }
+
+    // Build an update object with only the fields that are provided.
+    const accreditationUpdate = {};
+    if (accreditation_type) {
+      accreditationUpdate.accreditation_type = accreditation_type;
+    }
+    if (documents_and_status.length > 0) {
+      accreditationUpdate.documents_and_status = documents_and_status;
+    }
+
+    // Update the accreditation record using a query update and get the updated doc.
+    const updatedAccreditation = await Accreditation.findByIdAndUpdate(
+      accreditationId,
+      { $set: accreditationUpdate },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedAccreditation) {
       return res.status(404).json({ error: "Accreditation not found." });
     }
 
-    // Just log the incoming data without updating the record
-    console.log("Received update data:", updateData);
+    // Update the linked organization record.
+    const orgUpdate = {
+      adviser_name,
+      adviser_email,
+      adviser_department,
+      org_name,
+      org_acronym,
+      org_president,
+      org_email,
+      org_class,
+      // Update the logo if a new file was uploaded.
+      logo: documents_and_status.find(
+        (doc) => doc.label === "Organization Logo"
+      )?.file,
+    };
 
-    // Return the existing accreditation record without any changes
-    return res.json({
-      message: "Accreditation found. No updates have been applied.",
-      accreditation,
+    // Remove undefined values from orgUpdate.
+    Object.keys(orgUpdate).forEach((key) => {
+      if (typeof orgUpdate[key] === "undefined") {
+        delete orgUpdate[key];
+      }
+    });
+
+    // Update the organization record linked with the accreditation.
+    const organization = await Organizations.findOneAndUpdate(
+      { accreditation_status: accreditationId },
+      { $set: orgUpdate },
+      { new: true, runValidators: true }
+    );
+
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found." });
+    }
+
+    console.log("Accreditation updated:", updatedAccreditation);
+    console.log("Organization updated:", organization);
+
+    return res.status(200).json({
+      message: "Accreditation and organization updated successfully.",
+      accreditation: updatedAccreditation,
+      organization,
     });
   } catch (error) {
     console.error("Error updating accreditation:", error);
     return res.status(500).json({
       error: "Server error updating accreditation. Please try again later.",
     });
+  }
+};
+
+export const testUpdate = async (req, res) => {
+  try {
+    // Ensure route parameter exists and is trimmed.
+    const { accreditationId } = req.params;
+    if (!accreditationId) {
+      return res
+        .status(400)
+        .json({ error: "Missing accreditationId parameter" });
+    }
+    console.log("Route params:", req.params);
+
+    // Destructure incoming data.
+    const {
+      org_username,
+      org_password,
+      adviser_username,
+      adviser_password,
+      org_name,
+      org_acronym,
+      org_president,
+      org_email,
+      org_class,
+      adviser_name,
+      adviser_email,
+      adviser_department,
+      accreditation_type,
+    } = req.body;
+
+    // Define the mapping for file fields.
+    const fileFields = {
+      "org logo": { label: "Organization Logo", accept: "photos/*" },
+      "Constitution & By-laws": {
+        label: "Constitution & By-laws",
+        accept: ".pdf,.doc,.docx",
+      },
+      "Pledge Against Hazing": {
+        label: "Pledge Against Hazing",
+        accept: ".pdf,.doc,.docx",
+      },
+      Rosters: { label: "Rosters", accept: ".pdf,.doc,.docx" },
+      "President Info Sheet": {
+        label: "President Info Sheet",
+        accept: ".pdf,.doc,.docx",
+      },
+      "Financial Report": {
+        label: "Financial Report",
+        accept: ".pdf,.doc,.docx",
+      },
+      "Collectible Fees": {
+        label: "Collectible Fees",
+        accept: ".pdf,.doc,.docx",
+      },
+      "Commitment Statement": {
+        label: "Commitment Statement",
+        accept: ".pdf,.doc,.docx",
+      },
+      Memorandum: { label: "Memorandum", accept: ".pdf,.doc,.docx" },
+      "Action Plan": { label: "Action Plan", accept: ".pdf,.doc,.docx" },
+    };
+
+    // Retrieve the uploaded files.
+    const documentFiles = req.files?.document || []; // non-photo documents.
+    const photoFiles = req.files?.photo || []; // photo files.
+
+    // IMPORTANT: Use the correct model for accreditation!
+    const accreditation = await Accreditation.findById(
+      accreditationId
+    ).populate("accreditation_status");
+
+    if (!accreditation) {
+      console.error("Accreditation record not found for ID:", accreditationId);
+      return res.status(404).json({ error: "Accreditation record not found" });
+    }
+
+    // Build the updated documents_and_status array.
+    let documents_and_status = [];
+    for (const key in fileFields) {
+      if (req.body[key]) {
+        const clientFileName = req.body[key]; // provided filename
+        let matchedFile;
+        if (fileFields[key].accept.startsWith("photos")) {
+          // Look for a matching photo file.
+          matchedFile = photoFiles.find(
+            (p) => p.originalname === clientFileName
+          );
+        } else {
+          // Otherwise, search among document files.
+          matchedFile = documentFiles.find(
+            (d) => d.originalname === clientFileName
+          );
+        }
+        if (matchedFile) {
+          documents_and_status.push({
+            label: fileFields[key].label,
+            Status: "pending", // or use your custom logic to set status.
+            file: matchedFile.filename,
+          });
+        }
+      }
+    }
+
+    // Update accreditation details.
+    accreditation.accreditation_type =
+      accreditation_type || accreditation.accreditation_type;
+    accreditation.over_all_status = "pending";
+    accreditation.documents_and_status = documents_and_status;
+    await accreditation.save();
+    console.log("Accreditation updated:", accreditationId);
+
+    // Update the associated organization record.
+    // Note: In the creation process, ensure that accreditation.adviser_accreditation_id was set correctly.
+    const organization = await Organizations.findById(
+      accreditation.adviser_accreditation_id
+    );
+    if (!organization) {
+      console.error(
+        "Organization record not found for accreditation.adviser_accreditation_id:",
+        accreditation.adviser_accreditation_id
+      );
+      return res.status(404).json({ error: "Organization record not found" });
+    }
+
+    // Update organization fields.
+    organization.adviser_name = adviser_name || organization.adviser_name;
+    organization.adviser_email = adviser_email || organization.adviser_email;
+    organization.adviser_department =
+      adviser_department || organization.adviser_department;
+    organization.org_name = org_name || organization.org_name;
+    organization.org_acronym = org_acronym || organization.org_acronym;
+    organization.org_president = org_president || organization.org_president;
+    organization.org_class = org_class || organization.org_class;
+    organization.org_email = org_email || organization.org_email;
+
+    // Update logo if provided.
+    const logoFileEntry = documents_and_status.find(
+      (doc) => doc.label === "Organization Logo"
+    );
+    if (logoFileEntry) {
+      organization.logo = logoFileEntry.file;
+    }
+    await organization.save();
+    console.log("Organization updated:", organization._id);
+
+    // Update corresponding user records for student-leader and adviser.
+    const orgUser = await Users.findOne({
+      organization: organization._id,
+      position: "student-leader",
+    });
+    if (orgUser) {
+      orgUser.username = org_username || orgUser.username;
+      orgUser.email = org_email || orgUser.email;
+      // IMPORTANT: Hash the password before saving if it is updated.
+      orgUser.password = org_password || orgUser.password;
+      await orgUser.save();
+    }
+
+    const adviserUser = await Users.findOne({
+      organization: organization._id,
+      position: "adviser",
+    });
+    if (adviserUser) {
+      adviserUser.username = adviser_username || adviserUser.username;
+      adviserUser.email = adviser_email || adviserUser.email;
+      adviserUser.password = adviser_password || adviserUser.password;
+      await adviserUser.save();
+    }
+
+    return res.status(200).json({
+      message: "Accreditation and organization updated successfully",
+      accreditation,
+      organization,
+    });
+  } catch (error) {
+    console.error("Error updating accreditation:", error);
+    return res.status(500).json({ error: "Server error" });
   }
 };
 

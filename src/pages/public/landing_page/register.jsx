@@ -199,34 +199,30 @@ export default function RegisterSection() {
         <p className="text-white text-xl ml-4">Register Organization</p>
       </div>
 
-      {/* Progress Bar */}
-      <div className="relative container mx-auto py-8 w-[90%]">
-        {/* Base horizontal line */}
-        <div className="absolute top-1/2 left-0 right-0 h-2 bg-gray-300"></div>
-        {/* Completed portion overlay */}
-        <div
-          className="absolute top-1/2 left-0 h-2 bg-green-500"
-          style={{ width: `${(registrationStep / (steps.length - 1)) * 100}%` }}
-        ></div>
-        {/* Circles with icons and labels */}
-        <div className="flex justify-center mt-8">
+      {/* ────────── PROGRESS BAR ────────── */}
+      <div className="flex justify-center mt-8">
+        {/* 
+          Use a simple flex container with some gap 
+          and NO flex-grow or fixed wide classes. 
+        */}
+        <div className="flex items-center justify-center">
           {steps.map((stepLabel, index) => {
             const isCompleted = index < registrationStep;
             const isActive = index === registrationStep;
 
-            // Determine circle color based on step status
+            // Color logic
             let circleColor = "bg-gray-300"; // pending
             if (isCompleted) circleColor = "bg-green-500"; // completed
             else if (isActive) circleColor = "bg-blue-500"; // active
 
-            // Determine connecting line color (for steps that are not the last)
+            // Determine the line color
             let lineColor = "bg-gray-300"; // pending
             if (index < registrationStep) lineColor = "bg-green-500";
             else if (index === registrationStep) lineColor = "bg-blue-500";
 
             return (
               <div key={index} className="flex items-center">
-                {/* Step circle, label, and optional triangle */}
+                {/* Step (circle + label + triangle) */}
                 <div className="relative flex flex-col items-center w-fit">
                   <div
                     className={`w-18 h-18 rounded-full flex items-center justify-center text-white border-4 border-white ${circleColor}`}
@@ -236,7 +232,7 @@ export default function RegisterSection() {
                       className="text-xl"
                     />
                   </div>
-                  <span className="text-xs mt-2 font-bold text-center w-fit text-ellipsis whitespace-nowrap overflow-hidden">
+                  <span className="text-xs mt-2 font-bold text-center w-fit  text-ellipsis whitespace-nowrap overflow-hidden">
                     {stepLabel}
                   </span>
                   {isActive && (
@@ -258,7 +254,7 @@ export default function RegisterSection() {
                     />
                   )}
                 </div>
-                {/* Render connecting line if not last step */}
+                {/* Connecting line (if not the last step) */}
                 {index < steps.length - 1 && (
                   <div className={`w-30 h-1 -mt-5 ${lineColor}`} />
                 )}
@@ -267,6 +263,7 @@ export default function RegisterSection() {
           })}
         </div>
       </div>
+      {/* ────────── END PROGRESS BAR ────────── */}
 
       {/* Render the current step */}
       {registrationStep === 0 && (

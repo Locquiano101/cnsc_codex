@@ -97,9 +97,14 @@ export default function ProcessAccreditation({
   const handleSave = async () => {
     console.log("Updated Accreditation JSON:", editedAccreditation);
 
+    console.log(
+      "Updated Accreditation JSON:",
+      editedAccreditation.accreditation_status._id
+    );
+
     try {
       const response = await axios.put(
-        `${API_ROUTER}/edit-accreditation/${editedAccreditation._id}`,
+        `${API_ROUTER}/edit-accreditation/${editedAccreditation.accreditation_status._id}`,
         editedAccreditation // Send the updated object
       );
 
@@ -295,7 +300,7 @@ export default function ProcessAccreditation({
                 <textarea
                   className="border p-2 w-full h-20"
                   placeholder="Enter revision notes..."
-                  value={doc.revisionNotes || ""}
+                  value={doc.revision_notes || ""}
                   onChange={(e) =>
                     handleRevisionNoteChange(index, e.target.value)
                   }
@@ -335,10 +340,10 @@ export default function ProcessAccreditation({
       {/* Created At Field */}
       <div className="mb-4">
         <label className="block mb-2">
-          <strong>Created At:</strong>
+          <strong>Updated At:</strong>
           <input
             type="text"
-            value={new Date(editedAccreditation.createdAt).toLocaleString()}
+            value={new Date(editedAccreditation.updatedAt).toLocaleString()}
             readOnly
             className="w-full p-1 border bg-gray-200"
           />

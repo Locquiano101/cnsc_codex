@@ -5,15 +5,15 @@ import {
   Login,
   GetAllAccreditations,
   ProcessAccreditation,
-  UpdateAccreditation,
   GetAccreditationById,
+  testUpdate,
 } from "../controllers/users.js";
 import {
   getAllFile,
   getAllImageFile,
   UploadMultipleFiles,
 } from "../middleware/files.js";
-import { getOrganizations } from "../controllers/organization.js";
+import { UpdateAccreditationSandbox } from "../controllers/sandbox.js";
 
 const router = express.Router();
 
@@ -25,7 +25,9 @@ router.get("/get-all-files", getAllFile);
 router.get("/get-all-images", getAllImageFile);
 
 router.post("/accredit", UploadMultipleFiles, ProcessAccreditation);
-router.put("/edit-accreditation/:id", UpdateAccreditation);
+
+router.put("/edit-accreditation/:id", UpdateAccreditationSandbox);
+
 router.get("/get-accreditation", GetAllAccreditations);
 router.get("/get-accreditation/:id", GetAccreditationById);
 // router.get("/get-accreditation", getOrganizations);

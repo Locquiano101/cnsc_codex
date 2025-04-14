@@ -17,7 +17,7 @@ const AccreditationStatusSchema = new mongoose.Schema(
       {
         label: { type: String, required: true },
         Status: { type: String, required: true, default: "pending" },
-        revision_notes: { type: String, required: true, default: "" },
+        revision_notes: { type: String, default: "" },
         file: { type: String, required: true }, // URL or filepath
       },
     ],
