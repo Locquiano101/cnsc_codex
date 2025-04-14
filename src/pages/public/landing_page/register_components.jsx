@@ -7,6 +7,38 @@ import SearchableDropdown from "../../../components/searchable_drop_down";
 export const OrganizationComponent = ({ formData, onChange, handleSubmit }) => {
   const [showOrgPassword, setShowOrgPassword] = useState(false);
 
+  const OrganizationFormData = [
+    {
+      label: "Organization Username",
+      id: "organizationUsername",
+    },
+    {
+      label: "Organization Password",
+      id: "organizationPassword",
+      type: showOrgPassword ? "text" : "password",
+    },
+    {
+      label: "Organization Name",
+      id: "organizationName",
+      colSpan: 4,
+    },
+    {
+      label: "Organization Acronym",
+      id: "organizationAcronym",
+      colSpan: 2,
+    },
+    {
+      label: "Organization President",
+      id: "organizationPresident",
+      colSpan: 3,
+    },
+    {
+      label: "Organization Email",
+      id: "organizationEmail",
+      colSpan: 3,
+    },
+  ];
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     onChange({
@@ -50,87 +82,59 @@ export const OrganizationComponent = ({ formData, onChange, handleSubmit }) => {
                 </h1>
               </div>
               <div className="grid grid-cols-6 gap-x-2 gap-y-1">
-                {[
-                  {
-                    label: "Organization UserName",
-                    id: "organizationUsername",
-                  },
-                  {
-                    label: "Organization Password",
-                    id: "organizationPassword",
-                    type: showOrgPassword ? "text" : "password",
-                  },
-                  {
-                    label: "Organization Name",
-                    id: "organizationName",
-                    colSpan: 4,
-                  },
-                  {
-                    label: "Organization Acronym",
-                    id: "organizationAcronym",
-                    colSpan: 2,
-                  },
-                  {
-                    label: "Organization President",
-                    id: "organizationPresident",
-                    colSpan: 3,
-                  },
-                  {
-                    label: "Organization Email",
-                    id: "organizationEmail",
-                    colSpan: 3,
-                  },
-                ].map(({ label, id, colSpan = 3, type = "text" }) => (
-                  <div
-                    className={`flex flex-col gap-1 col-span-${colSpan}`}
-                    key={id}
-                  >
-                    <label htmlFor={id}>
-                      {label} <span className="text-red-500">*</span>
-                    </label>
-                    {id === "organizationPassword" ? (
-                      <div className="relative">
+                {OrganizationFormData.map(
+                  ({ label, id, colSpan = 3, type = "text" }) => (
+                    <div
+                      className={`flex flex-col gap-1 col-span-${colSpan}`}
+                      key={id}
+                    >
+                      <label htmlFor={id}>
+                        {label} <span className="text-red-500">*</span>
+                      </label>
+                      {id === "organizationPassword" ? (
+                        <div className="relative">
+                          <input
+                            type={type}
+                            id={id}
+                            name={id}
+                            autoComplete="new-password"
+                            className="border py-2 px-4 rounded-2xl w-full"
+                            value={formData[id] || ""}
+                            onChange={handleChange}
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={toggleOrgPassword}
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center focus:outline-none"
+                          >
+                            {showOrgPassword ? (
+                              <>
+                                <i className="fa fa-eye"></i>
+                                <span className="ml-1 text-sm">Hide</span>
+                              </>
+                            ) : (
+                              <>
+                                <i className="fa fa-eye-slash"></i>
+                                <span className="ml-1 text-sm">Show</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      ) : (
                         <input
                           type={type}
                           id={id}
                           name={id}
-                          autoComplete="new-password"
-                          className="border py-2 px-4 rounded-2xl w-full"
+                          className="border py-2 px-4 rounded-2xl"
                           value={formData[id] || ""}
                           onChange={handleChange}
                           required
                         />
-                        <button
-                          type="button"
-                          onClick={toggleOrgPassword}
-                          className="absolute inset-y-0 right-0 pr-3 flex items-center focus:outline-none"
-                        >
-                          {showOrgPassword ? (
-                            <>
-                              <i className="fa fa-eye"></i>
-                              <span className="ml-1 text-sm">Hide</span>
-                            </>
-                          ) : (
-                            <>
-                              <i className="fa fa-eye-slash"></i>
-                              <span className="ml-1 text-sm">Show</span>
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    ) : (
-                      <input
-                        type={type}
-                        id={id}
-                        name={id}
-                        className="border py-2 px-4 rounded-2xl"
-                        value={formData[id] || ""}
-                        onChange={handleChange}
-                        required
-                      />
-                    )}
-                  </div>
-                ))}
+                      )}
+                    </div>
+                  )
+                )}
 
                 <div className="col-span-6 flex">
                   <div className="flex flex-col w-2/5 gap-1">
@@ -243,23 +247,7 @@ export const AdviserComponent = ({
 
   const toggleAdviserPassword = () => setShowAdviserPassword((prev) => !prev);
 
-  const classification = formData.classification;
   const departments = ["Department A", "Department B", "Department C"];
-  const courses = ["Course X", "Course Y", "Course Z"];
-
-  const handleDepartmentChange = (selected) => {
-    onChange({
-      ...formData,
-      department: selected,
-    });
-  };
-
-  const handleCourseChange = (selected) => {
-    onChange({
-      ...formData,
-      course: selected,
-    });
-  };
 
   const handleAdviserDepartmentChange = (selected) => {
     onChange({
@@ -297,13 +285,10 @@ export const AdviserComponent = ({
                   />
                 </div>
                 <div className="flex flex-col gap-1 col-span-3">
-<<<<<<< HEAD
                   <label htmlFor="adviserPassword">Adviser Password</label>
-=======
                   <label htmlFor="adviserPassword">
                     Adviser Password <span className="text-red-500">*</span>
                   </label>
->>>>>>> merge-pr
                   <div className="relative">
                     <input
                       type={showAdviserPassword ? "text" : "password"}
@@ -312,10 +297,7 @@ export const AdviserComponent = ({
                       className="border py-2 px-4 rounded-2xl w-full"
                       value={formData.adviserPassword || ""}
                       onChange={handleChange}
-<<<<<<< HEAD
-=======
                       required
->>>>>>> merge-pr
                     />
                     <button
                       type="button"
@@ -566,7 +548,6 @@ export const ReviewComponent = ({
                   Object.entries(uploadedFiles).map(([key, file]) => (
                     <div
                       key={key}
-<<<<<<< HEAD
                       className="w-40 p-4 bg-white rounded-lg shadow hover:shadow-xl transition duration-200 flex flex-col items-center"
                     >
                       <strong className="mb-3 text-gray-700">{key}</strong>
@@ -581,36 +562,6 @@ export const ReviewComponent = ({
                           📄 {file.name}
                         </div>
                       )}
-=======
-                      className="flex-1 min-w-50 p-4 bg-white rounded-lg shadow hover:shadow-black 
-                      transition duration-200 flex flex-col items-center text-center gap-2"
-                    >
-                      {/* Header text that won't overflow */}
-                      <h3 className="text-gray-800 font-semibold w-full whitespace-normal break-words">
-                        {key}
-                      </h3>
-
-                      {/* Inline SVG icon in the center */}
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-10 w-10 text-gray-400"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M7 7h10M7 11h10m-7 4h7M5 21h14a2 2 0 002-2V7l-7-7H5a2 2 0 00-2 2v14a2 2 0 002 2z"
-                        />
-                      </svg>
-
-                      {/* File name that wraps inside the box */}
-                      <p className="text-sm text-gray-700 w-full whitespace-normal break-words">
-                        {file.name}
-                      </p>
->>>>>>> merge-pr
                     </div>
                   ))
                 ) : (

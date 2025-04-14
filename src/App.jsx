@@ -9,7 +9,6 @@ import StudentDevelopmentUnitSection from "./pages/admin/SDU/app_SDU";
 import { LandingPage } from "./pages/public/landing_page/app_main";
 import RegisterSection from "./pages/public/landing_page/register";
 import Sandbox from "./sandbox";
-import Register from "./sandbox2";
 import RegisterSectionSandbox from "./sandbox2";
 import { Sandbox3 } from "./sandbox3";
 export const API_ROUTER = "http://localhost:8080/api";
