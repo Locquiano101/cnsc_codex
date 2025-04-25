@@ -1,0 +1,141 @@
+import jwt from "jsonwebtoken";
+import { Users } from "../models/users.js";
+import dotenv from "dotenv";
+import { Proposal } from "../models/documents.js";
+dotenv.config();
+const JWT_SECRET = process.env.JWT_SECRET;
+
+export const Login = async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    // Find user and populate the organization and its nested accreditation_status field
+    const user = await Users.findOne({ username }).populate({
+      path: "organization",
+      populate: {
+        path: "accreditation_status", // Must match the ref defined in OrganizationSchema
+        select: "over_all_status", // Return only the accreditation overall status field
+      },
+    });
+
+    // Check if user exists
+    if (!user) {
+      return res.status(401).json({ message: "Invalid username or password" });
+    }
+
+    // Log the organization information if available
+    if (user.organization) {
+      console.log("Organization:", user.organization);
+    } else {
+      console.log("No organization found for user:", username);
+    }
+
+    // Validate password
+    if (user.password !== password) {
+      return res.status(401).json({ message: "Invalid username or password" });
+    }
+
+    // Create a JWT token
+    const token = jwt.sign(
+      { userId: user._id, username: user.username, position: user.position },
+      JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    // Prepare the organization data with accreditation overall status if available
+    const organizationData = user.organization
+      ? {
+          ...user.organization.toObject(),
+          accreditation_overall: user.organization.accreditation_status
+            ? user.organization.accreditation_status.over_all_status
+            : null,
+        }
+      : null;
+
+    res.status(200).json({
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+        position: user.position,
+        organization: organizationData,
+      },
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ message: "Server error during login" });
+  }
+};
+
+export const GetAllUsername = async (req, res) => {
+  try {
+    // Fetch all users, projecting only the "username" field.
+    // The _id field is excluded by setting _id: 0.
+    const users = await Users.find({}, { username: 1, _id: 0 }).exec();
+
+    // Send the result as JSON with a 200 HTTP status code.
+    res.status(200).json(users);
+  } catch (error) {
+    console.error("Error fetching usernames:", error);
+
+    // If there is any error, send a 500 status code along with an error message.
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+export const GetProposals = async (req, res) => {
+  try {
+    const proposals = await Proposal.find()
+      .populate("organization") // populate organization name only
+      .sort({ event_date: -1 }); // most recent first
+
+    return res.status(200).json({ proposals });
+  } catch (err) {
+    console.error("Error fetching proposals:", err);
+    return res
+      .status(500)
+      .json({ message: "Server error", error: err.message });
+  }
+};
+
+// controllers/proposals.js
+export const GetProposalsbyOrganization = async (req, res) => {
+  const { organizationId } = req.params;
+
+  try {
+    const proposals = await Proposal.find({ organization: organizationId }) // ← filter by org
+      .populate("organization") // populate only name
+      .sort({ event_date: -1 }); // most recent first
+
+    return res.status(200).json({ proposals });
+  } catch (err) {
+    console.error("Error fetching proposals:", err);
+    return res
+      .status(500)
+      .json({ message: "Server error", error: err.message });
+  }
+};
+export const GetSingleProposalsbyOrganization = async (req, res) => {
+  const { organizationId, proposalId } = req.params;
+
+  try {
+    const proposal = await Proposal.findOne({
+      _id: proposalId,
+      organization: organizationId,
+    })
+      .populate("organization") // optional: only get name if needed
+      .exec();
+
+    if (!proposal) {
+      return res.status(404).json({ message: "Proposal not found" });
+    }
+
+    return res.status(200).json({ proposal });
+  } catch (err) {
+    console.error("Error fetching proposal:", err);
+    return res.status(500).json({
+      message: "Server error",
+      error: err.message,
+    });
+  }
+};
