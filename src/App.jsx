@@ -63,6 +63,8 @@ function UnauthorizedAccess() {
 }
 
 export default function App() {
+  console.log("nyenyenye");
+
   return (
     <Routes>
       <Route path="/" element={<LoginPage />} />
