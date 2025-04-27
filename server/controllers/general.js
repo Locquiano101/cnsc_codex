@@ -1,7 +1,12 @@
 import jwt from "jsonwebtoken";
-import { Users } from "../models/users.js";
+import { Organizations, Users } from "../models/users.js";
 import dotenv from "dotenv";
-import { Proposal } from "../models/documents.js";
+import {
+  Proposal,
+  InstutionalAccomplisments,
+  ExternalAccomplishments,
+  ProposedAccomplishments,
+} from "../models/documents.js";
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -83,6 +88,33 @@ export const GetAllUsername = async (req, res) => {
   }
 };
 
+export const GetAllOrganization = async (req, res) => {
+  try {
+    // Fetch all users, projecting only the "username" field.
+    // The _id field is excluded by setting _id: 0.
+    const users = await Organizations.find();
+
+    res.status(200).json(users);
+  } catch (error) {
+    console.error("Error fetching usernames:", error);
+
+    // If there is any error, send a 500 status code along with an error message.
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+export const GetAllUsernameInfo = async (req, res) => {
+  try {
+    const users = await Users.find({}, { password: 0 })
+      .populate("organization") // populate organization name only
+      .sort({ event_date: -1 }); // exclude password field
+
+    res.status(200).json(users);
+  } catch (error) {
+    console.error("Error fetching usernames:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
 export const GetProposals = async (req, res) => {
   try {
     const proposals = await Proposal.find()
@@ -131,6 +163,78 @@ export const GetSingleProposalsbyOrganization = async (req, res) => {
     }
 
     return res.status(200).json({ proposal });
+  } catch (err) {
+    console.error("Error fetching proposal:", err);
+    return res.status(500).json({
+      message: "Server error",
+      error: err.message,
+    });
+  }
+};
+
+// controller, accomplishments
+export const GetAccomplishments = async (req, res) => {
+  try {
+    const InstitutionalActivity = await InstutionalAccomplisments.find()
+      .populate("organization") // populate organization name only
+      .sort({ event_date: -1 }); // most recent first
+
+    return res.status(200).json({ InstitutionalActivity });
+  } catch (err) {
+    console.error("Error fetching proposals:", err);
+    return res
+      .status(500)
+      .json({ message: "Server error", error: err.message });
+  }
+};
+export const GetAccomplishmentsbyOrganization = async (req, res) => {
+  const { organizationId } = req.params;
+
+  try {
+    const InstitutionalActivity = await InstutionalAccomplisments.find({
+      organization: organizationId,
+    }) // ← filter by org
+      .populate("organization") // populate only name
+      .sort({ event_date: -1 }); // most recent first
+
+    const ExternalActivity = await ExternalAccomplishments.find({
+      organization: organizationId,
+    }) // ← filter by org
+      .populate("organization") // populate only name
+      .sort({ event_date: -1 }); // most recent first
+    const ProposedActivity = await ProposedAccomplishments.find({
+      organization: organizationId,
+    }) // ← filter by org
+      .populate("organization") // populate only name
+      .sort({ event_date: -1 }); // most recent first
+
+    return res
+      .status(200)
+      .json({ InstitutionalActivity, ExternalActivity, ProposedActivity });
+  } catch (err) {
+    console.error("Error fetching proposals:", err);
+    return res
+      .status(500)
+      .json({ message: "Server error", error: err.message });
+  }
+};
+
+export const GetSingleAccomplishmentbyOrganization = async (req, res) => {
+  const { organizationId, proposalId } = req.params;
+
+  try {
+    const InstitutionalActivity = await InstutionalAccomplisments.findOne({
+      _id: proposalId,
+      organization: organizationId,
+    })
+      .populate("organization") // optional: only get name if needed
+      .exec();
+
+    if (!proposal) {
+      return res.status(404).json({ message: "Proposal not found" });
+    }
+
+    return res.status(200).json({ InstitutionalActivity });
   } catch (err) {
     console.error("Error fetching proposal:", err);
     return res.status(500).json({

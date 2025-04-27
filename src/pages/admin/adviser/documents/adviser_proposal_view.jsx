@@ -7,7 +7,7 @@ import EditProposalAdviserSection from "./adviser_proposal_edit";
 import { FileRenderer } from "../../../../components/file_renderer";
 
 function ViewProposalAdviserSection({ proposal, onBack }) {
-  const basePath = `/${proposal.organization.org_name}/Proposals/${proposal.title}/`;
+  const basePath = `/${proposal.organization.org_name}/Proposals/${proposal.title}`;
 
   const {
     proposal_document,
@@ -165,7 +165,7 @@ function ViewProposalAdviserSection({ proposal, onBack }) {
   );
 }
 
-function ViewProposalAdviserTableSection({ onView, onEdit, onAdd, user }) {
+function ViewProposalAdviserTableSection({ onView, onEdit, user }) {
   const [proposals, setProposals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

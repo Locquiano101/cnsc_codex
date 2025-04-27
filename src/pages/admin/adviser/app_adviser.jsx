@@ -14,11 +14,11 @@ import {
 import { HandleLogout } from "../../../api/login_api";
 import ProposalTableAdviserSection from "./documents/adviser_proposal_view";
 import AdviserOverview from "./adviser_admin_home_page";
-
+import AdviserAccomplishmentsTableView from "./documents/adviser_accomplishment_view";
 export default function AdviserAdminPage() {
   const navigate = useNavigate();
   const [storedUser, setStoredUser] = useState(null);
-  const [activeContent, setActiveContent] = useState("home");
+  const [activeContent, setActiveContent] = useState("accomplishments");
   const [showDocumentSubmenu, setShowDocumentSubmenu] = useState(false);
   const [activeDocumentSubContent, setActiveDocumentSubContent] =
     useState("proposals");
@@ -61,7 +61,7 @@ export default function AdviserAdminPage() {
       case "accreditations":
         return <>This is the accreditations section</>;
       case "accomplishments":
-        return <>This is Accomplishments Section</>;
+        return <AdviserAccomplishmentsTableView user={storedUser} />;
       case "settings":
         return <>This is settings content</>;
       default:
@@ -72,17 +72,11 @@ export default function AdviserAdminPage() {
   const handleClick = (key) => {
     setActiveContent(key);
     if (key === "documents") {
-      setShowDocumentSubmenu(!showDocumentSubmenu); // toggle submenu
+      setShowDocumentSubmenu(true); // always show submenu when clicking documents
+      setActiveDocumentSubContent("proposals"); // default subcontent
     } else {
       setShowDocumentSubmenu(false);
-      setActiveDocumentSubContent(""); // clear subcontent
-    }
-  };
-
-  const onLogout = () => {
-    const confirmed = window.confirm("Are you sure you want to log out?");
-    if (confirmed) {
-      HandleLogout(navigate);
+      setActiveDocumentSubContent(""); // clear subcontent when navigating away
     }
   };
 
@@ -152,7 +146,7 @@ export default function AdviserAdminPage() {
 
         {/* Logout */}
         <div
-          onClick={onLogout}
+          onClick={() => HandleLogout(navigate)}
           className="mt-auto w-full flex justify-center items-center py-3 cursor-pointer text-white hover:bg-[#2E4B6B] transition"
         >
           <FontAwesomeIcon icon={faRightFromBracket} className="mr-2" />

@@ -7,7 +7,7 @@ import {
 import { API_ROUTER } from "../../../../App";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
+import { faLeftLong, faOilCan } from "@fortawesome/free-solid-svg-icons";
 
 const textFields = [
   { label: "Event Title", id: "event_title", type: "text" },
@@ -28,18 +28,29 @@ function StudentAddAccomplishedInstitutional() {
     const userString = localStorage.getItem("user");
     if (userString) {
       try {
-        const user = JSON.parse(userString);
-        const orgId = user.organization?._id || "";
+        const user = JSON.parse(userString); // Parse first!
 
-        setFormDataState((prev) => ({
-          ...prev,
-          organization: orgId,
-        }));
+        console.log(user);
+        if (user?.organization?._id) {
+          const orgId = user.organization._id;
+          const orgName = user.organization.org_name;
+
+          console.log("Organization ID:", orgId, orgName);
+
+          setFormDataState((prev) => ({
+            ...prev,
+            organization: orgId,
+            organization_name: orgName,
+          }));
+        } else {
+          console.warn("Organization ID is missing from user data");
+        }
       } catch (err) {
         console.error("Failed parsing user from storage:", err);
       }
     }
   }, []);
+
   const fileFields = {
     narrative_report: {
       label: "Narrative Report",
@@ -100,11 +111,12 @@ function StudentAddAccomplishedInstitutional() {
     Object.entries(formDataState).forEach(([key, value]) => {
       formData.append(key, value);
     });
+    formData.append("activity_type", "Instutional");
 
     // 2) metadata
-    formData.append("orgFolder", formDataState.organizationName);
-    formData.append("orgDocumentClassification", "Proposals");
-    formData.append("orgDocumentTitle", formDataState.title);
+    formData.append("orgFolder", formDataState.organization_name);
+    formData.append("orgDocumentClassification", "InstutionalAccomplishment");
+    formData.append("orgDocumentTitle", formDataState.event_title);
 
     // 3A) append file binaries
     Object.entries(uploadedFiles).forEach(([fieldKey, fileOrFiles]) => {
@@ -218,118 +230,58 @@ function StudentAddAccomplishedInstitutional() {
 }
 
 function StudentAddAccomplishedExternal() {
-  const [formData, setFormData] = useState({
+  const [uploadedFiles, setUploadedFiles] = useState({});
+  const [formDataState, setFormDataState] = useState({
     event_title: "",
     event_description: "",
     event_date: "",
-    organization_name: "",
+    organization: "",
   });
-  const [uploadedFiles, setUploadedFiles] = useState({});
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  useEffect(() => {
+    const userString = localStorage.getItem("user");
+    if (userString) {
+      try {
+        const user = JSON.parse(userString); // Parse first!
 
-  const handleFileChange = (fieldKey, files) => {
-    if (!files || files.length === 0) {
-      setUploadedFiles((prev) => {
-        const copy = { ...prev };
-        delete copy[fieldKey];
-        return copy;
-      });
-      return;
-    }
-    setUploadedFiles((prev) => ({
-      ...prev,
-      [fieldKey]: Array.isArray(files) ? files : [files],
-    }));
-  };
+        console.log(user);
+        if (user?.organization?._id) {
+          const orgId = user.organization._id;
+          const orgName = user.organization.org_name;
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setSubmitError(null);
-    setSubmitSuccess(false);
+          console.log("Organization ID:", orgId, orgName);
 
-    try {
-      const payload = new FormData();
-
-      // 1) Append actual form data
-      Object.entries(formData).forEach(([key, value]) => {
-        payload.append(key, value);
-      });
-
-      payload.append("activity_type", "institutional");
-
-      // 3) Append uploaded files and their metadata
-      Object.entries(uploadedFiles).forEach(([fieldKey, fileOrFiles]) => {
-        const files = Array.isArray(fileOrFiles) ? fileOrFiles : [fileOrFiles];
-
-        files.forEach((file) => {
-          if (!file) return;
-
-          console.log("Checking file:", file);
-          if (!(file instanceof File)) {
-            console.error(`Invalid file object in ${fieldKey}:`, file);
-            throw new Error(`Invalid file format for ${fieldKey}`);
-          }
-
-          payload.append(fieldKey, file, file.name);
-          payload.append(
-            `${fieldKey}_metadata`,
-            JSON.stringify({
-              name: file.name,
-              type: file.type,
-              size: file.size,
-              lastModified: file.lastModified,
-            })
-          );
-        });
-      });
-
-      // 4) Console log everything
-      console.log("Form submission payload:");
-      for (let [key, value] of payload.entries()) {
-        console.log(`${key}:`, value);
+          setFormDataState((prev) => ({
+            ...prev,
+            organization: orgId,
+            organization_name: orgName,
+          }));
+        } else {
+          console.warn("Organization ID is missing from user data");
+        }
+      } catch (err) {
+        console.error("Failed parsing user from storage:", err);
       }
-
-      setSubmitSuccess(true);
-
-      // Reset form
-      setFormData({
-        event_title: "",
-        event_description: "",
-        event_date: "",
-      });
-      setUploadedFiles({});
-    } catch (error) {
-      console.error("Submission failed:", error);
-      setSubmitError(
-        error.message || "Failed to prepare form data. Please try again later."
-      );
-    } finally {
-      setIsSubmitting(false);
     }
-  };
+  }, []);
 
-  const textFields = [
-    { label: "Event Title", id: "event_title", type: "text" },
-    { label: "Event Description", id: "event_description", type: "textarea" },
-    { label: "Event Date", id: "event_date", type: "date" },
-    { label: "Organization Name", id: "organization_name", type: "text" },
-  ];
-
-  const singleFileFields = {
-    official_invitation: { label: "Official Invitation", accept: ".pdf" },
-    narrative_report: { label: "Narrative Report", accept: ".pdf" },
-    liquidation_report: { label: "Liquidation Report", accept: ".pdf" },
-  };
-
-  const multipleFileFields = {
+  const fileFields = {
+    official_invitation: {
+      label: "Official Invitation",
+      accept: ".pdf",
+    },
+    narrative_report: {
+      label: "Narrative Report",
+      accept: ".pdf",
+    },
+    liquidation_report: {
+      label: "Liquidation Report",
+      accept: ".pdf",
+    },
     photo_documentation: {
       label: "Photo Documentation",
       accept: "image/*",
@@ -347,9 +299,120 @@ function StudentAddAccomplishedExternal() {
     },
   };
 
+  const singleFileFields = {
+    official_invitation: fileFields.official_invitation,
+    narrative_report: fileFields.narrative_report,
+    liquidation_report: fileFields.liquidation_report,
+  };
+
+  const multipleFileFields = {
+    photo_documentation: fileFields.photo_documentation,
+    cm063_documents: fileFields.cm063_documents,
+    echo_seminar_documents: fileFields.echo_seminar_documents,
+  };
+
+  const textFields = [
+    { label: "Event Title", id: "event_title", type: "text" },
+    { label: "Event Description", id: "event_description", type: "textarea" },
+    { label: "Event Date", id: "event_date", type: "date" },
+  ];
+
+  // Handle text input changes
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormDataState((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Handle file input changes
+  const handleFileChange = (fieldKey, files) => {
+    if (!files || files.length === 0) {
+      setUploadedFiles((prev) => {
+        const copy = { ...prev };
+        delete copy[fieldKey];
+        return copy;
+      });
+      return;
+    }
+    setUploadedFiles((prev) => ({
+      ...prev,
+      [fieldKey]: fileFields[fieldKey].multiple ? Array.from(files) : files[0],
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitError(null);
+    setSubmitSuccess(false);
+
+    const formData = new FormData();
+
+    // 1) Append text fields
+    Object.entries(formDataState).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
+    formData.append("activity_type", "External");
+
+    formData.append("orgFolder", formDataState.organization_name);
+    formData.append("orgDocumentClassification", "ExternalAccomplishment");
+    formData.append("orgDocumentTitle", formDataState.event_title);
+
+    // 2) Append file binaries
+    Object.entries(uploadedFiles).forEach(([fieldKey, fileOrFiles]) => {
+      const files = Array.isArray(fileOrFiles) ? fileOrFiles : [fileOrFiles];
+      files.forEach((file) => {
+        if (!file) return;
+        const isImage = file.type.startsWith("image/");
+        const formKey = isImage ? "photo" : "document";
+        formData.append(formKey, file);
+      });
+    });
+
+    // 3) Append file names
+    Object.entries(uploadedFiles).forEach(([fieldKey, fileOrFiles]) => {
+      const files = Array.isArray(fileOrFiles) ? fileOrFiles : [fileOrFiles];
+      files.forEach((file) => {
+        formData.append(fieldKey, file.name);
+      });
+    });
+
+    // Debug
+    for (let [key, value] of formData.entries()) {
+      console.table(`${key}:`, value);
+    }
+
+    try {
+      // Assuming you have a route for external accomplishments
+      const { data } = await axios.post(
+        `${API_ROUTER}/submit-external-accomplishment`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+
+      console.log("Server response:", data);
+      setSubmitSuccess(true);
+
+      // Reset form after successful submission
+      setFormDataState({
+        event_title: "",
+        event_description: "",
+        event_date: "",
+        organization_name: "",
+      });
+      setUploadedFiles({});
+    } catch (error) {
+      console.error("Submission failed:", error);
+      setSubmitError(
+        error.message || "Submission failed. Please try again later."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-black text-center">
+    <section>
+      <h1 className="text-2xl font-bold text-black text-center mb-4">
         Add External Accomplished Activity
       </h1>
 
@@ -365,101 +428,161 @@ function StudentAddAccomplishedExternal() {
         </div>
       )}
 
-      <section>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-black">
-              Activity Information
-            </h2>
-            {textFields.map(({ label, id, type }) => (
-              <div key={id}>
-                <label
-                  htmlFor={id}
-                  className="block mb-1 text-black font-medium"
-                >
-                  {label} <span className="text-red-500">*</span>
-                </label>
-                {type === "textarea" ? (
-                  <textarea
-                    id={id}
-                    name={id}
-                    value={formData[id] || ""}
-                    onChange={handleChange}
-                    className="w-full border border-black rounded-lg p-3 focus:ring-2 focus:ring-black"
-                    rows={4}
-                    required
-                  />
-                ) : (
-                  <input
-                    type={type}
-                    id={id}
-                    name={id}
-                    value={formData[id] || ""}
-                    onChange={handleChange}
-                    className="w-full border border-black rounded-lg p-3 focus:ring-2 focus:ring-black"
-                    required
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-
-          <div>
-            <h2 className="text-lg font-semibold text-black mb-2">Documents</h2>
-            <div className="border border-black p-4 rounded-md">
-              <ReusableFileUpload
-                fields={singleFileFields}
-                onFileChange={handleFileChange}
-              />
+      <form onSubmit={handleSubmit} className="space-y-6 h-1/2 overflow-y-auto">
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold text-black">
+            Activity Information
+          </h2>
+          {textFields.map(({ label, id, type }) => (
+            <div key={id}>
+              <label htmlFor={id} className="block mb-1 text-black font-medium">
+                {label} <span className="text-red-500">*</span>
+              </label>
+              {type === "textarea" ? (
+                <textarea
+                  id={id}
+                  name={id}
+                  value={formDataState[id]}
+                  onChange={handleChange}
+                  className="w-full border border-black rounded-lg p-3 focus:ring-2 focus:ring-black"
+                  rows={4}
+                  required
+                />
+              ) : (
+                <input
+                  type={type}
+                  id={id}
+                  name={id}
+                  value={formDataState[id]}
+                  onChange={handleChange}
+                  className="w-full border border-black rounded-lg p-3 focus:ring-2 focus:ring-black"
+                  required
+                />
+              )}
             </div>
-          </div>
+          ))}
+        </div>
 
-          <div>
-            <h2 className="text-lg font-semibold text-black mb-2">
-              Additional Files
-            </h2>
-            <div className="border border-black p-4 rounded-md">
-              <ReusableMultiFileUpload
-                fields={multipleFileFields}
-                onFileChange={handleFileChange}
-              />
-            </div>
+        <div>
+          <h2 className="text-lg font-semibold text-black mb-2">Documents</h2>
+          <div className="border border-black p-4 rounded-md">
+            <ReusableFileUpload
+              fields={singleFileFields}
+              onFileChange={handleFileChange}
+            />
           </div>
+        </div>
 
-          <div className="text-right">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className={`bg-black text-white px-6 py-2 rounded-md text-base font-medium transition ${
-                isSubmitting
-                  ? "opacity-50 cursor-not-allowed"
-                  : "hover:bg-gray-800"
-              }`}
-            >
-              {isSubmitting ? "Submitting..." : "Submit Activity"}
-            </button>
+        <div>
+          <h2 className="text-lg font-semibold text-black mb-2">
+            Additional Files
+          </h2>
+          <div className="border border-black p-4 rounded-md">
+            <ReusableMultiFileUpload
+              fields={multipleFileFields}
+              onFileChange={handleFileChange}
+            />
           </div>
-        </form>
-      </section>
-    </div>
+        </div>
+
+        <div className="text-right">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className={`bg-black text-white px-6 py-2 rounded-md text-base font-medium transition ${
+              isSubmitting
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:bg-gray-800"
+            }`}
+          >
+            {isSubmitting ? "Submitting..." : "Submit Activity"}
+          </button>
+        </div>
+      </form>
+    </section>
   );
 }
 
 function StudentAddAccomplishedProposal() {
-  const [formData, setFormData] = useState({
+  const [uploadedFiles, setUploadedFiles] = useState({});
+  const [formDataState, setFormDataState] = useState({
     event_title: "",
     event_description: "",
     event_date: "",
     organization: "",
+    organization_name: "",
   });
-  const [uploadedFiles, setUploadedFiles] = useState({});
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
+  useEffect(() => {
+    const userString = localStorage.getItem("user");
+    if (userString) {
+      try {
+        const user = JSON.parse(userString);
+
+        if (user?.organization?._id) {
+          const orgId = user.organization._id;
+          const orgName = user.organization.org_name;
+
+          setFormDataState((prev) => ({
+            ...prev,
+            organization: orgId,
+            organization_name: orgName,
+          }));
+        } else {
+          console.warn("Organization ID is missing from user data");
+        }
+      } catch (err) {
+        console.error("Failed parsing user from storage:", err);
+      }
+    }
+  }, []);
+
+  const textFields = [
+    { label: "Event Title", id: "event_title", type: "text" },
+    { label: "Event Description", id: "event_description", type: "textarea" },
+    { label: "Event Date", id: "event_date", type: "date" },
+  ];
+
+  const fileFields = {
+    approved_proposal: { label: "Approved Proposal", accept: ".pdf" },
+    resolution: { label: "Resolution", accept: ".pdf" },
+    attendance_sheet: { label: "Attendance Sheet", accept: ".pdf" },
+    narrative_report: { label: "Narrative Report", accept: ".pdf" },
+    financial_report: { label: "Financial Report", accept: ".pdf" },
+    evaluation_summary: { label: "Evaluation Summary", accept: ".pdf" },
+    photo_documentation: {
+      label: "Photo Documentation",
+      accept: "image/*",
+      multiple: true,
+    },
+    sample_evaluations: {
+      label: "Sample Evaluations",
+      accept: ".pdf",
+      multiple: true,
+    },
+  };
+
+  const singleFileFields = {
+    approved_proposal: fileFields.approved_proposal,
+    resolution: fileFields.resolution,
+    attendance_sheet: fileFields.attendance_sheet,
+    narrative_report: fileFields.narrative_report,
+    financial_report: fileFields.financial_report,
+    evaluation_summary: fileFields.evaluation_summary,
+  };
+
+  const multipleFileFields = {
+    photo_documentation: fileFields.photo_documentation,
+    sample_evaluations: fileFields.sample_evaluations,
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormDataState((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleFileChange = (fieldKey, files) => {
@@ -473,7 +596,7 @@ function StudentAddAccomplishedProposal() {
     }
     setUploadedFiles((prev) => ({
       ...prev,
-      [fieldKey]: Array.isArray(files) ? files : [files],
+      [fieldKey]: fileFields[fieldKey].multiple ? Array.from(files) : files[0],
     }));
   };
 
@@ -483,89 +606,70 @@ function StudentAddAccomplishedProposal() {
     setSubmitError(null);
     setSubmitSuccess(false);
 
+    const formData = new FormData();
+
+    // 1) Append text fields
+    Object.entries(formDataState).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
+    formData.append("activity_type", "Proposed Plan");
+
+    formData.append("orgFolder", formDataState.organization_name);
+    formData.append("orgDocumentClassification", "ProposedActivity");
+    formData.append("orgDocumentTitle", formDataState.event_title);
+
+    // 2) Append file binaries
+    Object.entries(uploadedFiles).forEach(([fieldKey, fileOrFiles]) => {
+      const files = Array.isArray(fileOrFiles) ? fileOrFiles : [fileOrFiles];
+      files.forEach((file) => {
+        if (!file) return;
+        const isImage = file.type.startsWith("image/");
+        const formKey = isImage ? "photo" : "document";
+        formData.append(formKey, file);
+      });
+    });
+
+    // 3) Append file names
+    Object.entries(uploadedFiles).forEach(([fieldKey, fileOrFiles]) => {
+      const files = Array.isArray(fileOrFiles) ? fileOrFiles : [fileOrFiles];
+      files.forEach((file) => {
+        formData.append(fieldKey, file.name);
+      });
+    });
+
+    // Debug
+    for (let [key, value] of formData.entries()) {
+      console.table(`${key}:`, value);
+    }
+
     try {
-      const formDataToSend = new FormData();
+      // Assuming you have a route for external accomplishments
+      const { data } = await axios.post(
+        `${API_ROUTER}/submit-proposed-accomplishment`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
 
-      // Append text fields
-      Object.entries(formData).forEach(([key, value]) => {
-        formDataToSend.append(key, value);
-      });
-
-      // Append files
-      Object.entries(uploadedFiles).forEach(([fieldKey, files]) => {
-        files.forEach((file, index) => {
-          formDataToSend.append(`${fieldKey}[${index}]`, file, file.name);
-        });
-      });
-
-      // API call - replace with your actual endpoint
-      const response = await fetch("/api/proposal-activities", {
-        method: "POST",
-        body: formDataToSend,
-      });
-
-      if (!response.ok) {
-        throw new Error(`Server responded with ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log("Submission successful:", result);
+      console.log("Server response:", data);
       setSubmitSuccess(true);
-
-      // Reset form
-      setFormData({
-        event_title: "",
-        event_description: "",
-        event_date: "",
-        organization: "",
-      });
-      setUploadedFiles({});
     } catch (error) {
       console.error("Submission failed:", error);
-      setSubmitError(error.message || "Failed to submit form");
+      setSubmitError(
+        error.message || "Submission failed. Please try again later."
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  const textFields = [
-    { label: "Event Title", id: "event_title", type: "text" },
-    { label: "Event Description", id: "event_description", type: "textarea" },
-    { label: "Event Date", id: "event_date", type: "date" },
-    { label: "Organization", id: "organization", type: "text" },
-  ];
-
-  const singleFileFields = {
-    approved_proposal: { label: "Approved Proposal", accept: ".pdf" },
-    resolution: { label: "Resolution", accept: ".pdf" },
-    attendance_sheet: { label: "Attendance Sheet", accept: ".pdf" },
-    narrative_report: { label: "Narrative Report", accept: ".pdf" },
-    financial_report: { label: "Financial Report", accept: ".pdf" },
-    evaluation_summary: { label: "Evaluation Summary", accept: ".pdf" },
-  };
-
-  const multipleFileFields = {
-    photo_documentation: {
-      label: "Photo Documentation",
-      accept: "image/*",
-      multiple: true,
-    },
-    sample_evaluations: {
-      label: "Sample Evaluations",
-      accept: ".pdf",
-      multiple: true,
-    },
-  };
-
   return (
-    <section>
-      <h1 className="text-2xl font-bold text-gray-800 text-center flex-grow">
+    <section className="p-4">
+      <h1 className="text-2xl font-bold text-gray-800 text-center mb-6">
         Add Accomplished Action Plan
       </h1>
 
       {submitSuccess && (
         <div className="mb-4 p-4 bg-green-100 text-green-700 rounded">
-          Accomplishment submitted successfully!
+          Activity submitted successfully!
         </div>
       )}
 
@@ -575,26 +679,23 @@ function StudentAddAccomplishedProposal() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-gray-700">
-            Accomplishment Information
+      <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl mx-auto">
+        <div className="space-y-4 bg-white p-6 rounded-lg shadow">
+          <h2 className="text-lg font-semibold text-black">
+            Activity Information
           </h2>
           {textFields.map(({ label, id, type }) => (
-            <div key={id}>
-              <label
-                htmlFor={id}
-                className="block mb-1 text-sm font-medium text-gray-700"
-              >
+            <div key={id} className="mb-4">
+              <label htmlFor={id} className="block mb-1 text-black font-medium">
                 {label} <span className="text-red-500">*</span>
               </label>
               {type === "textarea" ? (
                 <textarea
                   id={id}
                   name={id}
-                  value={formData[id] || ""}
+                  value={formDataState[id]}
                   onChange={handleChange}
-                  className="w-full border border-black rounded-lg p-3 focus:ring-2 focus:ring-blue-400"
+                  className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   rows={4}
                   required
                 />
@@ -603,9 +704,9 @@ function StudentAddAccomplishedProposal() {
                   type={type}
                   id={id}
                   name={id}
-                  value={formData[id] || ""}
+                  value={formDataState[id]}
                   onChange={handleChange}
-                  className="w-full border border-black rounded-lg p-3 focus:ring-2 focus:ring-blue-400"
+                  className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 />
               )}
@@ -613,29 +714,25 @@ function StudentAddAccomplishedProposal() {
           ))}
         </div>
 
-        <div className="space-y-6">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-700 mb-2">
-              Documents
-            </h2>
-            <div className="border border-black p-4 rounded-md">
-              <ReusableFileUpload
-                fields={singleFileFields}
-                onFileChange={handleFileChange}
-              />
-            </div>
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-lg font-semibold text-black mb-4">Documents</h2>
+          <div className="border border-gray-200 p-4 rounded-md">
+            <ReusableFileUpload
+              fields={singleFileFields}
+              onFileChange={handleFileChange}
+            />
           </div>
+        </div>
 
-          <div>
-            <h2 className="text-lg font-semibold text-gray-700 mb-2">
-              Additional Files
-            </h2>
-            <div className="border border-black p-4 rounded-md">
-              <ReusableMultiFileUpload
-                fields={multipleFileFields}
-                onFileChange={handleFileChange}
-              />
-            </div>
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-lg font-semibold text-black mb-4">
+            Additional Files
+          </h2>
+          <div className="border border-gray-200 p-4 rounded-md">
+            <ReusableMultiFileUpload
+              fields={multipleFileFields}
+              onFileChange={handleFileChange}
+            />
           </div>
         </div>
 
@@ -649,15 +746,14 @@ function StudentAddAccomplishedProposal() {
                 : "hover:bg-blue-700"
             }`}
           >
-            {isSubmitting ? "Submitting..." : "Submit Accomplishment"}
+            {isSubmitting ? "Submitting..." : "Submit Activity"}
           </button>
         </div>
       </form>
     </section>
   );
 }
-
-export default function StudentAccreditationAdd({ onBack }) {
+export default function AddStudentAccomplishmentReport({ onBack }) {
   const [formType, setFormType] = useState("institutional_activity"); // Add this state
 
   const tabs = [
@@ -703,7 +799,7 @@ export default function StudentAccreditationAdd({ onBack }) {
           <StudentAddAccomplishedInstitutional />
         )}
         {formType === "external_activity" && <StudentAddAccomplishedExternal />}
-        {formType === "accomplishment" && <StudentAddAccompplishedProposal />}
+        {formType === "accomplishment" && <StudentAddAccomplishedProposal />}
       </div>
     </section>
   );

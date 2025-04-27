@@ -49,6 +49,8 @@ const documentDataFields = [
 
 export default function ProposalSubmitionStudentSection() {
   const [uploadedFiles, setUploadedFiles] = useState({});
+  const [showPopup, setShowPopup] = useState(false);
+
   const [formDataState, setFormDataState] = useState({
     organization_id: "",
     organizationName: "",
@@ -57,12 +59,15 @@ export default function ProposalSubmitionStudentSection() {
     description: "",
   });
 
+  const handleClosePopup = () => {
+    setShowPopup(false);
+    window.location.reload(); // or navigate somewhere
+  };
+
   // popup state
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupTitle, setPopupTitle] = useState("");
   const [popupText, setPopupText] = useState("");
-
-  const handleClosePopup = () => setPopupVisible(false);
 
   // on mount, grab org._id from localStorage → user.organization._id
   useEffect(() => {
@@ -146,10 +151,7 @@ export default function ProposalSubmitionStudentSection() {
         { headers: { "Content-Type": "multipart/form-data" } }
       );
       console.log("Server response:", data);
-      // show popup
-      setPopupTitle("Success!");
-      setPopupText("Your proposal has been submitted.");
-      setPopupVisible(true);
+      setShowPopup(true);
     } catch (error) {
       console.error("Submission error:", error);
       // optionally show error popup here
@@ -241,6 +243,14 @@ export default function ProposalSubmitionStudentSection() {
           </div>
         </div>
 
+        {showPopup && (
+          <PopUp
+            title="Success!"
+            text="Your form has been submitted."
+            ButtonText="Okay"
+            onClose={handleClosePopup}
+          />
+        )}
         {/* Submit */}
         <div className="flex justify-end pt-4">
           <button

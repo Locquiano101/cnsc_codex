@@ -9,242 +9,10 @@ import {
   faChevronDown,
 } from "@fortawesome/free-solid-svg-icons";
 import AddStudentAccomplishedActionPlan from "./student_accomplishment_add";
-
-function StudentAccomplishedActionPlan({ SelectedAccomplishment, onEdit }) {
-  return (
-    <div className="overflow-x-auto">
-      <div className="bg-[#1e4976] text-white p-3 rounded-t-lg font-medium">
-        Accomplished Action Plans
-      </div>
-      <table className="min-w-full bg-white">
-        <thead className="bg-gray-50 text-sm">
-          <tr>
-            <th className="p-3 text-left text-gray-600 font-medium border-b">
-              Event Title
-            </th>
-            <th className="p-3 text-left text-gray-600 font-medium border-b">
-              Description
-            </th>
-            <th className="p-3 text-left text-gray-600 font-medium border-b">
-              Status
-            </th>
-            <th className="p-3 text-center text-gray-600 font-medium border-b">
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {SelectedAccomplishment.length > 0 ? (
-            SelectedAccomplishment.map((p, index) => (
-              <tr key={index} className="border-b hover:bg-gray-50 transition">
-                <td className="px-6 py-4 font-medium">{p.event_title}</td>
-                <td className="px-6 py-4">{p.event_description}</td>
-                <td className="px-6 py-4">
-                  <a
-                    href={p.event_status}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 underline"
-                  >
-                    {p.event_status}
-                  </a>
-                </td>
-                <td className="px-6 py-4 text-center">
-                  <button
-                    onClick={() => onEdit(p)}
-                    className="p-1 bg-[#17a2b8] hover:bg-[#138496] text-white rounded-full transition"
-                    title="Edit"
-                  >
-                    <FontAwesomeIcon icon={faPencil} size="sm" />
-                  </button>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td
-                colSpan="4"
-                className="text-center px-6 py-8 text-gray-400 italic"
-              >
-                No accomplished activities found.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-function StudentInstutionalEvent({ SelectedAccomplishment, onEdit }) {
-  return (
-    <div className="overflow-x-auto">
-      <div className="bg-[#1e4976] text-white p-3 rounded-t-lg font-medium">
-        Institutional Activities
-      </div>
-      <table className="min-w-full bg-white">
-        <thead className="bg-gray-50 text-sm">
-          <tr>
-            <th className="px-6  text-left text-gray-600 font-medium border-b">
-              Event Title
-            </th>
-            <th className="p-3 text-left text-gray-600 font-medium border-b">
-              Certificate
-            </th>
-            <th className="p-3 text-left text-gray-600 font-medium border-b">
-              Attendance Sheet
-            </th>
-            <th className="p-3 text-left text-gray-600 font-medium border-b">
-              Narrative Report
-            </th>
-            <th className="p-3 text-center text-gray-600 font-medium border-b">
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {SelectedAccomplishment.length > 0 ? (
-            SelectedAccomplishment.map((p, index) => (
-              <tr key={index} className="border-b hover:bg-gray-50 transition">
-                <td className="px-6 py-4 font-medium">{p.event_title}</td>
-                <td className="px-6 py-4">
-                  <a
-                    href={p.certificate}
-                    target="_blank"
-                    className="text-blue-600 underline"
-                  >
-                    View Certificate
-                  </a>
-                </td>
-                <td className="px-6 py-4">
-                  <a
-                    href={p.attendance_sheet}
-                    target="_blank"
-                    className="text-blue-600 underline"
-                  >
-                    View Attendance
-                  </a>
-                </td>
-                <td className="px-6 py-4">
-                  <a
-                    href={p.narrative_report}
-                    target="_blank"
-                    className="text-blue-600 underline"
-                  >
-                    View Report
-                  </a>
-                </td>
-                <td className="px-6 py-4 text-center">
-                  <button
-                    onClick={() => onEdit(p)}
-                    className="p-1 bg-[#17a2b8] hover:bg-[#138496] text-white rounded-full transition"
-                    title="Edit"
-                  >
-                    <FontAwesomeIcon icon={faPencil} size="sm" />
-                  </button>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td
-                colSpan="5"
-                className="text-center px-6 py-8 text-gray-400 italic"
-              >
-                No institutional activities found.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-function StudentExternalEvents({ SelectedAccomplishment, onEdit }) {
-  return (
-    <div className="overflow-x-auto">
-      <div className="bg-[#1e4976] text-white p-3 rounded-t-lg font-medium">
-        External Activities
-      </div>
-      <table className="min-w-full bg-white">
-        <thead className="bg-gray-50 text-sm">
-          <tr>
-            <th className="p-3 text-left text-gray-600 font-medium border-b">
-              Event Title
-            </th>
-            <th className="p-3 text-left text-gray-600 font-medium border-b">
-              Invitation
-            </th>
-            <th className="p-3 text-left text-gray-600 font-medium border-b">
-              Narrative Report
-            </th>
-            <th className="p-3 text-left text-gray-600 font-medium border-b">
-              Liquidation
-            </th>
-            <th className="p-3 text-center text-gray-600 font-medium border-b">
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {SelectedAccomplishment.length > 0 ? (
-            SelectedAccomplishment.map((p, index) => (
-              <tr key={index} className="border-b hover:bg-gray-50 transition">
-                <td className="px-6 py-4 font-medium">{p.event_title}</td>
-                <td className="px-6 py-4">
-                  <a
-                    href={p.official_invitation}
-                    target="_blank"
-                    className="text-blue-600 underline"
-                  >
-                    View Invitation
-                  </a>
-                </td>
-                <td className="px-6 py-4">
-                  <a
-                    href={p.narrative_report}
-                    target="_blank"
-                    className="text-blue-600 underline"
-                  >
-                    View Report
-                  </a>
-                </td>
-                <td className="px-6 py-4">
-                  <a
-                    href={p.liquidation_report}
-                    target="_blank"
-                    className="text-blue-600 underline"
-                  >
-                    View Liquidation
-                  </a>
-                </td>
-                <td className="px-6 py-4 text-center">
-                  <button
-                    onClick={() => onEdit(p)}
-                    className="p-1 bg-[#17a2b8] hover:bg-[#138496] text-white rounded-full transition"
-                    title="Edit"
-                  >
-                    <FontAwesomeIcon icon={faPencil} size="sm" />
-                  </button>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td
-                colSpan="5"
-                className="text-center px-6 py-8 text-gray-400 italic"
-              >
-                No external activities found.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
-  );
-}
+import LongDateFormat from "../../../../api/formatter";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { API_ROUTER } from "../../../../App";
 
 function StudentAccomplishmentReportTable({
   activityFilter,
@@ -339,6 +107,9 @@ function StudentAccomplishmentReportTable({
                 Activity Type
               </th>
               <th className="p-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                Event Date
+              </th>
+              <th className="p-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
                 Event Description
               </th>
               <th className="p-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
@@ -362,6 +133,11 @@ function StudentAccomplishmentReportTable({
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                     <span className="px-2 inline-flex text-xs leading-5 font-semibold ">
                       {activity.activity_type}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    <span className="px-2 inline-flex text-xs leading-5 font-semibold ">
+                      {LongDateFormat(new Date(activity.event_date))}
                     </span>
                   </td>
                   <td
@@ -420,11 +196,50 @@ function StudentAccomplishmentReportTable({
   );
 }
 
-export default function StudentAccomplishmentsTableView() {
+export default function StudentAccomplishmentsTableView({ user }) {
   const [activityFilter, setActivityFilter] = useState("All");
   const [showAddForm, setShowAddForm] = useState(false);
   const [formData, setFormData] = useState({});
   const [fileData, setFileData] = useState({});
+  const [accomplishmentsList, setAccomplishmentsList] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
+  console.log(user);
+
+  useEffect(() => {
+    if (!user) return;
+
+    async function getAccomplishmentByOrgID() {
+      try {
+        setLoading(true);
+        const response = await axios.get(
+          `${API_ROUTER}/accomplishments/${user.organization._id}`
+        );
+        const {
+          InstitutionalActivity = [],
+          ExternalActivity = [],
+          ProposedActivity = [],
+        } = response.data;
+
+        const allActivities = [
+          ...InstitutionalActivity,
+          ...ExternalActivity,
+          ...ProposedActivity,
+        ];
+
+        setAccomplishmentsList(allActivities);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to fetch accomplishments data");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    getAccomplishmentByOrgID();
+  }, [user]);
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -448,61 +263,41 @@ export default function StudentAccomplishmentsTableView() {
     setShowAddForm(false); // return to table view after submission
   };
 
-  // Sample data for testing
-  const accomplished_proposed_action_plan_activities = [
-    {
-      event_title: "Sample Action Plan",
-      event_description: "Description of sample action plan",
-      event_status: "Completed",
-    },
-    // Add more sample data as needed
-  ];
-
-  const instutional_activities = [
-    {
-      event_title: "Sample Institutional Activity",
-      certificate: "#",
-      attendance_sheet: "#",
-      narrative_report: "#",
-    },
-    // Add more sample data as needed
-  ];
-
-  const external_activities = [
-    {
-      event_title: "Sample External Activity",
-      official_invitation: "#",
-      narrative_report: "#",
-      liquidation_report: "#",
-    },
-    // Add more sample data as needed
-  ];
-
-  // Combined activities for main table
-  const allActivities = [
-    ...accomplished_proposed_action_plan_activities.map((a) => ({
-      ...a,
-      activity_type: "Proposed Action Plan",
-    })),
-    ...instutional_activities.map((a) => ({
-      ...a,
-      activity_type: "Institutional Activity",
-    })),
-    ...external_activities.map((a) => ({
-      ...a,
-      activity_type: "External Activity",
-    })),
-  ];
-
   // Filter activities based on selected filter
   const filteredActivities =
     activityFilter === "All"
-      ? allActivities
-      : allActivities.filter((a) => a.activity_type === activityFilter);
+      ? accomplishmentsList || []
+      : (accomplishmentsList || []).filter(
+          (a) => a.activity_type === activityFilter
+        );
 
   const handleAddAccomplishment = () => {
     setShowAddForm(true);
   };
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        Loading user data...
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        Loading accomplishments...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen text-red-500">
+        {error}
+      </div>
+    );
+  }
 
   return (
     <div>

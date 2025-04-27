@@ -32,10 +32,12 @@ const OrganizationSchema = new mongoose.Schema(
     adviser_department: { type: String, required: true },
 
     org_name: { type: String, required: true },
+    org_type: { type: Object, required: true },
     org_acronym: { type: String, required: true },
     org_president: { type: String, required: true },
     org_class: { type: Object, required: true },
     org_email: { type: String, required: true },
+
     logo: { type: String },
 
     recognition_date: { type: Date },

@@ -15,6 +15,11 @@ import {
   GetProposals,
   GetProposalsbyOrganization,
   GetSingleProposalsbyOrganization,
+  GetAccomplishmentsbyOrganization,
+  GetSingleAccomplishmentbyOrganization,
+  GetAccomplishments,
+  GetAllUsernameInfo,
+  GetAllOrganization,
 } from "../controllers/general.js";
 
 import { UpdateProposalsNotesAdviser } from "../controllers/adviser_admin/document_controller.js";
@@ -38,6 +43,7 @@ import {
   SubmitExternalAccomplishments,
   SubmitInstutionalAccomplisments,
 } from "../controllers/student_admin/accomplishment_controller.js";
+import { CreateNewUser } from "../controllers/SDU_admin/user_creations.js";
 
 const router = express.Router();
 
@@ -54,7 +60,11 @@ router.post("/login", Login);
 router.get("/get-all-files", GetAllFile);
 
 router.get("/get-all-images", GetAllImageFile);
+router.get("/get-all-organization", GetAllOrganization);
 router.get("/get-all-username", GetAllUsername);
+router.get("/get-all-username-info", GetAllUsernameInfo);
+
+router.post("/create-new-user", CreateNewUser);
 
 /*ACCREDITATION ROUTE*/
 router.get("/get-accreditation", GetAllAccreditations);
@@ -93,20 +103,30 @@ router.put(
 );
 
 //Accomplishment Route
+router.get("/accomplishments", GetAccomplishments);
+
+router.get(
+  "/accomplishments/:organizationId",
+  GetAccomplishmentsbyOrganization
+);
+router.get(
+  "/accomplishments/:organizationId/:proposalId",
+  GetSingleAccomplishmentbyOrganization
+);
 
 router.post(
   "/submit-proposed-accomplishment",
-  upload.any(),
+  UploadMultipleFiles,
   SubmitProposedAccomplishments
 );
 router.post(
   "/submit-instutional-accomplishment",
-  upload.any(),
+  UploadMultipleFiles,
   SubmitInstutionalAccomplisments
 );
 router.post(
   "/submit-external-accomplishment",
-  upload.any(),
+  UploadMultipleFiles,
   SubmitExternalAccomplishments
 );
 

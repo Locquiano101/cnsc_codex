@@ -1,180 +1,172 @@
+import React, { useState } from "react";
 import axios from "axios";
 import { FileRenderer } from "../../../../components/file_renderer";
-import React, { useState, useEffect } from "react";
-import { API_ROUTER } from "../../../../App";
 import PopUp from "../../../../components/pop-ups";
+import { API_ROUTER } from "../../../../App";
 
 export default function EditProposalAdviserSection({ user, proposal, onBack }) {
-  const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [popup, setPopup] = useState({ visible: false, title: "", text: "" });
 
-  // NEW: popup state
-  const [popup, setPopup] = useState({
-    visible: false,
-    title: "",
-    text: "",
-  });
-  const isAllApproved = () => {
-    return Object.values(docStatus).every((status) => status === "approved");
-  };
-  console.log(user);
-  console.log(proposal);
+  const basePath = `/${proposal.organization.org_name}/Proposals/${proposal.title}`;
 
-  const basePath = `/${proposal.organization.org_name}/Proposals/${proposal.title}/`;
-
-  const {
-    proposal_document,
-    notice_document,
-    minutes_document,
-    resolution_document = [],
-    photo_documentations = [],
-  } = proposal.meeting;
-
-  const [docStatus, setDocStatus] = useState({
+  const initialStatus = {
     proposal: "pending",
     notice: "pending",
     minutes: "pending",
     resolution: "pending",
     photo: "pending",
-  });
-
-  const [revisionNotes, setRevisionNotes] = useState({
+  };
+  const initialNotes = {
     proposal: "",
     notice: "",
     minutes: "",
     resolution: "",
     photo: "",
-  });
-
-  const handleStatusChange = (key, status) => {
-    setDocStatus((prev) => ({ ...prev, [key]: status }));
-    setIsEditing(true);
   };
 
-  const handleNoteChange = (key, value) => {
-    setRevisionNotes((prev) => ({ ...prev, [key]: value }));
-    setIsEditing(true);
+  const [docStatus, setDocStatus] = useState(initialStatus);
+  const [revisionNotes, setRevisionNotes] = useState(initialNotes);
+
+  const documentsConfig = [
+    {
+      key: "proposal",
+      label: "Proposal Document",
+      files: [proposal.meeting.proposal_document],
+    },
+    {
+      key: "notice",
+      label: "Notice Document",
+      files: [proposal.meeting.notice_document],
+    },
+    {
+      key: "minutes",
+      label: "Minutes Document",
+      files: [proposal.meeting.minutes_document],
+    },
+    {
+      key: "resolution",
+      label: "Resolution Documents",
+      files: proposal.meeting.resolution_document || [],
+    },
+    {
+      key: "photo",
+      label: "Meeting's Photo Documentations",
+      files: proposal.meeting.photo_documentations || [],
+    },
+  ];
+
+  const isAllApproved = () =>
+    Object.values(docStatus).every((status) => status === "approved");
+
+  const handleChange = (key, type, value) => {
+    if (type === "status") setDocStatus((prev) => ({ ...prev, [key]: value }));
+    else setRevisionNotes((prev) => ({ ...prev, [key]: value }));
   };
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
-    const result = {
+    const body = {
       proposalId: proposal._id,
-
       approval_status: isAllApproved()
         ? "Approved by the Adviser"
         : "Revision from the Adviser",
-
       meeting: {
-        proposal_document: proposal.meeting.proposal_document,
-        proposal_document_status: docStatus.proposal,
-        proposal_document_note: revisionNotes.proposal,
-        notice_document: proposal.meeting.notice_document,
-        notice_document_status: docStatus.notice,
-        notice_document_note: revisionNotes.notice,
-        minutes_document: proposal.meeting.minutes_document,
-        minutes_document_status: docStatus.minutes,
-        minutes_document_note: revisionNotes.minutes,
-        resolution_document: proposal.meeting.resolution_document,
-        photo_documentations: proposal.meeting.photo_documentations,
+        ...proposal.meeting,
+        ...Object.fromEntries(
+          Object.keys(docStatus).flatMap((key) => [
+            [`${key}_document_status`, docStatus[key]],
+            [`${key}_document_note`, revisionNotes[key]],
+          ])
+        ),
       },
     };
 
-    console.log("Done editing:", result);
-
-    // OPTIONAL: send to API if needed
-    axios
-      .put(`${API_ROUTER}/update-proposals-adviser/${proposal._id}`, result)
-      .then((res) => {
-        setPopup({
-          visible: true,
-          title: "Change Submitted",
-          text: "Your changes have been submitted successfully.",
-        });
-
-        console.log("Submitted:", res.data);
-      })
-      .catch((err) => {
-        setPopup({
-          visible: true,
-          title: "Error",
-          text: err.response?.data?.message || "Something went wrong.",
-        });
-        console.error("Submit error:", err);
-      })
-      .finally(() => {
-        setLoading(false);
+    try {
+      const res = await axios.put(
+        `${API_ROUTER}/update-proposals-adviser/${proposal._id}`,
+        body
+      );
+      setPopup({
+        visible: true,
+        title: "Change Submitted",
+        text: "Your changes have been submitted successfully.",
       });
+    } catch (err) {
+      setPopup({
+        visible: true,
+        title: "Error",
+        text: err.response?.data?.message || "Something went wrong.",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <form onSubmit={onSubmit}>
-      {/* 1) PopUp */}
+    <form onSubmit={onSubmit} className="space-y-6 bg-white p-4">
       {popup.visible && (
         <PopUp
-          title={popup.title}
-          text={popup.text}
-          onClose={() => setPopup({ ...popup, visible: false })}
+          {...popup}
+          onClose={() => setPopup((p) => ({ ...p, visible: false }))}
         />
       )}
-      <div className="  space-y-4 overflow-autoflex-col items-center px-20 pt-10 bg-white rounded-2xl ">
-        <div className="flex flex-wrap gap-4">
-          <h2 className="text-2xl font-bold">
-            Proposal Title: {proposal.title}
-          </h2>
-          <h2 className="text-lg ">
-            Proposal description: {proposal.description}
-          </h2>
-        </div>
 
-        {/* Proposal Document */}
-        <section>
-          {proposal_document ? (
-            <div className="flex flex-col">
-              <div className="flex items-center justify-start gap-12 w-full">
+      <h2 className="text-2xl font-bold text-center">
+        Proposal Title: {proposal.title}
+      </h2>
+      <p className="text-lg">
+        Description: {proposal.description} <br />
+        Event Date:{" "}
+        {new Date(proposal.event_date).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })}
+      </p>
+
+      {documentsConfig.map(({ key, label, files }) => (
+        <section key={key} className="">
+          <h3 className="font-semibold">{label}</h3>
+          {files.length > 0 && files[0] ? (
+            <div className="space-y-2">
+              <div className="flex gap-12">
                 <div className="flex-1">
-                  <h3 className="font-semibold mb-1">Proposal Document:</h3>
-                  <FileRenderer
-                    basePath={basePath}
-                    fileName={proposal_document}
-                  />
+                  {files.map((file, i) => (
+                    <FileRenderer key={i} basePath={basePath} fileName={file} />
+                  ))}
                 </div>
                 <div className="flex-1">
                   <label className="mr-4">
                     <input
                       type="radio"
-                      name="proposalStatus"
+                      name={`${key}Status`}
                       value="approved"
-                      checked={docStatus.proposal === "approved"}
-                      onChange={() =>
-                        handleStatusChange("proposal", "approved")
-                      }
+                      checked={docStatus[key] === "approved"}
+                      onChange={() => handleChange(key, "status", "approved")}
                     />
                     Approved
                   </label>
                   <label>
                     <input
                       type="radio"
-                      name="proposalStatus"
+                      name={`${key}Status`}
                       value="revision"
-                      checked={docStatus.proposal === "revision"}
-                      onChange={() =>
-                        handleStatusChange("proposal", "revision")
-                      }
+                      checked={docStatus[key] === "revision"}
+                      onChange={() => handleChange(key, "status", "revision")}
                     />
                     Revision
                   </label>
                 </div>
               </div>
-              {docStatus.proposal === "revision" && (
+              {docStatus[key] === "revision" && (
                 <textarea
                   className="w-full mt-2 border p-2"
                   rows={3}
                   placeholder="Reason for revision"
-                  value={revisionNotes.proposal}
-                  onChange={(e) => handleNoteChange("proposal", e.target.value)}
+                  value={revisionNotes[key]}
+                  onChange={(e) => handleChange(key, "note", e.target.value)}
                 />
               )}
             </div>
@@ -182,251 +174,32 @@ export default function EditProposalAdviserSection({ user, proposal, onBack }) {
             <p className="italic text-sm">None</p>
           )}
         </section>
+      ))}
 
-        <hr />
-
-        {/* Notice Document */}
-        <section>
-          {notice_document ? (
-            <div className="flex flex-col">
-              <div className="flex items-center justify-start gap-12 w-full">
-                <div className="flex-1">
-                  <h3 className="font-semibold mb-1">Notice Document:</h3>
-                  <FileRenderer
-                    basePath={basePath}
-                    fileName={notice_document}
-                  />
-                </div>
-                <div className="flex-1">
-                  <label className="mr-4">
-                    <input
-                      type="radio"
-                      name="noticeStatus"
-                      value="approved"
-                      checked={docStatus.notice === "approved"}
-                      onChange={() => handleStatusChange("notice", "approved")}
-                    />
-                    Approved
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name="noticeStatus"
-                      value="revision"
-                      checked={docStatus.notice === "revision"}
-                      onChange={() => handleStatusChange("notice", "revision")}
-                    />
-                    Revision
-                  </label>
-                </div>
-              </div>
-              {docStatus.notice === "revision" && (
-                <textarea
-                  className="w-full mt-2 border p-2"
-                  rows={3}
-                  placeholder="Reason for revision"
-                  value={revisionNotes.notice}
-                  onChange={(e) => handleNoteChange("notice", e.target.value)}
-                />
-              )}
-            </div>
-          ) : (
-            <p className="italic text-sm">None</p>
-          )}
-        </section>
-
-        <hr />
-
-        {/* Minutes Document */}
-        <section>
-          {minutes_document ? (
-            <div className="flex flex-col">
-              <div className="flex items-center justify-start gap-12 w-full">
-                <div className="flex-1">
-                  <h3 className="font-semibold mb-1">Minutes Document:</h3>
-                  <FileRenderer
-                    basePath={basePath}
-                    fileName={minutes_document}
-                  />
-                </div>
-                <div className="flex-1">
-                  <label className="mr-4">
-                    <input
-                      type="radio"
-                      name="minutesStatus"
-                      value="approved"
-                      checked={docStatus.minutes === "approved"}
-                      onChange={() => handleStatusChange("minutes", "approved")}
-                    />
-                    Approved
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name="minutesStatus"
-                      value="revision"
-                      checked={docStatus.minutes === "revision"}
-                      onChange={() => handleStatusChange("minutes", "revision")}
-                    />
-                    Revision
-                  </label>
-                </div>
-              </div>
-              {docStatus.minutes === "revision" && (
-                <textarea
-                  className="w-full mt-2 border p-2"
-                  rows={3}
-                  placeholder="Reason for revision"
-                  value={revisionNotes.minutes}
-                  onChange={(e) => handleNoteChange("minutes", e.target.value)}
-                />
-              )}
-            </div>
-          ) : (
-            <p className="italic text-sm">None</p>
-          )}
-        </section>
-
-        <hr />
-
-        {/* Resolution Documents */}
-        <section>
-          {resolution_document.length > 0 ? (
-            <div className="flex flex-col">
-              <div className="flex items-center justify-start gap-12 w-full">
-                <div className="flex-1">
-                  <h3 className="font-semibold mb-1">Resolution Documents:</h3>
-                  <ul className="list-disc pl-5 space-y-1">
-                    {resolution_document.map((file, i) => (
-                      <li key={i}>
-                        <FileRenderer basePath={basePath} fileName={file} />
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="flex-1">
-                  <label className="mr-4">
-                    <input
-                      type="radio"
-                      name="resolutionStatus"
-                      value="approved"
-                      checked={docStatus.resolution === "approved"}
-                      onChange={() =>
-                        handleStatusChange("resolution", "approved")
-                      }
-                    />
-                    Approved
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name="resolutionStatus"
-                      value="revision"
-                      checked={docStatus.resolution === "revision"}
-                      onChange={() =>
-                        handleStatusChange("resolution", "revision")
-                      }
-                    />
-                    Revision
-                  </label>
-                </div>
-              </div>
-              {docStatus.resolution === "revision" && (
-                <textarea
-                  className="w-full mt-2 border p-2"
-                  rows={3}
-                  placeholder="Reason for revision"
-                  value={revisionNotes.resolution}
-                  onChange={(e) =>
-                    handleNoteChange("resolution", e.target.value)
-                  }
-                />
-              )}
-            </div>
-          ) : (
-            <p className="italic text-sm">None</p>
-          )}
-        </section>
-        <hr />
-        {/* Photo Documentations - default layout */}
-        <section>
-          <div className="flex justify-between gap-12  items-center">
-            <div className="flex-1">
-              <h3 className="font-semibold">Meeting's Photo Documentations</h3>
-            </div>
-            <div className="flex-1">
-              <label className="mr-4">
-                <input
-                  type="radio"
-                  name="photoStatus"
-                  value="approved"
-                  checked={docStatus.photo === "approved"}
-                  onChange={() => handleStatusChange("photo", "approved")}
-                />
-                Approved
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="photoStatus"
-                  value="revision"
-                  checked={docStatus.photo === "revision"}
-                  onChange={() => handleStatusChange("photo", "revision")}
-                />
-                Revision
-              </label>
-            </div>
-          </div>
-          {docStatus.photo === "revision" && (
-            <textarea
-              className="w-full mt-2 border p-2"
-              rows={3}
-              placeholder="Reason for revision"
-              value={revisionNotes.photo}
-              onChange={(e) => handleNoteChange("photo", e.target.value)}
-            />
-          )}
-          {photo_documentations.length > 0 ? (
-            <div className="flex overflow-x-auto space-x-4 p-2">
-              {photo_documentations.map((file, i) => (
-                <FileRenderer key={i} basePath={basePath} fileName={file} />
-              ))}
-            </div>
-          ) : (
-            <p className="italic text-sm">None</p>
-          )}
-        </section>
-        {/* Done Editing Button */}
-        <div className="flex items-center  justify-end gap-4 mt-4">
-          <button
-            type="button"
-            onClick={onBack}
-            disabled={loading}
-            className="px-4 py-2 rounded bg-gray-200 text-gray-800 hover:bg-gray-300 transition disabled:opacity-50"
-          >
-            Back
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className={`px-4 py-2 rounded transition disabled:opacity-50 ${
-              isAllApproved()
-                ? "bg-green-600 hover:bg-green-700 text-white"
-                : "bg-gray-200 text-black"
-            }`}
-          >
-            {loading ? (
-              <span className="flex items-center">
-                <span className="border-4 border-blue-500 border-t-transparent rounded-full w-5 h-5 animate-spin mr-2" />
-                Submitting...
-              </span>
-            ) : isAllApproved() ? (
-              "Approve"
-            ) : (
-              "Send Revision"
-            )}
-          </button>
-        </div>
+      <div className="flex justify-end gap-4 pt-4">
+        <button
+          type="button"
+          onClick={onBack}
+          disabled={loading}
+          className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+        >
+          Back
+        </button>
+        <button
+          type="submit"
+          disabled={loading}
+          className={`px-4 py-2 rounded ${
+            isAllApproved()
+              ? "bg-green-600 hover:bg-green-700 text-white"
+              : "bg-gray-200 text-black"
+          }`}
+        >
+          {loading
+            ? "Submitting..."
+            : isAllApproved()
+            ? "Approve"
+            : "Send Revision"}
+        </button>
       </div>
     </form>
   );

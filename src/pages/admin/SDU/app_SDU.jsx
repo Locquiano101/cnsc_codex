@@ -14,10 +14,11 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { HandleLogout } from "../../../api/login_api";
 import AccreditationTableSection from "./accreditation/view";
+import SDUAdminUserTableView from "./user_management_page/user_table_view";
 
 export default function StudentDevelopmentUnitPage() {
   const navigate = useNavigate();
-  const [activeContent, setActiveContent] = useState("home");
+  const [activeContent, setActiveContent] = useState("users");
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -37,7 +38,7 @@ export default function StudentDevelopmentUnitPage() {
       case "documents":
         return <>This is documents content</>;
       case "users":
-        return <>This is user management</>;
+        return <SDUAdminUserTableView />;
       case "logs":
         return <>This is system logs</>;
       case "settings":
@@ -45,11 +46,6 @@ export default function StudentDevelopmentUnitPage() {
       default:
         return null;
     }
-  };
-
-  const handleLogout = () => {
-    const confirmed = window.confirm("Are you sure you want to log out?");
-    if (confirmed) HandleLogout(navigate);
   };
 
   return (
@@ -71,13 +67,13 @@ export default function StudentDevelopmentUnitPage() {
           {[
             { key: "home", icon: faHome, label: "Reports / Dashboard" },
             { key: "organizations", icon: faUsers, label: "Organizations" },
+            { key: "users", icon: faUserGear, label: "User Management" },
             {
               key: "accreditations",
               icon: faFolderOpen,
               label: "Accreditations",
             },
             { key: "documents", icon: faFileAlt, label: "Documents" },
-            { key: "users", icon: faUserGear, label: "User Management" },
             { key: "logs", icon: faClockRotateLeft, label: "System Logs" },
             { key: "settings", icon: faGears, label: "Settings" },
           ].map(({ key, icon, label }) => (
@@ -98,7 +94,7 @@ export default function StudentDevelopmentUnitPage() {
 
         {/* Logout */}
         <div
-          onClick={handleLogout}
+          onClick={() => HandleLogout(navigate)}
           className="mt-auto w-full flex justify-center items-center py-3 cursor-pointer text-white hover:bg-red-50 transition"
         >
           <FontAwesomeIcon icon={faRightFromBracket} className="mr-2" />

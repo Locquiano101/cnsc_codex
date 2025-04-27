@@ -4,6 +4,7 @@ export default function SearchableDropdown({
   options = [],
   value,
   onChange,
+  className,
   placeholder = "Select an option",
   required = true,
 }) {
@@ -57,12 +58,11 @@ export default function SearchableDropdown({
         onBlur={handleBlur}
         placeholder={required ? `${placeholder} *` : placeholder}
         required={required}
-        className={`w-full border bg-white py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500
-          ${error ? "border-red-500 ring-red-200" : ""}`}
+        className={`${className}  w-full`}
       />
 
       {showOptions && (
-        <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg max-h-60 overflow-auto mt-1 shadow-lg">
+        <ul className="absolute z-10 w-full bg-white text-black border border-gray-300 rounded-lg max-h-60 overflow-auto mt-1 shadow-lg">
           {filteredOptions.length === 0 ? (
             <li className="px-4 py-2 text-gray-500">No results found</li>
           ) : (

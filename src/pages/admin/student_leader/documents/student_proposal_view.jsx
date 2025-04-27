@@ -40,13 +40,6 @@ function ProposalView({ onAdd, onView, onEdit, user }) {
     };
   }, [organizationId]);
 
-  const formatDate = (isoString) =>
-    new Date(isoString).toLocaleDateString(undefined, {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-
   if (loading) return <p className="p-4">Loading proposals…</p>;
   if (error) return <p className="p-4 text-red-500">{error}</p>;
 
@@ -192,6 +185,6 @@ export default function StudentProposalTableView(user) {
         <ProposalSubmissionStudentSection mode="add" onBack={handleBack} />
       );
     default:
-      return <EditProposalStudentSection />;
+      return <>nyenyenyen </>;
   }
 }

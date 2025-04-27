@@ -165,45 +165,49 @@ export default function ProcessAccreditationSection({
         <div className="flex flex-col gap-2 ">
           <h1 className="text-center text-xl ">Documents Section</h1>
           {documents.map((doc, index) => (
-            <div key={index} className="flex gap-2">
-              <div className="flex flex-col flex-1 items-center gap-2">
-                <span className="min-w-fit font-medium">{doc.label}:</span>
-                <div className=" p-2 ">
-                  <label className="mr-4">
-                    <input
-                      type="radio"
-                      name={`status-${index}`}
-                      value="approved"
-                      checked={doc.Status === "approved"}
-                      onChange={() => handleStatusChange(index, "approved")}
-                    />
-                    Approved
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name={`status-${index}`}
-                      value="revision"
-                      checked={doc.Status === "revision"}
-                      onChange={() => handleStatusChange(index, "revision")}
-                    />
-                    Revision
-                  </label>
+            <div key={index} className="flex gap-4 border-b ">
+              <div className="flex flex-col flex-1">
+                <div className="space-x-4 flex justify-between">
+                  <h1 className="min-w-fit font-medium">{doc.label}:</h1>
+                  <div className="flex gap-4">
+                    <label for={`status-${index}`}>
+                      <input
+                        type="radio"
+                        name={`status-${index}`}
+                        value="approved"
+                        checked={doc.Status === "approved"}
+                        onChange={() => handleStatusChange(index, "approved")}
+                        className="mr-2"
+                      />
+                      Approved
+                    </label>
+                    <label for={`status-${index}`}>
+                      <input
+                        type="radio"
+                        name={`status-${index}`}
+                        value="revision"
+                        checked={doc.Status === "revision"}
+                        onChange={() => handleStatusChange(index, "revision")}
+                        className="mr-2"
+                      />
+                      Approved
+                    </label>
+                  </div>
                 </div>
+                {doc.Status === "revision" && (
+                  <textarea
+                    className="border p-2 w-full h-20"
+                    placeholder="Enter revision notes..."
+                    value={doc.revision_notes || ""}
+                    onChange={(e) =>
+                      handleRevisionNoteChange(index, e.target.value)
+                    }
+                  />
+                )}
               </div>
-              {doc.Status === "revision" && (
-                <textarea
-                  className="border p-2 w-full h-20"
-                  placeholder="Enter revision notes..."
-                  value={doc.revision_notes || ""}
-                  onChange={(e) =>
-                    handleRevisionNoteChange(index, e.target.value)
-                  }
-                />
-              )}
 
               {/* File Rendering */}
-              <div className="">
+              <div className="flex-1/2">
                 <FileRenderer basePath={basePath} fileName={doc.file} />
               </div>
             </div>

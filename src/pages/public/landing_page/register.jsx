@@ -92,6 +92,8 @@ export default function RegisterPage() {
   // Final submission function
   const handleFinalSubmit = async () => {
     const formDataToSubmit = new FormData();
+
+    // Basic organization info
     formDataToSubmit.append("org_username", orgFormData.organizationUsername);
     formDataToSubmit.append("org_password", orgFormData.organizationPassword);
     formDataToSubmit.append("adviser_username", orgFormData.adviserUsername);
@@ -102,14 +104,35 @@ export default function RegisterPage() {
     formDataToSubmit.append("org_class", orgFormData.classification);
     formDataToSubmit.append("org_president", orgFormData.organizationPresident);
 
-    // Classification-specific fields
+    // Handle org_type based on classification
+    const orgType = {
+      Classification: orgFormData.classification,
+    };
+
     if (orgFormData.classification === "Local") {
-      formDataToSubmit.append("department", orgFormData.organizationDepartment);
-      formDataToSubmit.append("course", orgFormData.organizationCourse);
+      // For Local organizations, create Departments array
+      orgType.Departments = [
+        {
+          Department: orgFormData.organizationDepartment || "",
+          Course: orgFormData.organizationCourse || "",
+        },
+      ];
     } else if (orgFormData.classification === "System-wide") {
-      formDataToSubmit.append("specialization", orgFormData.specialization);
+      // For System-wide organizations, create Fields array
+      orgType.Fields = [
+        {
+          fieldName: orgFormData.fieldName || "",
+          specializations: orgFormData.specialization
+            ? orgFormData.specialization.split(",").map((s) => s.trim())
+            : [],
+        },
+      ];
     }
 
+    // Append the org_type as JSON string
+    formDataToSubmit.append("org_type", JSON.stringify(orgType));
+
+    // Adviser info
     formDataToSubmit.append("adviser_name", orgFormData.adviserName);
     formDataToSubmit.append("adviser_email", orgFormData.adviserEmail);
     formDataToSubmit.append(
@@ -117,6 +140,7 @@ export default function RegisterPage() {
       orgFormData.adviserDepartment
     );
 
+    // Accreditation type
     if (orgFormData.accreditation_type) {
       formDataToSubmit.append(
         "accreditation_type",
@@ -129,12 +153,12 @@ export default function RegisterPage() {
     formDataToSubmit.append("orgDocumentClassification", "Accreditation");
     formDataToSubmit.append("orgDocumentTitle", "Accreditation");
 
-    // Append files
+    // Append files and their names
     Object.entries(documentFormData).forEach(([key, file]) => {
       if (file && file.type) {
         if (file.type.startsWith("image/")) {
           formDataToSubmit.append("photo", file);
-          console.log("Photo appended:", key);
+          formDataToSubmit.append(key, file.name); // Append the field name with file name
         } else if (
           file.type === "application/pdf" ||
           file.type === "application/msword" ||
@@ -142,21 +166,18 @@ export default function RegisterPage() {
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         ) {
           formDataToSubmit.append("document", file);
+          formDataToSubmit.append(key, file.name); // Append the field name with file name
         } else {
           formDataToSubmit.append(key, file);
-          console.log("Other file appended:", key);
+          formDataToSubmit.append(key, file.name);
         }
-        // Optionally include the file name
-        formDataToSubmit.append(`${key}`, file.name);
       }
     });
 
-    // Debug
+    // Debug: Log all form data entries
     for (let [key, value] of formDataToSubmit.entries()) {
       console.log(key, value);
     }
-
-    console.log("Final Org Form Data:", formDataToSubmit);
 
     try {
       const response = await axios.post(
@@ -166,19 +187,22 @@ export default function RegisterPage() {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
+
       if (response.status === 200) {
         console.log("Submitted successfully!");
         alert("Submission successful!");
-        navigate("/");
       } else {
         console.error("Submission error", response);
+        alert("Submission failed. Please try again.");
       }
     } catch (error) {
       console.error("Error submitting data:", error);
+      alert("An error occurred during submission. Please try again.");
     }
   };
 
   const handleEmailConfirmation = async (code) => {
+    handleFinalSubmit();
     console.log(code);
     try {
       const response = await axios.post(
@@ -187,7 +211,6 @@ export default function RegisterPage() {
       );
       if (response.status === 200) {
         alert("Email confirmed successfully!");
-        handleFinalSubmit();
       } else {
         alert("Invalid code, please try again.");
       }

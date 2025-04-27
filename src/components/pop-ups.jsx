@@ -19,7 +19,7 @@ export default function PopUp({ title, text, onClose, ButtonText }) {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/25 p-4"
+      className="fixed inset-0 z-[100] h-full w-full flex items-center justify-center bg-black/25 p-4"
       onClick={onClose}
     >
       <div

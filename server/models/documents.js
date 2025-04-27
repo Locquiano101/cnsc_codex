@@ -11,8 +11,10 @@ const AccomplishedProposedSchema = new Schema(
       required: true,
     },
     over_all_status: { type: String },
+    activity_type: { type: String },
     event_title: { type: String },
     event_description: { type: String },
+    event_status: { type: String },
     event_date: { type: Date },
 
     event_score: { type: Number },
@@ -52,6 +54,7 @@ const AccomplishedInstitutionalSchema = new Schema(
     },
     over_all_status: { type: String },
     event_title: { type: String },
+    activity_type: { type: String },
     event_description: { type: String },
     event_date: { type: Date },
 
@@ -75,6 +78,7 @@ const AccomplishedExternalSchema = new Schema(
       required: true,
     },
 
+    activity_type: { type: String, require: true },
     event_score: { type: Number },
 
     over_all_status: { type: String },
@@ -176,15 +180,15 @@ const Accomplishments = mongoose.model(
 );
 
 const ExternalAccomplishments = mongoose.model(
-  "external_accomplished",
+  "external_accomplishment",
   AccomplishedExternalSchema
 );
 const InstutionalAccomplisments = mongoose.model(
-  "institutional_accomplished",
+  "institutional_accomplishment",
   AccomplishedInstitutionalSchema
 );
 const ProposedAccomplishments = mongoose.model(
-  "proposed_accomplished",
+  "proposed_accomplishment",
   AccomplishedProposedSchema
 );
 const Proposal = mongoose.model("Proposal", proposalSchema);

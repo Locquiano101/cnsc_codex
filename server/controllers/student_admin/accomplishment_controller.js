@@ -26,6 +26,7 @@ export const SubmitProposedAccomplishments = async (req, res) => {
       approved_proposal,
       evaluation_summary,
       sample_evaluations,
+      activity_type,
       photo_documentation,
     } = req.body;
 
@@ -36,6 +37,7 @@ export const SubmitProposedAccomplishments = async (req, res) => {
       event_title,
       event_description,
       event_date,
+      activity_type,
       documents: {
         resolution,
         attendance_sheet,
@@ -78,11 +80,6 @@ export const SubmitProposedAccomplishments = async (req, res) => {
   }
 };
 
-/**
- * Expects multer to handle:
- *   certificate, narrative_report, attendance_sheet,
- *   photo_documentation[]
- */
 export const SubmitInstutionalAccomplisments = async (req, res) => {
   try {
     const {
@@ -93,6 +90,7 @@ export const SubmitInstutionalAccomplisments = async (req, res) => {
       event_date,
       narrative_report,
       attendance_sheet,
+      activity_type,
       certificate,
       photo_documentations,
     } = req.body;
@@ -109,6 +107,7 @@ export const SubmitInstutionalAccomplisments = async (req, res) => {
     };
 
     const activity = new InstutionalAccomplisments({
+      activity_type,
       organization,
       status: status || "pending",
       event_title,
@@ -132,33 +131,40 @@ export const SubmitInstutionalAccomplisments = async (req, res) => {
   }
 };
 
-/**
- * Expects multer to handle:
- *   narrative_report, official_invitation, liquidation_report,
- *   echo_seminar_document, cm063_documents[], photo_documentation[]
- */
 export const SubmitExternalAccomplishments = async (req, res) => {
   try {
-    const { organization, status, event_title, event_description, event_date } =
-      req.body;
-    const files = req.files || {};
+    const {
+      organization,
+      status,
+      event_title,
+      event_description,
+      event_date,
+      narrative_report,
+      official_invitation,
+      activity_type,
+      liquidation_report,
+      echo_seminar_document,
+      cm063_documents,
+      photo_documentations,
+    } = req.body;
 
     const docs = {
       narrative_report,
-      official_invitation: files.official_invitation?.[0]?.filename || "",
-      liquidation_report: files.liquidation_report?.[0]?.filename || "",
-      echo_seminar_document: files.echo_seminar_document?.[0]?.filename || "",
-      cm063_documents: files.cm063_documents
-        ? files.cm063_documents.map((f) => f.filename)
-        : [],
-      photo_documentation: files.photo_documentation
-        ? files.photo_documentation.map((f) => f.filename)
-        : [],
+      official_invitation,
+      liquidation_report,
+      echo_seminar_document,
+      cm063_documents: Array.isArray(cm063_documents)
+        ? cm063_documents
+        : [cm063_documents].filter(Boolean),
+      photo_documentation: Array.isArray(photo_documentations)
+        ? photo_documentations
+        : [photo_documentations].filter(Boolean),
     };
 
     const activity = new ExternalAccomplishments({
       organization,
-      status,
+      status: status || "pending",
+      activity_type,
       event_title,
       event_description,
       event_date,
@@ -166,6 +172,9 @@ export const SubmitExternalAccomplishments = async (req, res) => {
     });
 
     const saved = await activity.save();
+
+    console.log(saved);
+
     return res.status(201).json({
       message: "External activity submitted successfully",
       activity: saved,
