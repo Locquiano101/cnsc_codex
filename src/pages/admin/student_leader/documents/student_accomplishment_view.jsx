@@ -13,12 +13,14 @@ import LongDateFormat from "../../../../api/formatter";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { API_ROUTER } from "../../../../App";
+import RandomTest from "./student_accomplishment_edit";
 
 function StudentAccomplishmentReportTable({
   activityFilter,
   setActivityFilter,
   filteredActivities,
   onAdd,
+  onEdit, // <-- Added here
 }) {
   // Add state for dropdown visibility
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
@@ -104,7 +106,7 @@ function StudentAccomplishmentReportTable({
                 Event Title
               </th>
               <th className="p-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
-                Activity Type
+                Accomplishment Type
               </th>
               <th className="p-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
                 Event Date
@@ -159,7 +161,7 @@ function StudentAccomplishmentReportTable({
                       </span>
                     )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex justify-center space-x-2">
                       <button
                         className="p-1.5 bg-[#17a2b8] hover:bg-[#138496] text-white rounded-full transition-colors duration-150 shadow-sm"
@@ -170,7 +172,7 @@ function StudentAccomplishmentReportTable({
                       </button>
                       <button
                         className="p-1.5 bg-[#dc3545] hover:bg-[#c82333] text-white rounded-full transition-colors duration-150 shadow-sm"
-                        onClick={() => console.log("Edit", activity)}
+                        onClick={() => onEdit(activity)}
                         title="Edit"
                       >
                         <FontAwesomeIcon icon={faPencil} size="sm" />
@@ -197,6 +199,8 @@ function StudentAccomplishmentReportTable({
 }
 
 export default function StudentAccomplishmentsTableView({ user }) {
+  const [editingAccomplishment, setEditingAccomplishment] = useState(null);
+
   const [activityFilter, setActivityFilter] = useState("All");
   const [showAddForm, setShowAddForm] = useState(false);
   const [formData, setFormData] = useState({});
@@ -272,7 +276,13 @@ export default function StudentAccomplishmentsTableView({ user }) {
         );
 
   const handleAddAccomplishment = () => {
+    setEditingAccomplishment(null); // Clear editing
+    setFormData({}); // Reset form data
     setShowAddForm(true);
+  };
+  const handleEditAccomplishment = (activity) => {
+    setEditingAccomplishment(activity); // Set the activity you're editing
+    setShowAddForm(false); // Hide add form if it's open
   };
 
   if (!user) {
@@ -301,7 +311,9 @@ export default function StudentAccomplishmentsTableView({ user }) {
 
   return (
     <div>
-      {showAddForm ? (
+      {editingAccomplishment ? (
+        <RandomTest selectedAccomplishment={editingAccomplishment} />
+      ) : showAddForm ? (
         <AddStudentAccomplishedActionPlan
           onSubmit={handleSubmit}
           onBack={() => setShowAddForm(false)}
@@ -315,6 +327,7 @@ export default function StudentAccomplishmentsTableView({ user }) {
           setActivityFilter={setActivityFilter}
           filteredActivities={filteredActivities}
           onAdd={handleAddAccomplishment}
+          onEdit={handleEditAccomplishment}
         />
       )}
     </div>

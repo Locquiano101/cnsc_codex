@@ -77,13 +77,11 @@ export default function PostTemplate() {
               </p>
             </div>
           </div>
-
           {/* Post Caption */}
           <div className="mt-3 text-sm text-gray-800">
             <p>{post.caption}</p>
           </div>
-
-          {/* File Display */}
+          ` {/* File Display */}
           <div className="mt-3">
             {post.type === "documents" ? (
               <embed
@@ -113,6 +111,7 @@ export default function PostTemplate() {
               </div>
             ) : null}
           </div>
+          `
         </div>
       ))}
     </div>

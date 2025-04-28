@@ -16,10 +16,10 @@ import {
   GetProposalsbyOrganization,
   GetSingleProposalsbyOrganization,
   GetAccomplishmentsbyOrganization,
-  GetSingleAccomplishmentbyOrganization,
   GetAccomplishments,
   GetAllUsernameInfo,
   GetAllOrganization,
+  GetSingleInstitutiuonalAccomplishmentbyOrganization,
 } from "../controllers/general.js";
 
 import { UpdateProposalsNotesAdviser } from "../controllers/adviser_admin/document_controller.js";
@@ -111,7 +111,7 @@ router.get(
 );
 router.get(
   "/accomplishments/:organizationId/:proposalId",
-  GetSingleAccomplishmentbyOrganization
+  GetSingleInstitutiuonalAccomplishmentbyOrganization
 );
 
 router.post(

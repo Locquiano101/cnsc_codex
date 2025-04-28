@@ -175,11 +175,13 @@ export const GetSingleProposalsbyOrganization = async (req, res) => {
 // controller, accomplishments
 export const GetAccomplishments = async (req, res) => {
   try {
-    const InstitutionalActivity = await InstutionalAccomplisments.find()
-      .populate("organization") // populate organization name only
-      .sort({ event_date: -1 }); // most recent first
+    const InstitutionalActivity = await InstutionalAccomplisments.find(); // ← filter by org
+    const ExternalActivity = await ExternalAccomplishments.find(); // most recent first
+    const ProposedActivity = await ProposedAccomplishments.find();
 
-    return res.status(200).json({ InstitutionalActivity });
+    return res
+      .status(200)
+      .json({ InstitutionalActivity, ExternalActivity, ProposedActivity });
   } catch (err) {
     console.error("Error fetching proposals:", err);
     return res
@@ -219,7 +221,10 @@ export const GetAccomplishmentsbyOrganization = async (req, res) => {
   }
 };
 
-export const GetSingleAccomplishmentbyOrganization = async (req, res) => {
+export const GetSingleInstitutiuonalAccomplishmentbyOrganization = async (
+  req,
+  res
+) => {
   const { organizationId, proposalId } = req.params;
 
   try {
@@ -230,8 +235,10 @@ export const GetSingleAccomplishmentbyOrganization = async (req, res) => {
       .populate("organization") // optional: only get name if needed
       .exec();
 
-    if (!proposal) {
-      return res.status(404).json({ message: "Proposal not found" });
+    if (!InstitutionalActivity) {
+      return res
+        .status(404)
+        .json({ message: "Instutional Accomplishment not found" });
     }
 
     return res.status(200).json({ InstitutionalActivity });

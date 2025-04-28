@@ -127,48 +127,54 @@ export default function EditProposalAdviserSection({ user, proposal, onBack }) {
       </p>
 
       {documentsConfig.map(({ key, label, files }) => (
-        <section key={key} className="">
+        <section key={key} className="border">
           <h3 className="font-semibold">{label}</h3>
           {files.length > 0 && files[0] ? (
-            <div className="space-y-2">
-              <div className="flex gap-12">
-                <div className="flex-1">
+            <div className="">
+              <div className="flex flex-col gap-6">
+                <div className="flex border items-center flex-1 gap-4">
+                  <div className="max-w-fit border-red-500   flex">
+                    <label className="mr-4">
+                      <input
+                        type="radio"
+                        name={`${key}Status`}
+                        value="approved"
+                        checked={docStatus[key] === "approved"}
+                        onChange={() => handleChange(key, "status", "approved")}
+                      />
+                      Approved
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name={`${key}Status`}
+                        value="revision"
+                        checked={docStatus[key] === "revision"}
+                        onChange={() => handleChange(key, "status", "revision")}
+                      />
+                      Revision
+                    </label>
+                  </div>
+                  <div className="flex-1">
+                    {docStatus[key] === "revision" && (
+                      <textarea
+                        className="w-full h-full border p-4"
+                        rows={3}
+                        placeholder="Reason for revision"
+                        value={revisionNotes[key]}
+                        onChange={(e) =>
+                          handleChange(key, "note", e.target.value)
+                        }
+                      />
+                    )}
+                  </div>
+                </div>
+                <div className="flex-1 flex shrink-0 overflow-auto">
                   {files.map((file, i) => (
                     <FileRenderer key={i} basePath={basePath} fileName={file} />
                   ))}
                 </div>
-                <div className="flex-1">
-                  <label className="mr-4">
-                    <input
-                      type="radio"
-                      name={`${key}Status`}
-                      value="approved"
-                      checked={docStatus[key] === "approved"}
-                      onChange={() => handleChange(key, "status", "approved")}
-                    />
-                    Approved
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name={`${key}Status`}
-                      value="revision"
-                      checked={docStatus[key] === "revision"}
-                      onChange={() => handleChange(key, "status", "revision")}
-                    />
-                    Revision
-                  </label>
-                </div>
               </div>
-              {docStatus[key] === "revision" && (
-                <textarea
-                  className="w-full mt-2 border p-2"
-                  rows={3}
-                  placeholder="Reason for revision"
-                  value={revisionNotes[key]}
-                  onChange={(e) => handleChange(key, "note", e.target.value)}
-                />
-              )}
             </div>
           ) : (
             <p className="italic text-sm">None</p>
