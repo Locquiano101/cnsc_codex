@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { stringify } from "uuid";
 
 const AccreditationStatusSchema = new mongoose.Schema(
   {
@@ -68,7 +69,23 @@ const UserSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+const PostSchema = new mongoose.Schema(
+  {
+    organization: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "organizations",
+    },
+    title: { type: String },
+    caption: { type: String },
+    status: { type: String },
+    tags: [{ type: String }],
+    content: { type: Object },
+  },
+  { timestamps: true }
+);
+
 const Users = mongoose.model("user", UserSchema);
+const Posts = mongoose.model("Posts", PostSchema);
 const Organizations = mongoose.model("organizations", OrganizationSchema);
 
 const Accreditation = mongoose.model(
@@ -76,4 +93,4 @@ const Accreditation = mongoose.model(
   AccreditationStatusSchema
 );
 
-export { Users, Organizations, Accreditation };
+export { Users, Posts, Organizations, Accreditation };

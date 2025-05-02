@@ -85,6 +85,8 @@ export const UpdateAccreditationSDU = async (req, res) => {
 };
 
 export const SubmitAccreditation = async (req, res) => {
+  console.log(req.body);
+
   try {
     // First, properly parse the incoming request body
     let parsedBody;
@@ -104,7 +106,6 @@ export const SubmitAccreditation = async (req, res) => {
       });
     }
 
-    // Destructure with the parsed body
     const {
       org_username,
       org_password,
@@ -130,86 +131,145 @@ export const SubmitAccreditation = async (req, res) => {
       });
     }
 
-    // Rest of your file handling code remains the same...
+    // Modified to handle both formats (with space and with underscore)
     const fileFields = {
-      // ... (keep your existing fileFields configuration)
+      "org logo": { label: "Organization Logo", accept: "photos/*" },
+      org_logo: { label: "Organization Logo", accept: "photos/*" }, // Added this line
+      "Constitution & By-laws": {
+        label: "Constitution & By-laws",
+        accept: ".pdf,.doc,.docx",
+      },
+      "Pledge Against Hazing": {
+        label: "Pledge Against Hazing",
+        accept: ".pdf,.doc,.docx",
+      },
+      Rosters: { label: "Rosters", accept: ".pdf,.doc,.docx" },
+      "President Info Sheet": {
+        label: "President Info Sheet",
+        accept: ".pdf,.doc,.docx",
+      },
+      "Financial Report": {
+        label: "Financial Report",
+        accept: ".pdf,.doc,.docx",
+      },
+      "Collectible Fees": {
+        label: "Collectible Fees",
+        accept: ".pdf,.doc,.docx",
+      },
+      "Commitment Statement": {
+        label: "Commitment Statement",
+        accept: ".pdf,.doc,.docx",
+      },
+      Memorandum: { label: "Memorandum", accept: ".pdf,.doc,.docx" },
+      "Action Plan": { label: "Action Plan", accept: ".pdf,.doc,.docx" },
     };
 
+    // Get the uploaded files.
     const documentFiles = req.files?.document || [];
     const photoFiles = req.files?.photo || [];
+
+    // Build the documents_and_status array.
     let documents_and_status = [];
 
     for (const key in fileFields) {
-      // ... (keep your existing file processing logic)
+      if (req.body[key]) {
+        const clientFileName = req.body[key];
+        if (fileFields[key].accept.startsWith("photos")) {
+          const matchedFile = photoFiles.find(
+            (p) => p.originalname === clientFileName
+          );
+          if (matchedFile) {
+            documents_and_status.push({
+              label: fileFields[key].label,
+              Status: "Pending",
+              file: matchedFile.filename,
+            });
+          }
+        } else {
+          const matchedFile = documentFiles.find(
+            (d) => d.originalname === clientFileName
+          );
+          if (matchedFile) {
+            documents_and_status.push({
+              label: fileFields[key].label,
+              Status: "Pending",
+              file: matchedFile.filename,
+            });
+          }
+        }
+      }
     }
 
-    // Process org_type with proper validation
     const validClassifications = ["Local", "System-Wide"];
-    if (!validClassifications.includes(org_type.Classification)) {
-      return res.status(400).json({
-        message: `Invalid classification. Must be one of: ${validClassifications.join(
-          ", "
-        )}`,
-        received: org_type.Classification,
-      });
-    }
 
-    // Create sanitized org_type object
-    const sanitizedOrgType = {
-      Classification: org_type.Classification,
-    };
-
-    if (org_type.Classification === "Local") {
-      if (!org_type.Departments || !Array.isArray(org_type.Departments)) {
-        return res.status(400).json({
-          message: "Local organizations require a Departments array",
-        });
-      }
-
-      sanitizedOrgType.Departments = org_type.Departments.filter(
-        (dep) => dep && (dep.Department || dep.Course)
-      ).map((dep) => ({
-        Department: dep.Department || "",
-        Course: dep.Course || "",
-      }));
-
-      if (sanitizedOrgType.Departments.length === 0) {
-        return res.status(400).json({
-          message: "At least one valid department is required",
-        });
-      }
-    } else if (org_type.Classification === "System-Wide") {
-      if (!org_type.Fields || !Array.isArray(org_type.Fields)) {
-        return res.status(400).json({
-          message: "System-Wide organizations require a Fields array",
-        });
-      }
-
-      sanitizedOrgType.Fields = org_type.Fields.filter(
-        (field) => field && field.fieldName
-      ).map((field) => ({
-        fieldName: field.fieldName,
-        specializations: Array.isArray(field.specializations)
-          ? field.specializations.filter((spec) => spec)
-          : [],
-      }));
-
-      if (sanitizedOrgType.Fields.length === 0) {
-        return res.status(400).json({
-          message: "At least one valid field is required",
-        });
-      }
-    }
-
-    // Rest of your database operations remain the same...
+    // Step 1: Create accreditation record
     const accreditationStatus = new Accreditation({
-      accreditation_type,
+      accreditation_type: accreditation_type || "recognition",
       over_all_status: "Pending",
       documents_and_status,
     });
 
     const savedAccreditation = await accreditationStatus.save();
 
+    // Validate and process org_type
+    let sanitizedOrgType = {};
+
+    if (!org_type || !org_type.Classification) {
+      return res
+        .status(400)
+        .json({ message: "Organization classification is required." });
+    }
+
+    if (!["Local", "System-Wide"].includes(org_type.Classification)) {
+      return res
+        .status(400)
+        .json({ message: "Invalid organization classification." });
+    }
+
+    sanitizedOrgType.Classification = org_type.Classification;
+
+    if (org_type.Classification === "Local") {
+      if (
+        !org_type.Departments ||
+        !Array.isArray(org_type.Departments) ||
+        org_type.Departments.length === 0
+      ) {
+        return res.status(400).json({
+          message:
+            "At least one department is required for Local organizations.",
+        });
+      }
+
+      // Filter and map departments
+      sanitizedOrgType.Departments = org_type.Departments.filter(
+        (dep) => dep.Department || dep.Course
+      ) // Keep only entries with at least one field
+        .map((dep) => ({
+          Department: dep.Department || "",
+          Course: dep.Course || "",
+        }));
+    } else if (org_type.Classification === "System-Wide") {
+      if (
+        !org_type.Fields ||
+        !Array.isArray(org_type.Fields) ||
+        org_type.Fields.length === 0
+      ) {
+        return res.status(400).json({
+          message:
+            "At least one field is required for System-Wide organizations.",
+        });
+      }
+
+      // Process fields and specializations
+      sanitizedOrgType.Fields = org_type.Fields.map((field) => ({
+        fieldName: field.fieldName || "",
+        specializations: Array.isArray(field.specializations)
+          ? field.specializations.filter((spec) => spec) // Remove empty specializations
+          : [],
+      }));
+    }
+
+    // Step 2: Create organization record with the sanitized org_type
     const organizationData = {
       adviser_name,
       adviser_email,
@@ -219,7 +279,7 @@ export const SubmitAccreditation = async (req, res) => {
       org_president,
       org_class,
       org_email,
-      org_type: sanitizedOrgType, // This will now be stored as a proper object
+      org_type: sanitizedOrgType, // Include the processed org_type
       logo:
         documents_and_status.find((doc) => doc.label === "Organization Logo")
           ?.file || "",
@@ -227,48 +287,45 @@ export const SubmitAccreditation = async (req, res) => {
     };
 
     const savedOrganization = await new Organizations(organizationData).save();
+
+    // Step 3: Update accreditation record
     savedAccreditation.adviser_accreditation_id = savedOrganization._id;
+
+    console.log("tite", savedAccreditation);
+
     await savedAccreditation.save();
 
-    // Create users
-    await Promise.all([
-      new Users({
-        username: org_username,
-        email: org_email,
-        password: org_password,
-        position: "student-leader",
-        organization: savedOrganization._id,
-      }).save(),
-      new Users({
-        username: adviser_username,
-        email: adviser_email,
-        password: adviser_password,
-        position: "adviser",
-        organization: savedOrganization._id,
-      }).save(),
-    ]);
+    // Step 4: Create user records
+    const orgUser = new Users({
+      username: org_username,
+      email: org_email,
+      password: org_password,
+      position: "student-leader",
+      organization: savedOrganization._id,
+    });
+
+    const adviserUser = new Users({
+      username: adviser_username,
+      email: adviser_email,
+      password: adviser_password,
+      position: "adviser",
+      organization: savedOrganization._id,
+    });
+
+    await orgUser.save();
+    await adviserUser.save();
 
     return res.status(200).json({
-      message: "Accreditation processed successfully",
+      message: "Accreditation processed and users saved successfully",
       accreditation: savedAccreditation,
       organization: savedOrganization,
     });
   } catch (error) {
     console.error("Error processing accreditation:", error);
-
-    if (error.name === "ValidationError") {
-      return res.status(400).json({
-        error: "Validation failed",
-        details: error.errors,
-      });
-    }
-
-    res.status(500).json({
-      error: "Internal server error",
-      message: error.message,
-    });
+    res.status(500).json({ error: "Server error" });
   }
 };
+
 export const GetAllAccreditations = async (req, res) => {
   try {
     // Retrieve all accreditations and populate the accreditationStatus details

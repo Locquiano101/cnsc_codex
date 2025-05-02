@@ -10,6 +10,8 @@ import {
   ReusableFileUpload,
   ReusableMultiFileUpload,
 } from "../../../../components/reusable_file_upload";
+import { Accomplishments } from "../../../../../server/models/documents";
+import { API_ROUTER } from "../../../../App";
 
 function EditInstitutionalAccomplishment({ selectedAccomplishment }) {
   const [basicInfo, setBasicInfo] = useState({
@@ -18,7 +20,9 @@ function EditInstitutionalAccomplishment({ selectedAccomplishment }) {
     event_date: selectedAccomplishment.event_date.split("T")[0], // Format date for input
     organization: selectedAccomplishment.organization._id,
     organization_name: selectedAccomplishment.organization.org_name,
+    Accomplishment_id: selectedAccomplishment._id,
   });
+
   const basePath = `/${basicInfo.organization_name}/InstitutionalAccomplishment/${basicInfo.event_title}`;
   const [editing, setEditing] = useState({
     narrative_report: false,
@@ -125,17 +129,17 @@ function EditInstitutionalAccomplishment({ selectedAccomplishment }) {
       console.log(key, val);
     }
 
-    // try {
-    //   const { data } = await axios.post(
-    //     `${API_ROUTER}/submit-instutional-accomplishment`,
-    //     formData,
-    //     { headers: { "Content-Type": "multipart/form-data" } }
-    //   );
-    //   console.log("✅ Submission successful:", data);
-    //   alert("Institutional Accomplishment submitted successfully!");
-    // } catch (err) {
-    //   console.error("❌ Submission failed:", err);
-    // }
+    try {
+      const { data } = await axios.post(
+        `${API_ROUTER}/update-instutional-accomplishment/${basicInfo.Accomplishment_id}`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+      console.log("✅ Submission successful:", data);
+      alert("Institutional Accomplishment submitted successfully!");
+    } catch (err) {
+      console.error("❌ Submission failed:", err);
+    }
   };
 
   const isAnythingEditing =
@@ -347,6 +351,7 @@ function EditExternalAccomplishment({ selectedAccomplishment }) {
     event_date: selectedAccomplishment.event_date.split("T")[0], // Format date for input
     organization: selectedAccomplishment.organization._id,
     organization_name: selectedAccomplishment.organization.org_name,
+    Accomplishment_id: selectedAccomplishment._id,
   });
   const basePath = `/${basicInfo.organization_name}/ExternalAccomplishment/${basicInfo.event_title}`;
   const [editing, setEditing] = useState({
@@ -471,17 +476,17 @@ function EditExternalAccomplishment({ selectedAccomplishment }) {
       console.log(key, val);
     }
 
-    // try {
-    //   const { data } = await axios.post(
-    //     `${API_ROUTER}/submit-external-accomplishment`,
-    //     formData,
-    //     { headers: { "Content-Type": "multipart/form-data" } }
-    //   );
-    //   console.log("✅ Submission successful:", data);
-    //   alert("External Accomplishment updated successfully!");
-    // } catch (err) {
-    //   console.error("❌ Submission failed:", err);
-    // }
+    try {
+      const { data } = await axios.post(
+        `${API_ROUTER}/update-external-accomplishment/${basicInfo.Accomplishment_id}`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+      console.log("✅ Submission successful:", data);
+      alert("External Accomplishment updated successfully!");
+    } catch (err) {
+      console.error("❌ Submission failed:", err);
+    }
   };
 
   const isAnythingEditing =

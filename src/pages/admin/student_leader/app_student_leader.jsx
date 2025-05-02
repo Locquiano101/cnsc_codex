@@ -8,12 +8,15 @@ import {
   faFolderOpen,
   faGears,
   faHome,
+  faPenToSquare,
+  faPersonWalkingDashedLineArrowRight,
   faRightFromBracket,
   faUserGroup,
 } from "@fortawesome/free-solid-svg-icons";
 import StudentProposalTableView from "./documents/student_proposal_view";
 import StudentAdminHomePage from "./student_admin_home_page";
 import StudentAccomplishmentsTableView from "./documents/student_accomplishment_view";
+import StudentPosting from "./posts/student_post";
 
 function PendingOrRevisionUI({ status, storedUser }) {
   return (
@@ -63,7 +66,7 @@ function PendingOrRevisionUI({ status, storedUser }) {
 export default function StudentLeaderPage() {
   const navigate = useNavigate();
   const [storedUser, setStoredUser] = useState(null);
-  const [activeContent, setActiveContent] = useState("accreditations");
+  const [activeContent, setActiveContent] = useState("post");
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -104,7 +107,7 @@ export default function StudentLeaderPage() {
       case "accreditations":
         return <StudentAccomplishmentsTableView user={storedUser} />;
       case "post":
-        return <div className="p-4">This is posts content</div>;
+        return <StudentPosting user={storedUser} />;
       case "settings":
         return <div className="p-4">This is settings content</div>;
       default:
@@ -121,8 +124,12 @@ export default function StudentLeaderPage() {
         {/* Logo & Welcome side-by-side */}
         <div className="flex h-24 bg-white text-brian-blue gap-2 px-2  items-center">
           <img
-            src="/general/cnsc_codex_ver_2.png"
-            className="h-10 w-auto"
+            src={`/${encodeURIComponent(
+              storedUser.organization.org_name
+            )}/Accreditation/Accreditation/photos/${encodeURIComponent(
+              storedUser.organization.logo
+            )}`}
+            className="h-10 w-auto rounded-full"
             alt="Logo"
           />
           <div className="flex flex-col ">
@@ -143,7 +150,11 @@ export default function StudentLeaderPage() {
               label: "Accomplishments",
             },
             { key: "documents", icon: faFileAlt, label: "Documents" },
-            { key: "post", icon: faUserGroup, label: "Post" },
+            {
+              key: "post",
+              icon: faPenToSquare,
+              label: "Post",
+            },
             { key: "settings", icon: faGears, label: "Settings" },
           ].map(({ key, icon, label }) => (
             <div

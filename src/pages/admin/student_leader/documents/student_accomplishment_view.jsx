@@ -25,6 +25,8 @@ function StudentAccomplishmentReportTable({
   // Add state for dropdown visibility
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
 
+  console.log(filteredActivities);
+
   // Add ref for handling outside clicks
   const dropdownRef = useRef(null);
 
@@ -149,10 +151,10 @@ function StudentAccomplishmentReportTable({
                     {activity.event_description ?? "N/A"}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {activity.event_status ? (
+                    {activity.over_all_status ? (
                       <span className="flex items-center">
                         <span className="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
-                        <span>{activity.event_status}</span>
+                        <span>{activity.over_all_status}</span>
                       </span>
                     ) : (
                       <span className="flex items-center">

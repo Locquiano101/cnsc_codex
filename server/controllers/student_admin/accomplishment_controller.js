@@ -21,6 +21,7 @@ export const SubmitProposedAccomplishments = async (req, res) => {
       event_date,
       resolution,
       attendance_sheet,
+      event_status,
       narrative_report,
       financial_report,
       approved_proposal,
@@ -38,6 +39,7 @@ export const SubmitProposedAccomplishments = async (req, res) => {
       event_description,
       event_date,
       activity_type,
+      event_status,
       documents: {
         resolution,
         attendance_sheet,
@@ -109,8 +111,8 @@ export const SubmitInstutionalAccomplisments = async (req, res) => {
     const activity = new InstutionalAccomplisments({
       activity_type,
       organization,
-      status: status || "pending",
       event_title,
+      over_all_status: "Pending",
       event_description,
       event_date,
       documents: docs,
@@ -163,7 +165,7 @@ export const SubmitExternalAccomplishments = async (req, res) => {
 
     const activity = new ExternalAccomplishments({
       organization,
-      status: status || "pending",
+      over_all_status: "Pending",
       activity_type,
       event_title,
       event_description,
@@ -181,6 +183,259 @@ export const SubmitExternalAccomplishments = async (req, res) => {
     });
   } catch (err) {
     console.error("Error submitting external activity:", err);
+    return res.status(500).json({
+      message: "Server error",
+      error: err.message,
+    });
+  }
+};
+
+export const UpdateProposedAccomplishments = async (req, res) => {
+  try {
+    const id = req.params.accomplishmentId;
+    const accomplishment = await ProposedAccomplishments.findById(id);
+
+    if (!accomplishment) {
+      return res.status(404).json({ message: "Accomplishment not found" });
+    }
+
+    const docFiles = req.files?.document || [];
+    const photoFiles = req.files?.photo || [];
+
+    const resolveFile = (bucket, originalName) => {
+      const match = bucket.find((f) => f.originalname === originalName);
+      return match ? match.filename : originalName;
+    };
+
+    const resolveMultiple = (bucket, field) => {
+      const value = req.body[field];
+      if (!value) return accomplishment.documents[field];
+      const names = Array.isArray(value) ? value : [value];
+      return names.map((name) => resolveFile(bucket, name));
+    };
+
+    const {
+      event_title,
+      event_score,
+      event_description,
+      event_date,
+      event_status,
+      activity_type,
+    } = req.body;
+
+    // Update fields
+    accomplishment.event_title = event_title;
+    accomplishment.event_score = event_score;
+    accomplishment.event_description = event_description;
+    accomplishment.event_date = event_date;
+    accomplishment.event_status = event_status;
+    accomplishment.activity_type = activity_type;
+    accomplishment.over_all_status = "Revision Applied by the Student Leader";
+
+    // Flags to check if document fields were updated
+    const updatedFields = [
+      "resolution",
+      "attendance_sheet",
+      "narrative_report",
+      "financial_report",
+      "approved_proposal",
+      "evaluation_summary",
+      "sample_evaluations",
+      "photo_documentation",
+    ];
+
+    updatedFields.forEach((field) => {
+      if (req.body[field]) {
+        const isMultiple = [
+          "sample_evaluations",
+          "photo_documentation",
+        ].includes(field);
+        const value = isMultiple
+          ? resolveMultiple(
+              field === "photo_documentation" ? photoFiles : docFiles,
+              field
+            )
+          : resolveFile(docFiles, req.body[field]);
+
+        accomplishment.documents[field] = value;
+
+        if (!isMultiple) {
+          accomplishment.documents[`${field}_note`] =
+            "Revision Applied Student Leader";
+          accomplishment.documents[`${field}_status`] =
+            "Revision Applied Student Leader";
+        }
+      }
+    });
+
+    const updated = await accomplishment.save();
+
+    return res.status(200).json({
+      message: "Proposed accomplishment updated successfully",
+      activity: updated,
+    });
+  } catch (err) {
+    console.error("Error updating proposed accomplishment:", err);
+    return res.status(500).json({
+      message: "Server error",
+      error: err.message,
+    });
+  }
+};
+
+export const UpdateInstutionalAccomplishments = async (req, res) => {
+  try {
+    const id = req.params.accomplishmentId;
+    const activity = await InstutionalAccomplisments.findById(id);
+
+    if (!activity) {
+      return res
+        .status(404)
+        .json({ message: "Institutional accomplishment not found" });
+    }
+
+    const docFiles = req.files?.document || [];
+    const photoFiles = req.files?.photo || [];
+
+    const resolveFile = (bucket, originalName) => {
+      const match = bucket.find((f) => f.originalname === originalName);
+      return match ? match.filename : originalName;
+    };
+
+    const resolveMultiple = (bucket, field) => {
+      const value = req.body[field];
+      if (!value) return activity.documents[field];
+      const names = Array.isArray(value) ? value : [value];
+      return names.map((name) => resolveFile(bucket, name));
+    };
+
+    const { event_title, event_description, event_date, activity_type } =
+      req.body;
+
+    activity.event_title = event_title;
+    activity.event_description = event_description;
+    activity.event_date = event_date;
+    activity.activity_type = activity_type;
+    activity.over_all_status = "Revision Applied by the Student Leader";
+
+    // Update documents
+    if (req.body.narrative_report) {
+      activity.documents.narrative_report = resolveFile(
+        docFiles,
+        req.body.narrative_report
+      );
+    }
+    if (req.body.attendance_sheet) {
+      activity.documents.attendance_sheet = resolveFile(
+        docFiles,
+        req.body.attendance_sheet
+      );
+    }
+    if (req.body.certificate) {
+      activity.documents.certificate = resolveMultiple(docFiles, "certificate");
+    }
+    if (req.body.photo_documentations) {
+      activity.documents.photo_documentation = resolveMultiple(
+        photoFiles,
+        "photo_documentations"
+      );
+    }
+
+    const updated = await activity.save();
+
+    return res.status(200).json({
+      message: "Institutional accomplishment updated successfully",
+      activity: updated,
+    });
+  } catch (err) {
+    console.error("Error updating institutional accomplishment:", err);
+    return res.status(500).json({
+      message: "Server error",
+      error: err.message,
+    });
+  }
+};
+
+export const UpdateExternalAccomplishments = async (req, res) => {
+  try {
+    const id = req.params.accomplishmentId;
+    const activity = await ExternalAccomplishments.findById(id);
+
+    if (!activity) {
+      return res
+        .status(404)
+        .json({ message: "External accomplishment not found" });
+    }
+
+    const docFiles = req.files?.document || [];
+    const photoFiles = req.files?.photo || [];
+
+    const resolveFile = (bucket, originalName) => {
+      const match = bucket.find((f) => f.originalname === originalName);
+      return match ? match.filename : originalName;
+    };
+
+    const resolveMultiple = (bucket, field) => {
+      const value = req.body[field];
+      if (!value) return activity.documents[field];
+      const names = Array.isArray(value) ? value : [value];
+      return names.map((name) => resolveFile(bucket, name));
+    };
+
+    const { event_title, event_description, event_date, activity_type } =
+      req.body;
+
+    activity.event_title = event_title;
+    activity.event_description = event_description;
+    activity.event_date = event_date;
+    activity.activity_type = activity_type;
+    activity.over_all_status = "Revision Applied by the Student Leader";
+
+    if (req.body.narrative_report) {
+      activity.documents.narrative_report = resolveFile(
+        docFiles,
+        req.body.narrative_report
+      );
+    }
+    if (req.body.official_invitation) {
+      activity.documents.official_invitation = resolveFile(
+        docFiles,
+        req.body.official_invitation
+      );
+    }
+    if (req.body.liquidation_report) {
+      activity.documents.liquidation_report = resolveFile(
+        docFiles,
+        req.body.liquidation_report
+      );
+    }
+    if (req.body.echo_seminar_document) {
+      activity.documents.echo_seminar_document = resolveFile(
+        docFiles,
+        req.body.echo_seminar_document
+      );
+    }
+    if (req.body.cm063_documents) {
+      activity.documents.cm063_documents = resolveMultiple(
+        docFiles,
+        "cm063_documents"
+      );
+    }
+    if (req.body.photo_documentations) {
+      activity.documents.photo_documentation = resolveMultiple(
+        photoFiles,
+        "photo_documentations"
+      );
+    }
+
+    const updated = await activity.save();
+
+    return res.status(200).json({
+      message: "External accomplishment updated successfully",
+      activity: updated,
+    });
+  } catch (err) {
+    console.error("Error updating external accomplishment:", err);
     return res.status(500).json({
       message: "Server error",
       error: err.message,

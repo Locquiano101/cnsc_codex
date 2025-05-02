@@ -2,6 +2,7 @@ import path from "path";
 import fs from "fs";
 import fsPromises from "fs/promises";
 import multer from "multer";
+import { error } from "console";
 
 // Ensure the target directory exists (using an absolute path)
 const ensureDirExists = (dir) => {
@@ -90,54 +91,26 @@ export const DeleteDocumentTitle = async (req, res, next) => {
 };
 
 export const UploadMultipleFiles = (req, res, next) => {
-  // should log ["document","photo"]
-  uploadFields(req, res, (err) => {
-    console.log(
-      "👀 document files:",
-      req.files.document?.map((f) => f.originalname)
-    );
-    console.log(
-      "👀 photo files:",
-      req.files.photo?.map((f) => f.originalname)
-    );
-    if (err) {
-      return res.status(500).json({
-        error: "File upload failed",
-        details: err.message,
-      });
-    }
-    if (err) {
-      return res
-        .status(500)
-        .json({ error: "File upload failed", details: err.message });
-    }
+  try {
+    uploadFields(req, res, (err) => {
+      const { orgFolder } = req.body;
+      const documents = req.files?.document;
+      const photos = req.files?.photo;
 
-    const { orgFolder, orgDocumentClassification } = req.body;
-    const documents = req.files?.document;
-    const photos = req.files?.photo;
+      if (!orgFolder || (!documents && !photos)) {
+        return res.status(400).json({
+          error:
+            "orgFolder and at least one file (document or photo) are required",
+        });
+      } else {
+        console.log(err);
+      }
 
-    if (!orgFolder || (!documents && !photos)) {
-      return res.status(400).json({
-        error:
-          "orgFolder and at least one file (document or photo) are required",
-      });
-    }
-
-    // Log the received data for debugging
-    console.log("Received Upload:");
-    console.log("Org Folder:", orgFolder);
-    console.log("Document Type:", orgDocumentClassification);
-    console.log(
-      "Documents:",
-      documents?.map((file) => file.originalname)
-    );
-    console.log(
-      "Photos:",
-      photos?.map((file) => file.originalname)
-    );
-
-    next();
-  });
+      next();
+    });
+  } catch (error) {
+    console.error(error);
+  } // should log ["document","photo"]
 };
 
 // Middleware to accept a single file upload from the "document" field
@@ -262,6 +235,54 @@ export const DownloadFile = (req, res) => {
       }
     });
   });
+};
+
+export const GetAllOrganizationFile = async (req, res) => {
+  const baseDir = path.join(process.cwd(), "public");
+
+  async function getFilesGroupedByOrg(dir) {
+    const orgs = await fsPromises.readdir(dir, { withFileTypes: true });
+    const result = {};
+
+    for (const org of orgs) {
+      if (org.isDirectory()) {
+        const orgName = org.name;
+        const orgDir = path.join(dir, orgName);
+        const allFiles = await getFilesRecursively(orgDir);
+        result[orgName] = allFiles.map((file) =>
+          path
+            .relative(path.join(process.cwd(), "public"), file)
+            .replace(/\\/g, "/")
+        );
+      }
+    }
+
+    return result;
+  }
+
+  async function getFilesRecursively(dir) {
+    let results = [];
+    const list = await fsPromises.readdir(dir, { withFileTypes: true });
+
+    for (const file of list) {
+      const fullPath = path.join(dir, file.name);
+      if (file.isDirectory()) {
+        results = results.concat(await getFilesRecursively(fullPath));
+      } else {
+        results.push(fullPath);
+      }
+    }
+
+    return results;
+  }
+
+  try {
+    const filesGrouped = await getFilesGroupedByOrg(baseDir);
+    return res.status(200).json({ filesByOrganization: filesGrouped });
+  } catch (error) {
+    console.error("Error reading files:", error);
+    return res.status(500).json({ error: "Could not read files" });
+  }
 };
 
 export const GetFilesByDirectory = async (req, res) => {
