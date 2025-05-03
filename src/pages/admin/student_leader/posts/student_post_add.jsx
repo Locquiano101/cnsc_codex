@@ -1,64 +1,36 @@
-import { useState } from "react";
+// Common utilities for both forms
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPenToSquare, faTimes } from "@fortawesome/free-solid-svg-icons";
-import axios from "axios";
-import { API_ROUTER } from "../../../../App";
+import PopUp from "../../../../components/pop-ups";
+import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import {
   ReusableFileUpload,
   ReusableMultiFileUpload,
 } from "../../../../components/reusable_file_upload";
-import { PostFeed } from "../../../../components/posts";
-
-function CreatePostModal({ onPost, orgName, orgLogo, orgId, onCancel }) {
-  const [formDataState, setFormDataState] = useState({
-    title: "",
-    tags: [],
-    content: "",
-  });
-
-  const [uploadedFiles, setUploadedFiles] = useState({});
-  const [isDocument, setIsDocument] = useState(false);
-
-  const tags = [
-    "Event",
-    "Update",
-    "Achievement",
-    "Memorandum/s",
-    "Resolution/s",
-    "Announcement",
-    "Accomplishment",
-  ];
-
-  const handleTagToggle = (tag) => {
-    setFormDataState((prev) => {
-      const tags = prev.tags.includes(tag)
-        ? prev.tags.filter((t) => t !== tag)
-        : [...prev.tags, tag];
-      return { ...prev, tags };
-    });
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormDataState((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleFileChange = (fieldKey, files) => {
-    if (!files || files.length === 0) {
-      setUploadedFiles((prev) => {
-        const copy = { ...prev };
-        delete copy[fieldKey];
-        return copy;
-      });
-      return;
-    }
-
-    // Store files based on document type
-    setUploadedFiles((prev) => ({
-      ...prev,
-      [fieldKey]: isDocument ? files[0] : Array.from(files),
-    }));
-  };
+import { usePostForm } from "../../../../components/posts";
+import { API_ROUTER } from "../../../../App";
+import axios from "axios";
+// Component for adding a new post
+export default function AddPostFormModal({
+  orgName,
+  orgLogo,
+  orgId,
+  onCancel,
+}) {
+  const {
+    formDataState,
+    uploadedFiles,
+    isDocument,
+    setIsDocument,
+    showPopup,
+    setShowPopup,
+    tags,
+    handleTagToggle,
+    handleChange,
+    handleFileChange,
+    setUploadedFiles,
+    getFileFields,
+    getLogoPath,
+  } = usePostForm(orgName);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -94,49 +66,45 @@ function CreatePostModal({ onPost, orgName, orgLogo, orgId, onCancel }) {
       });
     });
 
-    // Log form data for debugging
-    for (let pair of formData.entries()) {
-      console.log(`${pair[0]}:`, pair[1]);
-    }
-
     try {
-      // Uncomment this section to enable the actual API call
+      const formDataObject = {};
+      for (let [key, value] of formData.entries()) {
+        formDataObject[key] = value;
+      }
+
+      console.log("Form data before submission:", formDataObject);
+
       const { data } = await axios.post(`${API_ROUTER}/upload-post`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
       console.log("Server response:", data);
-
-      // Call the onPost callback with the post data
-      onPost?.({
-        title: formDataState.title,
-        caption: formDataState.content,
-        tags: formDataState.tags,
-        files: Object.values(uploadedFiles).flat(),
-      });
-
-      onCancel();
+      setShowPopup(true);
     } catch (error) {
       console.error("Submission error:", error);
+      // Add error handling here (could show an error popup)
     }
   };
 
-  const fileFields = {
-    upload: isDocument
-      ? {
-          label: "Document Upload",
-          accept: ".pdf",
-          multiple: false,
-        }
-      : {
-          label: "Photo Upload",
-          accept: "image/*",
-          multiple: true,
-        },
+  const handleClosePopup = () => {
+    setShowPopup(false);
+    onCancel(); // Close the modal
+    window.location.reload(); // Refresh to show updated data
   };
+
+  const logoPath = getLogoPath(orgName, orgLogo);
+  const fileFields = getFileFields();
 
   return (
     <div className="inset-0 fixed bg-black/50 backdrop-blur-xs flex items-center justify-center z-50">
+      {showPopup && (
+        <PopUp
+          title="Success!"
+          text="Your post has been created."
+          ButtonText="Okay"
+          onClose={handleClosePopup}
+        />
+      )}
       <div className="bg-white shadow rounded-2xl p-4 w-full max-w-xl mx-auto relative">
         <button
           type="button"
@@ -149,11 +117,7 @@ function CreatePostModal({ onPost, orgName, orgLogo, orgId, onCancel }) {
         <form onSubmit={handleSubmit}>
           <div className="flex items-center gap-2">
             <img
-              src={`/${encodeURIComponent(
-                orgName
-              )}/Accreditation/Accreditation/photos/${encodeURIComponent(
-                orgLogo
-              )}`}
+              src={logoPath}
               alt="Organization Logo"
               className="w-16 h-16 mt-1 ml-2 object-cover rounded-full"
             />
@@ -168,6 +132,7 @@ function CreatePostModal({ onPost, orgName, orgLogo, orgId, onCancel }) {
                   placeholder="Enter post title"
                   value={formDataState.title}
                   onChange={handleChange}
+                  required
                 />
               </div>
               <div className="flex gap-1">
@@ -179,6 +144,7 @@ function CreatePostModal({ onPost, orgName, orgLogo, orgId, onCancel }) {
                   value={formDataState.content}
                   onChange={handleChange}
                   rows={3}
+                  required
                 />
               </div>
             </div>
@@ -223,7 +189,11 @@ function CreatePostModal({ onPost, orgName, orgLogo, orgId, onCancel }) {
             </label>
           </div>
 
+          {/* File upload section */}
           <div className="mt-4">
+            <h3 className="text-sm font-medium text-gray-700 mb-2">
+              Upload Files:
+            </h3>
             {isDocument ? (
               <ReusableFileUpload
                 fields={fileFields}
@@ -254,104 +224,6 @@ function CreatePostModal({ onPost, orgName, orgLogo, orgId, onCancel }) {
           </div>
         </form>
       </div>
-    </div>
-  );
-}
-
-function ViewPostModals({ user }) {
-  return (
-    <div className="border p-4 w-full h-[32rem] flex-1 flex flex-col gap-4">
-      <div className="flex gap-4">
-        <img
-          src={`/${encodeURIComponent(
-            user.organization.org_name
-          )}/Accreditation/Accreditation/photos/${encodeURIComponent(
-            user.organization.logo
-          )}`}
-          className="h-10 w-auto rounded-full"
-          alt="Logo"
-        />
-        <div>
-          <h1>{user.organization.org_name}</h1>
-          <h1>Status: Pending</h1>
-        </div>
-      </div>
-      <div className="border h-full w-full p-4">
-        <h1 className="font-bold mb-2">CAPTION</h1>
-        <p>
-          Share your experiences, achievements, and updates with your
-          organization.
-        </p>
-      </div>
-    </div>
-  );
-}
-// Your posts data
-const posts = [
-  // More posts...
-];
-export default function StudentPosting({ user }) {
-  const [posts, setPosts] = useState([
-    {
-      type: "documents",
-      owner: "Proficient Architects",
-      owner_profile: "../general/logo.jpg",
-      caption: "Constitution and By-Laws",
-      fileDirectory: "../general/PRAXIS_CBL.pdf",
-      postedAt: Date.now(),
-    },
-  ]);
-  const [isCreatingPost, setIsCreatingPost] = useState(false);
-
-  const handleNewPost = async (postData) => {
-    try {
-      // Add the new post to the local state
-      setPosts((prevPosts) => [
-        {
-          title: postData.title,
-          content: postData.caption,
-          tags: postData.tags,
-          photoName: postData.files.length > 0 ? postData.files[0].name : null,
-          // For document we'd have similar logic
-        },
-        ...prevPosts,
-      ]);
-
-      setIsCreatingPost(false);
-    } catch (error) {
-      console.error("Post handling error:", error);
-    }
-  };
-
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {/* ADD POST */}
-      <div
-        onClick={() => setIsCreatingPost(true)}
-        className="flex flex-col items-center justify-center border p-4 w-full h-[32rem] cursor-pointer hover:bg-gray-100"
-      >
-        <FontAwesomeIcon icon={faPenToSquare} className="text-[3rem]" />
-        <h1 className="font-bold text-[2.5rem]">ADD POST</h1>
-      </div>
-      <PostFeed
-        posts={posts}
-        maxImagesToShow={4}
-        documentHeight={700}
-        imageHeight={256}
-      />
-
-      <ViewPostModals user={user} />
-
-      {/* Create Post Modal */}
-      {isCreatingPost && (
-        <CreatePostModal
-          onPost={handleNewPost}
-          orgName={user.organization.org_name}
-          orgLogo={user.organization.logo}
-          orgId={user.organization._id}
-          onCancel={() => setIsCreatingPost(false)}
-        />
-      )}
     </div>
   );
 }

@@ -9,14 +9,12 @@ import {
   faGears,
   faHome,
   faPenToSquare,
-  faPersonWalkingDashedLineArrowRight,
   faRightFromBracket,
-  faUserGroup,
 } from "@fortawesome/free-solid-svg-icons";
 import StudentProposalTableView from "./documents/student_proposal_view";
 import StudentAdminHomePage from "./student_admin_home_page";
 import StudentAccomplishmentsTableView from "./documents/student_accomplishment_view";
-import StudentPosting from "./posts/student_post";
+import StudentPosting from "./posts/student_posts_view";
 
 function PendingOrRevisionUI({ status, storedUser }) {
   return (

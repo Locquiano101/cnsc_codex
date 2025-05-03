@@ -48,8 +48,11 @@ import {
 } from "../controllers/student_admin/accomplishment_controller.js";
 import { CreateNewUser } from "../controllers/SDU_admin/user_creations.js";
 import multer from "multer";
-import { CreateNewPosts } from "../controllers/posts.js";
-import { create } from "domain";
+import {
+  CreateNewPosts,
+  GetAllOrgPosts,
+  UpdatePosts,
+} from "../controllers/posts.js";
 
 const upload = multer();
 
@@ -150,5 +153,7 @@ router.post(
 //POSTING ROUTES
 
 router.post("/upload-post", UploadMultipleFiles, CreateNewPosts);
+router.post("/update-post/:postId", UploadMultipleFiles, UpdatePosts);
+router.get("/get-post/:orgId", GetAllOrgPosts);
 
 export default router;

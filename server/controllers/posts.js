@@ -65,39 +65,87 @@ export const CreateNewPosts = async (req, res) => {
   }
 };
 
-export const createPosts = async (req, res) => {
+export const UpdatePosts = async (req, res) => {
+  const { title, organization, tags, caption, upload } = req.body;
+
   try {
-    const { organization, caption, title } = req.body;
-    let { tags } = req.body;
+    const { postId } = req.params;
 
-    console.log(req.body);
-    // Check if tags is a string and convert it to array if needed
-    if (tags && typeof tags === "string") {
-      tags = tags.split(",").map((tag) => tag.trim());
+    // Find the existing post
+    const post = await Posts.findById(postId);
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
     }
+    // Get the post ID from the route
+    const parsedTags =
+      typeof tags === "string"
+        ? JSON.parse(tags)
+        : Array.isArray(tags)
+        ? tags
+        : [];
 
-    const newPosts = new Posts({
-      organization,
-      title,
-      caption,
-      tags,
-      status: "Pending",
+    const uploadedPhotos = [];
+    const uploadedDocs = [];
+
+    const allUploads = Array.isArray(upload) ? upload : upload ? [upload] : [];
+
+    allUploads.forEach((file) => {
+      const lower = file.toLowerCase();
+      if (
+        lower.endsWith(".jpg") ||
+        lower.endsWith(".jpeg") ||
+        lower.endsWith(".png") ||
+        lower.endsWith(".webp") ||
+        lower.endsWith(".gif")
+      ) {
+        uploadedPhotos.push(file);
+      } else {
+        uploadedDocs.push(file);
+      }
     });
 
-    const savedPosts = await newPosts.save();
-    res.status(201).json(savedPosts);
+    // Clear and update the content
+    post.title = title;
+    post.caption = caption;
+    post.organization = organization;
+    post.tags = parsedTags;
+    post.status = "published";
+    post.content = {
+      photos: uploadedPhotos,
+      documents: uploadedDocs,
+    };
+
+    // Save the updated post
+    await post.save();
+
+    res.status(200).json({ message: "Post updated successfully" });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Error creating posts", error });
+    console.error("UpdatePosts error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
 // Get all postss
-export const getAllPostss = async (req, res) => {
+export const GetAllPosts = async (req, res) => {
   try {
     const postss = await Posts.find().populate("organization");
     res.status(200).json(postss);
   } catch (error) {
     res.status(500).json({ message: "Error fetching postss", error });
+  }
+};
+
+export const GetAllOrgPosts = async (req, res) => {
+  const { orgId } = req.params;
+
+  try {
+    const posts = await Posts.find({ organization: orgId }).populate(
+      "organization"
+    );
+    res.status(200).json(posts);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching posts", error });
   }
 };
 
@@ -111,25 +159,6 @@ export const getPostsById = async (req, res) => {
     res.status(200).json(posts);
   } catch (error) {
     res.status(500).json({ message: "Error fetching posts", error });
-  }
-};
-
-// Update a posts
-export const updatePosts = async (req, res) => {
-  try {
-    const updatedPosts = await Posts.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        new: true,
-      }
-    );
-    if (!updatedPosts) {
-      return res.status(404).json({ message: "Posts not found" });
-    }
-    res.status(200).json(updatedPosts);
-  } catch (error) {
-    res.status(500).json({ message: "Error updating posts", error });
   }
 };
 
