@@ -9,7 +9,7 @@ import {
 import { API_ROUTER } from "../../../../App";
 import axios from "axios";
 import { useState } from "react";
-import { usePostForm } from "../../../../components/posts";
+import { usePostForm } from "./student_posts_view";
 // Component for editing an existing post
 export default function EditPostFormModal({
   orgName,

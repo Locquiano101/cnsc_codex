@@ -6,7 +6,7 @@ import {
   ReusableFileUpload,
   ReusableMultiFileUpload,
 } from "../../../../components/reusable_file_upload";
-import { usePostForm } from "../../../../components/posts";
+import { usePostForm } from "./student_posts_view";
 import { API_ROUTER } from "../../../../App";
 import axios from "axios";
 // Component for adding a new post

@@ -52,6 +52,8 @@ import {
   CreateNewPosts,
   GetAllOrgPosts,
   UpdatePosts,
+  ApprovedPosts,
+  RevisionPosts,
 } from "../controllers/posts.js";
 
 const upload = multer();
@@ -154,6 +156,8 @@ router.post(
 
 router.post("/upload-post", UploadMultipleFiles, CreateNewPosts);
 router.post("/update-post/:postId", UploadMultipleFiles, UpdatePosts);
+router.post("/approve-post/:postId", ApprovedPosts);
+router.post("/revision-post/:postId", RevisionPosts);
 router.get("/get-post/:orgId", GetAllOrgPosts);
 
 export default router;

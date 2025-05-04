@@ -126,6 +126,13 @@ export const UpdatePosts = async (req, res) => {
   }
 };
 
+export const ApprovedPosts = async (req, res) => {
+  res.status(200).json({ message: "post approved update successfully" });
+};
+export const RevisionPosts = async (req, res) => {
+  res.status(200).json({ message: "post revision update successfully" });
+};
+
 // Get all postss
 export const GetAllPosts = async (req, res) => {
   try {
