@@ -218,12 +218,6 @@ function StudentAddAccomplishedInstitutional() {
             />
           </div>
         </div>
-
-        <div className="text-right">
-          <button type="submit" className="px-4 py-2 border ">
-            Submit
-          </button>
-        </div>
       </form>
     </section>
   );
@@ -764,7 +758,7 @@ export default function AddStudentAccomplishmentReport({ onBack }) {
   ];
 
   return (
-    <section className="flex flex-col bg-gray-50 border h-full space-y-4">
+    <section className="flex flex-col bg-gray-50 h-screen space-y-4 overflow-y-auto">
       {/* Back + Tab selector */}
       <div className="flex items-center justify-between mb-8">
         <div className="border-red-600 border-2 rounded-lg flex space-x-4 p-2">
@@ -795,7 +789,7 @@ export default function AddStudentAccomplishmentReport({ onBack }) {
       </div>
 
       {/* Scrollable Form Section */}
-      <div className="overflow-y-auto p-4 border h-full">
+      <div className="overflow-y-auto p-4 border h-full rounded">
         {formType === "institutional_activity" && (
           <StudentAddAccomplishedInstitutional />
         )}
