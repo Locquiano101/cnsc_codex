@@ -119,7 +119,7 @@ export default function StudentLeaderPage() {
       {/* Sidebar */}
       <div className="w-2/10 bg-brian-blue flex flex-col">
         {/* Logo & Welcome side-by-side */}
-        <div className="flex h-24 bg-white text-brian-blue gap-2 px-2  items-center">
+        <div className="flex h-24 bg-brian-blue text-cnsc-white-color gap-2 px-2  items-center">
           <img
             src="/general/cnsc_codex_ver_2.png"
             className="h-10 w-auto"

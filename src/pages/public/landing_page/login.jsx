@@ -22,38 +22,44 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="bg-[url('/general/cnscsch.png')] bg-cover bg-center h-screen flex flex-col">
-      <header className="w-full h-20 flex justify-between px-16 ">
-        <div className="h-full w-fit flex items-center space-x-1.5">
+    <div className="bg-[url('/general/cnscsch.png')] bg-cover bg-center min-h-screen flex flex-col">
+      {/* Header */}
+      <header className="w-full flex flex-col md:flex-row justify-between items-center px-6 md:px-16 py-4">
+        <div className="flex items-center space-x-2 mb-2 md:mb-0">
           <img
-            className="h-[3rem] w-auto"
+            className="h-10 md:h-12 w-auto"
             src={"/general/cnsc_codex_ver_2.png"}
             alt="CNSC Codex Logo"
           />
-          <span className="text-sm text-white font-bold">CNSC CODEX</span>
+          <span className="text-sm md:text-base text-white font-bold">
+            CNSC CODEX
+          </span>
         </div>
-        <div className="flex gap-3 h-full py-4 mr-27 mt-20 items-center  my-auto text-white ">
+
+        <div className="flex flex-wrap justify-center gap-4 items-center text-white text-sm md:text-base">
           <Link to={`newsfeed`} className="underline-animate py-2">
             Public Information Page
           </Link>
-          <div className="h-6 w-0.5 bg-white" />
+          <div className="h-5 w-0.5 bg-white" />
           <Link to={`organization`} className="underline-animate py-2">
             Organizations
           </Link>
-          <div className="h-6 w-0.5 bg-white" />
+          <div className="h-5 w-0.5 bg-white" />
           <h1 className="underline-animate py-2">Manuals</h1>
         </div>
       </header>
 
-      <section className="w-full  h-full flex items-center justify-evenly gap-12 ">
-        {/* Left side content (optional for layout) */}
-        <div className="h-full w-1/10 flex justify-center">
-          <div className="bg-cnsc-white-color h-2/3 w-1"></div>
+      {/* Main Section */}
+      <section className="flex-1 w-full flex flex-col lg:flex-row items-center justify-evenly gap-8 p-4 md:p-8">
+        {/* Left vertical line */}
+        <div className="flex h-full justify-center items-center">
+          <div className="bg-cnsc-white-color h-2/3 w-1" />
         </div>
 
-        <div className="flex flex-1/4 flex-col items-start w-fit text-9xl  ">
+        {/* CNSC CODEX Titles */}
+        <div className="flex flex-col items-center lg:items-start text-center lg:text-left w-full max-w-sm">
           <h1
-            className="text-cnsc-primary-color font-black font-outline-3"
+            className="text-cnsc-primary-color text-6xl md:text-8xl font-black"
             style={{
               textShadow:
                 "1px 1px 0 white, -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white",
@@ -62,7 +68,7 @@ export default function LoginPage() {
             CNSC
           </h1>
           <h1
-            className="text-cnsc-secondary-color font-bold"
+            className="text-cnsc-secondary-color text-5xl md:text-7xl font-bold"
             style={{
               textShadow:
                 "1px 1px 0 maroon, -1px -1px 0 maroon, 1px -1px 0 maroon, -1px 1px 0 maroon",
@@ -70,32 +76,30 @@ export default function LoginPage() {
           >
             CODEX
           </h1>
-          <h1 className="text-sm text-cnsc-white-color italic">
+          <h1 className="text-xs md:text-sm text-cnsc-white-color italic mt-2">
             Document Tracking and Data Management for Student Organizations
           </h1>
         </div>
 
-        {/* Main Section - Login Form */}
-        <div className="w-[420px] h-auto   rounded-2xl bg-cnsc-white-color p-6 py-12 flex flex-col justify-between items-center ">
+        {/* Login Form */}
+        <div className="w-full max-w-[420px] bg-cnsc-white-color rounded-2xl p-6 py-10 flex flex-col justify-center items-center">
           <form className="w-full" onSubmit={handleSubmit}>
-            <div>
+            <div className="space-y-4">
               <input
                 type="text"
                 placeholder="Username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="bg-white text-black-800 w-full px-4 py-2 rounded-lg border"
+                className="bg-white text-black w-full px-4 py-2 rounded-lg border"
                 required
               />
-              <div className="bg-white mt-2 text-black-800 w-full rounded-lg border relative">
+              <div className="bg-white text-black w-full rounded-lg border relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className={`bg-white w-full px-4 py-2 rounded-lg outline-none ${
-                    showPassword ? "text-base" : "text-sm"
-                  }`}
+                  className="bg-white w-full px-4 py-2 rounded-lg outline-none text-sm"
                   required
                 />
                 <FontAwesomeIcon
@@ -109,26 +113,27 @@ export default function LoginPage() {
             {errorMsg && (
               <p className="text-red-500 text-xs mt-2">{errorMsg}</p>
             )}
+
             <button
               type="submit"
-              className="bg-cnsc-primary-color mt-2 text-cnsc-white-color w-full px-4 py-2 rounded-lg border"
+              className="bg-cnsc-primary-color mt-4 text-cnsc-white-color w-full px-4 py-2 rounded-lg border hover:bg-cnsc-secondary-color transition-colors duration-300"
             >
               Login
             </button>
           </form>
-          <div className="w-full h-10 flex justify-center items-center text-xs mt-2">
-            <hr className="flex-1" />
-            <button className="px-2">
+
+          <div className="flex items-center justify-center w-full text-xs mt-4">
+            <hr className="flex-1 border-gray-300" />
+            <button className="px-2 text-cnsc-primary-color">
               <Link to="/register">Register</Link>
             </button>
-            <hr className="flex-1" />
+            <hr className="flex-1 border-gray-300" />
           </div>
         </div>
 
-        {/* Right side content (optional for layout) */}
-        <div className="h-full w-1/10 flex justify-center items-end">
-          {" "}
-          <div className="bg-cnsc-white-color h-2/3 w-1"></div>
+        {/* Right vertical line */}
+        <div className="flex h-full justify-center items-center">
+          <div className="bg-cnsc-white-color h-2/3 w-1" />
         </div>
       </section>
     </div>
