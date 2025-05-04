@@ -111,11 +111,11 @@ function StudentAddAccomplishedInstitutional() {
     Object.entries(formDataState).forEach(([key, value]) => {
       formData.append(key, value);
     });
-    formData.append("activity_type", "Instutional");
+    formData.append("activity_type", "Institutional");
 
     // 2) metadata
     formData.append("orgFolder", formDataState.organization_name);
-    formData.append("orgDocumentClassification", "InstutionalAccomplishment");
+    formData.append("orgDocumentClassification", "InstitutionalAccomplishment");
     formData.append("orgDocumentTitle", formDataState.event_title);
 
     // 3A) append file binaries
@@ -753,6 +753,7 @@ function StudentAddAccomplishedProposal() {
     </section>
   );
 }
+
 export default function AddStudentAccomplishmentReport({ onBack }) {
   const [formType, setFormType] = useState("institutional_activity"); // Add this state
 

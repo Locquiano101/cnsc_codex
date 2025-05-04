@@ -1,6 +1,10 @@
 import { Proposal } from "../../models/documents.js";
 
 export const SubmitProposalsStudent = async (req, res) => {
+  console.log("Creating new post...");
+  console.log("Body:", req.body);
+  console.log("Files FROM PROPOSALS:", req.files);
+
   try {
     const {
       organization_id,

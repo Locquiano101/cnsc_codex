@@ -10,15 +10,22 @@ import {
   faRightFromBracket,
   faFolder,
   faFolderOpen,
+  faGroupArrowsRotate,
+  faUserGroup,
+  faPencilSquare,
+  faSquarePen,
+  faPersonCircleQuestion,
+  faPencilAlt,
 } from "@fortawesome/free-solid-svg-icons";
 import { HandleLogout } from "../../../api/login_api";
 import ProposalTableAdviserSection from "./documents/adviser_proposal_view";
 import AdviserOverview from "./adviser_admin_home_page";
 import AdviserAccomplishmentsTableView from "./documents/adviser_accomplishment_view";
+import AdviserPosting from "./posts/adviser_post_view";
 export default function AdviserAdminPage() {
   const navigate = useNavigate();
   const [storedUser, setStoredUser] = useState(null);
-  const [activeContent, setActiveContent] = useState("accomplishments");
+  const [activeContent, setActiveContent] = useState("post");
   const [showDocumentSubmenu, setShowDocumentSubmenu] = useState(false);
   const [activeDocumentSubContent, setActiveDocumentSubContent] =
     useState("proposals");
@@ -30,7 +37,6 @@ export default function AdviserAdminPage() {
       return;
     }
     const user = JSON.parse(localStorage.getItem("user"));
-    console.log(JSON.parse(localStorage.getItem("user")));
     setStoredUser(user);
   }, [navigate]);
 
@@ -62,6 +68,8 @@ export default function AdviserAdminPage() {
         return <>This is the accreditations section</>;
       case "accomplishments":
         return <AdviserAccomplishmentsTableView user={storedUser} />;
+      case "post":
+        return <AdviserPosting user={storedUser} />;
       case "settings":
         return <>This is settings content</>;
       default:
@@ -100,6 +108,7 @@ export default function AdviserAdminPage() {
           {[
             { key: "home", label: "Reports / Dashboard", icon: faHome },
             { key: "organizations", label: "Organizations", icon: faUsers },
+            { key: "post", label: "post", icon: faPencilAlt },
             { key: "documents", label: "Documents", icon: faFolderOpen },
             {
               key: "accomplishments",

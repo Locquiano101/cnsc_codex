@@ -203,20 +203,21 @@ export default function RegisterPage() {
 
   const handleEmailConfirmation = async (code) => {
     handleFinalSubmit();
+
     console.log(code);
-    try {
-      const response = await axios.post(
-        `${API_ROUTER}/confirm-verification-accreditation`,
-        { org_email: orgFormData.organizationEmail, code }
-      );
-      if (response.status === 200) {
-        alert("Email confirmed successfully!");
-      } else {
-        alert("Invalid code, please try again.");
-      }
-    } catch (error) {
-      console.error("Error confirming code:", error);
-    }
+    // try {
+    //   const response = await axios.post(
+    //     `${API_ROUTER}/confirm-verification-accreditation`,
+    //     { org_email: orgFormData.organizationEmail, code }
+    //   );
+    //   if (response.status === 200) {
+    //     alert("Email confirmed successfully!");
+    //   } else {
+    //     alert("Invalid code, please try again.");
+    //   }
+    // } catch (error) {
+    //   console.error("Error confirming code:", error);
+    // }
   };
 
   const handleResendEmail = () => {

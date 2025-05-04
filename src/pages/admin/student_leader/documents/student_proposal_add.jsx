@@ -64,11 +64,6 @@ export default function ProposalSubmitionStudentSection() {
     window.location.reload(); // or navigate somewhere
   };
 
-  // popup state
-  const [popupVisible, setPopupVisible] = useState(false);
-  const [popupTitle, setPopupTitle] = useState("");
-  const [popupText, setPopupText] = useState("");
-
   // on mount, grab org._id from localStorage → user.organization._id
   useEffect(() => {
     const userString = localStorage.getItem("user");

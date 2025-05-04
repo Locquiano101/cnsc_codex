@@ -27,7 +27,6 @@ const fileFields = {
 };
 
 export default function EditProposalStudentSection(selectedProposal) {
-  console.log(selectedProposal);
   // Basic info state
   const [basicInfo, setBasicInfo] = useState({
     title: selectedProposal.selectedProposal.title,
