@@ -57,7 +57,7 @@ function ProposalView({ onAdd, onView, onEdit, user }) {
       </div>
 
       {/* Table wrapper with fixed height */}
-      <div className="max-h-[500px] overflow-y-auto h-110 shadow-2xl">
+      <div className="h-screen overflow-y-auto  shadow-2xl">
         <table className="w-full bg-white border-collapse">
           <thead className="bg-gray-50 text-sm">
             <tr className="bg-gray-50">
