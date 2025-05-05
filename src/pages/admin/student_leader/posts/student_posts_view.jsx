@@ -293,7 +293,7 @@ export default function StudentPosting({ user }) {
       {/* ADD POST Button */}
       <div
         onClick={() => setIsCreatingPost(true)}
-        className="flex flex-col items-center justify-center border p-4 w-full h-[32rem] cursor-pointer hover:bg-gray-100 transition-colors duration-200 rounded-xl shadow-sm"
+        className="flex flex-col items-center justify-center border p-4 w-full h-[10REM] cursor-pointer hover:bg-gray-100 transition-colors duration-200 rounded-xl shadow-sm"
       >
         <FontAwesomeIcon
           icon={faPenToSquare}
