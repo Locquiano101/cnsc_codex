@@ -238,7 +238,7 @@ export const DownloadFile = (req, res) => {
 };
 
 export const GetAllOrganizationFile = async (req, res) => {
-  const baseDir = path.join(process.cwd(), "public");
+  const baseDir = path.join(process.cwd(), "../public");
 
   async function getFilesGroupedByOrg(dir) {
     const orgs = await fsPromises.readdir(dir, { withFileTypes: true });
@@ -282,6 +282,71 @@ export const GetAllOrganizationFile = async (req, res) => {
   } catch (error) {
     console.error("Error reading files:", error);
     return res.status(500).json({ error: "Could not read files" });
+  }
+};
+
+export const GetAllStudentPostFiles = async (req, res) => {
+  const baseDir = path.join(process.cwd(), "../public");
+
+  const getFilesRecursively = async (dir) => {
+    const entries = await fsPromises.readdir(dir, { withFileTypes: true });
+    const files = await Promise.all(
+      entries.map(async (entry) => {
+        const fullPath = path.join(dir, entry.name);
+        return entry.isDirectory()
+          ? await getFilesRecursively(fullPath)
+          : fullPath;
+      })
+    );
+    return files.flat();
+  };
+
+  const getStudentPostFilesInOrg = async (orgDir) => {
+    const results = [];
+
+    const walk = async (dir) => {
+      const entries = await fsPromises.readdir(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name);
+
+        if (entry.isDirectory()) {
+          if (entry.name === "StudentPost") {
+            const files = await getFilesRecursively(fullPath);
+            results.push(...files);
+          } else {
+            await walk(fullPath);
+          }
+        }
+      }
+    };
+
+    await walk(orgDir);
+    return results;
+  };
+
+  try {
+    const orgs = await fsPromises.readdir(baseDir, { withFileTypes: true });
+    const filesByOrganization = {};
+
+    for (const org of orgs) {
+      if (org.isDirectory()) {
+        const orgDir = path.join(baseDir, org.name);
+        const studentPostFiles = await getStudentPostFilesInOrg(orgDir);
+
+        if (studentPostFiles.length > 0) {
+          filesByOrganization[org.name] = studentPostFiles.map((filePath) =>
+            path.relative(baseDir, filePath).replace(/\\/g, "/")
+          );
+        }
+      }
+    }
+
+    return res.status(200).json({ StudentPosts: filesByOrganization });
+  } catch (err) {
+    console.error("Error retrieving StudentPost files:", err);
+    return res
+      .status(500)
+      .json({ error: "Could not retrieve StudentPost files" });
   }
 };
 

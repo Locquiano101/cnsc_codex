@@ -26,7 +26,7 @@ export const CreateNewPosts = async (req, res) => {
       caption: content || "",
       organization,
       tags: parsedTags,
-      status: "published",
+      status: "pending",
       content: {
         photos: photoDocumentations,
         documents: resolutionDocuments,
@@ -110,7 +110,7 @@ export const UpdatePosts = async (req, res) => {
     post.caption = caption;
     post.organization = organization;
     post.tags = parsedTags;
-    post.status = "published";
+    post.status = "pending";
     post.content = {
       photos: uploadedPhotos,
       documents: uploadedDocs,
@@ -126,13 +126,102 @@ export const UpdatePosts = async (req, res) => {
   }
 };
 
+// Backend endpoints
 export const ApprovedPosts = async (req, res) => {
-  res.status(200).json({ message: "post approved update successfully" });
+  try {
+    // Get data from request body
+    const { postId, status } = req.body;
+
+    console.log("Post status update request received:", req.body);
+
+    if (!postId) {
+      return res.status(400).json({
+        success: false,
+        message: "Post ID is required",
+      });
+    }
+
+    if (!status) {
+      return res.status(400).json({
+        success: false,
+        message: "Status is required",
+      });
+    }
+
+    // Update the post status in the database
+    const updatedPost = await Posts.findByIdAndUpdate(
+      postId,
+      { status },
+      { new: true } // This returns the updated document
+    );
+
+    if (!updatedPost) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found",
+      });
+    }
+
+    // Return success response
+    res.status(200).json({
+      success: true,
+      message: `Post status updated to ${status} successfully`,
+      data: { post: updatedPost },
+    });
+  } catch (error) {
+    console.error("Error in ApprovedPosts:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update post status",
+      error: error.message,
+    });
+  }
 };
 export const RevisionPosts = async (req, res) => {
-  res.status(200).json({ message: "post revision update successfully" });
-};
+  try {
+    const { postId } = req.params;
+    const { status, revision_notes } = req.body;
 
+    // Validate required fields
+    if (!postId) {
+      return res.status(400).json({
+        success: false,
+        message: "Post ID is required",
+      });
+    }
+
+    // Update the post with status and revision notes
+    const updatedPost = await Posts.findByIdAndUpdate(
+      postId,
+      {
+        status: "revision",
+        revision_notes,
+      },
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedPost) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found",
+      });
+    }
+
+    // Return success response
+    res.status(200).json({
+      success: true,
+      message: "Post status updated to revision successfully",
+      data: { post: updatedPost },
+    });
+  } catch (error) {
+    console.error("Error in RevisionPosts:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update post status",
+      error: error.message,
+    });
+  }
+};
 // Get all postss
 export const GetAllPosts = async (req, res) => {
   try {

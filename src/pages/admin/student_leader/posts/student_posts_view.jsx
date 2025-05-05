@@ -129,6 +129,14 @@ export const PostCard = ({
   const hasDocuments =
     post.content?.documents && post.content.documents.length > 0;
 
+  console.log(
+    `${encodeURIComponent(
+      post.organization.org_name
+    )}/Accreditation/Accreditation/photos/${encodeURIComponent(
+      post.organization.logo
+    )}`
+  );
+
   return (
     <>
       <div className={`rounded-xl shadow-md px-8 py-6 relative ${className}`}>
@@ -147,7 +155,7 @@ export const PostCard = ({
         {/* Profile and Org Name */}
         <div className="flex items-center space-x-3">
           <img
-            src={`${basePath}/logos/${post.organization.logo}`}
+            src={`/${post.organization.org_name}/Accreditation/Accreditation/photos/${post.organization.logo}`}
             alt={`${post.organization.org_name} logo`}
             className="w-10 h-10 rounded-full object-cover"
           />

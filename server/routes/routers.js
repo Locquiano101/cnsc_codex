@@ -7,6 +7,7 @@ import {
   GetAllFile,
   GetAllImageFile,
   GetAllOrganizationFile,
+  GetAllStudentPostFiles,
 } from "../middleware/files.js";
 
 import {
@@ -54,6 +55,7 @@ import {
   UpdatePosts,
   ApprovedPosts,
   RevisionPosts,
+  GetAllPosts,
 } from "../controllers/posts.js";
 
 const upload = multer();
@@ -64,6 +66,7 @@ const router = express.Router();
 router.post("/login", Login);
 router.get("/get-all-files", GetAllFile);
 router.get("/get-all-organization-files", GetAllOrganizationFile);
+router.get("/get-all-student-post", GetAllStudentPostFiles);
 
 router.get("/get-all-images", GetAllImageFile);
 router.get("/get-all-organization", GetAllOrganization);
@@ -156,8 +159,8 @@ router.post(
 
 router.post("/upload-post", UploadMultipleFiles, CreateNewPosts);
 router.post("/update-post/:postId", UploadMultipleFiles, UpdatePosts);
-router.post("/approve-post/:postId", ApprovedPosts);
-router.post("/revision-post/:postId", RevisionPosts);
+router.post("/approve-post/:postId", upload.any(), ApprovedPosts);
+router.post("/revision-post/:postId", upload.any(), RevisionPosts);
 router.get("/get-post/:orgId", GetAllOrgPosts);
-
+router.get("/get-post", GetAllPosts);
 export default router;

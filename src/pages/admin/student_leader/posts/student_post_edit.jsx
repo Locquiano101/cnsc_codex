@@ -137,9 +137,9 @@ export default function EditPostFormModal({
     setDocumentsToRemove((prev) => [...prev, filename]);
   };
 
-  const logoPath = getLogoPath(orgName, orgLogo);
+  const logoPath = `/${orgName}/Accreditation/Accreditation/photos/${orgLogo}`;
   const fileFields = getFileFields();
-
+  console.log(logoPath);
   return (
     <div className="inset-0 fixed bg-black/50 backdrop-blur-xs flex items-center justify-center z-50">
       {showPopup && (
