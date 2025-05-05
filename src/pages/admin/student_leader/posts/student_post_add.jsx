@@ -117,7 +117,7 @@ export default function AddPostFormModal({
         <form onSubmit={handleSubmit}>
           <div className="flex items-center gap-2">
             <img
-              src={logoPath}
+              src={`/${orgName}/Accreditation/Accreditation/photos/${orgLogo}`}
               alt="Organization Logo"
               className="w-16 h-16 mt-1 ml-2 object-cover rounded-full"
             />

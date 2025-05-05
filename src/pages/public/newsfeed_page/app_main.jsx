@@ -39,6 +39,7 @@ export default function NewsFeedPage() {
         <div className="w-6 md:hidden"></div>
       </header>
 
+      <div className="border border-black p-4"></div>
       {/* Page Content */}
       <div className="pt-20 px-4 md:px-8">
         {/* Layout */}

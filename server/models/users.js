@@ -78,6 +78,7 @@ const PostSchema = new mongoose.Schema(
     title: { type: String },
     caption: { type: String },
     status: { type: String },
+    revision_notes: { type: String },
     tags: [{ type: String }],
     content: { type: Object },
   },
