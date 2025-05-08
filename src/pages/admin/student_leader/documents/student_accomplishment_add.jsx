@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
-import PopUp from "../../../../components/pop-ups";
+import { API_ROUTER } from "../../../../App";
+import axios from "axios";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faLeftLong, faCheckCircle } from "@fortawesome/free-solid-svg-icons";
 import {
   ReusableFileUpload,
   ReusableMultiFileUpload,
 } from "../../../../components/reusable_file_upload";
-import { API_ROUTER } from "../../../../App";
-import axios from "axios";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faLeftLong, faOilCan } from "@fortawesome/free-solid-svg-icons";
 
 const textFields = [
   { label: "Event Title", id: "event_title", type: "text" },
@@ -15,36 +14,51 @@ const textFields = [
   { label: "Event Date", id: "event_date", type: "date" },
 ];
 
+// Notification Component
+const Notification = ({ type, message, onClose }) => {
+  const bgColor = type === "success" ? "bg-green-100" : "bg-red-100";
+  const textColor = type === "success" ? "text-green-700" : "text-red-700";
+  const icon = type === "success" ? faCheckCircle : null;
+
+  return (
+    <div
+      className={`p-4 ${bgColor} ${textColor} rounded-lg shadow-sm flex justify-between items-center mb-4`}
+    >
+      <div className="flex items-center">
+        {icon && <FontAwesomeIcon icon={icon} className="mr-2" />}
+        <span>{message}</span>
+      </div>
+      <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+        &times;
+      </button>
+    </div>
+  );
+};
+
 function StudentAddAccomplishedInstitutional() {
   const [uploadedFiles, setUploadedFiles] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [notification, setNotification] = useState(null);
   const [formDataState, setFormDataState] = useState({
     event_title: "",
     event_description: "",
     event_date: "",
-    organization: "", // Added for payload metadata
+    organization: "",
   });
 
   useEffect(() => {
     const userString = localStorage.getItem("user");
     if (userString) {
       try {
-        const user = JSON.parse(userString); // Parse first!
-
-        console.log(user);
+        const user = JSON.parse(userString);
         if (user?.organization?._id) {
           const orgId = user.organization._id;
           const orgName = user.organization.org_name;
-
-          console.log("Organization ID:", orgId, orgName);
-
           setFormDataState((prev) => ({
             ...prev,
             organization: orgId,
             organization_name: orgName,
           }));
-        } else {
-          console.warn("Organization ID is missing from user data");
         }
       } catch (err) {
         console.error("Failed parsing user from storage:", err);
@@ -82,13 +96,11 @@ function StudentAddAccomplishedInstitutional() {
     photo_documentations: fileFields.photo_documentations,
   };
 
-  // handle text inputs
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormDataState((prev) => ({ ...prev, [name]: value }));
   };
 
-  // handle file inputs (single vs multiple)
   const handleFileChange = (fieldKey, files) => {
     if (!files || files.length === 0) {
       setUploadedFiles((prev) => {
@@ -139,97 +151,121 @@ function StudentAddAccomplishedInstitutional() {
       });
     });
 
-    // Debug
-    for (let [key, value] of formData.entries()) {
-      console.table(`${key}:`, value);
-    }
-
     try {
       const { data } = await axios.post(
         `${API_ROUTER}/submit-instutional-accomplishment`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
-      console.log("Server response:", data);
-      alert("submission Succesful!");
+      setNotification({
+        type: "success",
+        message: "Submission successful!",
+      });
+
+      // Reset form after successful submission
+      setFormDataState({
+        event_title: "",
+        event_description: "",
+        event_date: "",
+        organization: formDataState.organization,
+        organization_name: formDataState.organization_name,
+      });
+      setUploadedFiles({});
     } catch (error) {
       console.error("Submission error:", error);
-      // optionally show error popup here
+      setNotification({
+        type: "error",
+        message: error.message || "Submission failed. Please try again.",
+      });
     } finally {
       setIsSubmitting(false);
+      // Scroll to top to show notification
+      window.scrollTo(0, 0);
     }
   };
 
   return (
-    <div className="h-full">
-      <h1 className="text-2xl font-bold text-black text-center mb-4">
+    <div className="w-full h-full overflow-auto px-4 py-6">
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">
         Add Institutional Collaboration Activity
       </h1>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-black">
+      {notification && (
+        <Notification
+          type={notification.type}
+          message={notification.message}
+          onClose={() => setNotification(null)}
+        />
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4  overflow-y-auto">
+        <div className="bg-white p-6 rounded-lg shadow-sm">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">
             Activity Information
           </h2>
-          {textFields.map(({ label, id, type }) => (
-            <div key={id}>
-              <label htmlFor={id} className="block mb-1 text-black font-medium">
-                {label} <span className="text-red-500">*</span>
-              </label>
-              {type === "textarea" ? (
-                <textarea
-                  id={id}
-                  name={id}
-                  value={formDataState[id]}
-                  onChange={handleChange}
-                  className="w-full border border-black rounded-lg p-3 focus:ring-2 focus:ring-black"
-                  rows={4}
-                  required
-                />
-              ) : (
-                <input
-                  type={type}
-                  id={id}
-                  name={id}
-                  value={formDataState[id]}
-                  onChange={handleChange}
-                  className="w-full border border-black rounded-lg p-3 focus:ring-2 focus:ring-black"
-                  required
-                />
-              )}
-            </div>
-          ))}
-        </div>
-
-        <div>
-          <h2 className="text-lg font-semibold text-black mb-2">Documents</h2>
-          <div className="border border-black p-4 rounded-md">
-            <ReusableFileUpload
-              fields={singleFileFields}
-              onFileChange={handleFileChange}
-            />
+          <div className="space-y-4">
+            {textFields.map(({ label, id, type }) => (
+              <div key={id}>
+                <label
+                  htmlFor={id}
+                  className="block mb-2 text-gray-700 font-medium"
+                >
+                  {label} <span className="text-red-500">*</span>
+                </label>
+                {type === "textarea" ? (
+                  <textarea
+                    id={id}
+                    name={id}
+                    value={formDataState[id]}
+                    onChange={handleChange}
+                    className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    rows={4}
+                    required
+                  />
+                ) : (
+                  <input
+                    type={type}
+                    id={id}
+                    name={id}
+                    value={formDataState[id]}
+                    onChange={handleChange}
+                    className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                )}
+              </div>
+            ))}
           </div>
         </div>
 
-        <div>
-          <h2 className="text-lg font-semibold text-black mb-2">
+        <div className="bg-white p-6 rounded-lg shadow-sm">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">
+            Required Documents
+          </h2>
+          <ReusableFileUpload
+            fields={singleFileFields}
+            onFileChange={handleFileChange}
+          />
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">
             Additional Files
           </h2>
-          <div className="border border-black p-4 rounded-md">
-            <ReusableMultiFileUpload
-              fields={multipleFileFields}
-              onFileChange={handleFileChange}
-            />
-          </div>
+          <ReusableMultiFileUpload
+            fields={multipleFileFields}
+            onFileChange={handleFileChange}
+          />
         </div>
-        <div className="text-right">
+
+        <div className="flex justify-end pt-4">
           <button
             type="submit"
             disabled={isSubmitting}
-            className={`bg-black text-white px-6 py-2 rounded-md text-base font-medium transition ${
+            className={`bg-blue-600 text-white px-6 py-3 rounded-lg text-base font-medium transition ${
               isSubmitting
                 ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-gray-800"
+                : "hover:bg-blue-700"
             }`}
           >
             {isSubmitting ? "Submitting..." : "Submit Activity"}
@@ -250,29 +286,21 @@ function StudentAddAccomplishedExternal() {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState(null);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [notification, setNotification] = useState(null);
 
   useEffect(() => {
     const userString = localStorage.getItem("user");
     if (userString) {
       try {
-        const user = JSON.parse(userString); // Parse first!
-
-        console.log(user);
+        const user = JSON.parse(userString);
         if (user?.organization?._id) {
           const orgId = user.organization._id;
           const orgName = user.organization.org_name;
-
-          console.log("Organization ID:", orgId, orgName);
-
           setFormDataState((prev) => ({
             ...prev,
             organization: orgId,
             organization_name: orgName,
           }));
-        } else {
-          console.warn("Organization ID is missing from user data");
         }
       } catch (err) {
         console.error("Failed parsing user from storage:", err);
@@ -322,12 +350,6 @@ function StudentAddAccomplishedExternal() {
     echo_seminar_documents: fileFields.echo_seminar_documents,
   };
 
-  const textFields = [
-    { label: "Event Title", id: "event_title", type: "text" },
-    { label: "Event Description", id: "event_description", type: "textarea" },
-    { label: "Event Date", id: "event_date", type: "date" },
-  ];
-
   // Handle text input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -353,8 +375,7 @@ function StudentAddAccomplishedExternal() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setSubmitError(null);
-    setSubmitSuccess(false);
+    setNotification(null);
 
     const formData = new FormData();
 
@@ -387,123 +408,122 @@ function StudentAddAccomplishedExternal() {
       });
     });
 
-    // Debug
-    for (let [key, value] of formData.entries()) {
-      console.table(`${key}:`, value);
-    }
-
     try {
-      // Assuming you have a route for external accomplishments
       const { data } = await axios.post(
         `${API_ROUTER}/submit-external-accomplishment`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
 
-      console.log("Server response:", data);
-      setSubmitSuccess(true);
+      setNotification({
+        type: "success",
+        message: "External activity submitted successfully!",
+      });
 
       // Reset form after successful submission
       setFormDataState({
         event_title: "",
         event_description: "",
         event_date: "",
-        organization_name: "",
+        organization: formDataState.organization,
+        organization_name: formDataState.organization_name,
       });
       setUploadedFiles({});
     } catch (error) {
       console.error("Submission failed:", error);
-      setSubmitError(
-        error.message || "Submission failed. Please try again later."
-      );
+      setNotification({
+        type: "error",
+        message: error.message || "Submission failed. Please try again later.",
+      });
     } finally {
       setIsSubmitting(false);
+      // Scroll to top to show notification
+      window.scrollTo(0, 0);
     }
   };
 
   return (
-    <div className="h-full">
-      <h1 className="text-2xl font-bold text-black text-center mb-4">
+    <div className="w-full px-4 py-6">
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">
         Add External Accomplished Activity
       </h1>
 
-      {submitSuccess && (
-        <div className="mb-4 p-4 bg-green-100 text-green-700 rounded">
-          Activity submitted successfully!
-        </div>
+      {notification && (
+        <Notification
+          type={notification.type}
+          message={notification.message}
+          onClose={() => setNotification(null)}
+        />
       )}
 
-      {submitError && (
-        <div className="mb-4 p-4 bg-red-100 text-red-700 rounded">
-          Error: {submitError}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-black">
+      <form onSubmit={handleSubmit} className="space-y-8">
+        <div className="bg-white p-6 rounded-lg shadow-sm">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">
             Activity Information
           </h2>
-          {textFields.map(({ label, id, type }) => (
-            <div key={id}>
-              <label htmlFor={id} className="block mb-1 text-black font-medium">
-                {label} <span className="text-red-500">*</span>
-              </label>
-              {type === "textarea" ? (
-                <textarea
-                  id={id}
-                  name={id}
-                  value={formDataState[id]}
-                  onChange={handleChange}
-                  className="w-full border border-black rounded-lg p-3 focus:ring-2 focus:ring-black"
-                  rows={4}
-                  required
-                />
-              ) : (
-                <input
-                  type={type}
-                  id={id}
-                  name={id}
-                  value={formDataState[id]}
-                  onChange={handleChange}
-                  className="w-full border border-black rounded-lg p-3 focus:ring-2 focus:ring-black"
-                  required
-                />
-              )}
-            </div>
-          ))}
-        </div>
-
-        <div>
-          <h2 className="text-lg font-semibold text-black mb-2">Documents</h2>
-          <div className="border border-black p-4 rounded-md">
-            <ReusableFileUpload
-              fields={singleFileFields}
-              onFileChange={handleFileChange}
-            />
+          <div className="space-y-4">
+            {textFields.map(({ label, id, type }) => (
+              <div key={id}>
+                <label
+                  htmlFor={id}
+                  className="block mb-2 text-gray-700 font-medium"
+                >
+                  {label} <span className="text-red-500">*</span>
+                </label>
+                {type === "textarea" ? (
+                  <textarea
+                    id={id}
+                    name={id}
+                    value={formDataState[id]}
+                    onChange={handleChange}
+                    className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    rows={4}
+                    required
+                  />
+                ) : (
+                  <input
+                    type={type}
+                    id={id}
+                    name={id}
+                    value={formDataState[id]}
+                    onChange={handleChange}
+                    className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                )}
+              </div>
+            ))}
           </div>
         </div>
 
-        <div>
-          <h2 className="text-lg font-semibold text-black mb-2">
+        <div className="bg-white p-6 rounded-lg shadow-sm">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">
+            Required Documents
+          </h2>
+          <ReusableFileUpload
+            fields={singleFileFields}
+            onFileChange={handleFileChange}
+          />
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">
             Additional Files
           </h2>
-          <div className="border border-black p-4 rounded-md">
-            <ReusableMultiFileUpload
-              fields={multipleFileFields}
-              onFileChange={handleFileChange}
-            />
-          </div>
+          <ReusableMultiFileUpload
+            fields={multipleFileFields}
+            onFileChange={handleFileChange}
+          />
         </div>
 
-        <div className="text-right">
+        <div className="flex justify-end pt-4">
           <button
             type="submit"
             disabled={isSubmitting}
-            className={`bg-black text-white px-6 py-2 rounded-md text-base font-medium transition ${
+            className={`bg-blue-600 text-white px-6 py-3 rounded-lg text-base font-medium transition ${
               isSubmitting
                 ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-gray-800"
+                : "hover:bg-blue-700"
             }`}
           >
             {isSubmitting ? "Submitting..." : "Submit Activity"}
@@ -525,38 +545,27 @@ function StudentAddAccomplishedProposal() {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState(null);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [notification, setNotification] = useState(null);
 
   useEffect(() => {
     const userString = localStorage.getItem("user");
     if (userString) {
       try {
         const user = JSON.parse(userString);
-
         if (user?.organization?._id) {
           const orgId = user.organization._id;
           const orgName = user.organization.org_name;
-
           setFormDataState((prev) => ({
             ...prev,
             organization: orgId,
             organization_name: orgName,
           }));
-        } else {
-          console.warn("Organization ID is missing from user data");
         }
       } catch (err) {
         console.error("Failed parsing user from storage:", err);
       }
     }
   }, []);
-
-  const textFields = [
-    { label: "Event Title", id: "event_title", type: "text" },
-    { label: "Event Description", id: "event_description", type: "textarea" },
-    { label: "Event Date", id: "event_date", type: "date" },
-  ];
 
   const fileFields = {
     approved_proposal: { label: "Approved Proposal", accept: ".pdf" },
@@ -614,8 +623,7 @@ function StudentAddAccomplishedProposal() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setSubmitError(null);
-    setSubmitSuccess(false);
+    setNotification(null);
 
     const formData = new FormData();
 
@@ -648,110 +656,119 @@ function StudentAddAccomplishedProposal() {
       });
     });
 
-    // Debug
-    for (let [key, value] of formData.entries()) {
-      console.table(`${key}:`, value);
-    }
-
     try {
-      // Assuming you have a route for external accomplishments
       const { data } = await axios.post(
         `${API_ROUTER}/submit-proposed-accomplishment`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
 
-      console.log("Server response:", data);
-      setSubmitSuccess(true);
+      setNotification({
+        type: "success",
+        message: "Action plan submitted successfully!",
+      });
+
+      // Reset form after successful submission
+      setFormDataState({
+        event_title: "",
+        event_description: "",
+        event_date: "",
+        organization: formDataState.organization,
+        organization_name: formDataState.organization_name,
+      });
+      setUploadedFiles({});
     } catch (error) {
       console.error("Submission failed:", error);
-      setSubmitError(
-        error.message || "Submission failed. Please try again later."
-      );
+      setNotification({
+        type: "error",
+        message: error.message || "Submission failed. Please try again later.",
+      });
     } finally {
       setIsSubmitting(false);
+      // Scroll to top to show notification
+      window.scrollTo(0, 0);
     }
   };
+
   return (
-    <div className="h-full">
-      <h1 className="text-2xl font-bold text-gray-800 text-center mb-6">
+    <div className="w-full  px-4 py-6">
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">
         Add Accomplished Action Plan
       </h1>
 
-      {submitSuccess && (
-        <div className="mb-4 p-4 bg-green-100 text-green-700 rounded">
-          Activity submitted successfully!
-        </div>
+      {notification && (
+        <Notification
+          type={notification.type}
+          message={notification.message}
+          onClose={() => setNotification(null)}
+        />
       )}
 
-      {submitError && (
-        <div className="mb-4 p-4 bg-red-100 text-red-700 rounded">
-          Error: {submitError}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-4 bg-white p-6 rounded-lg shadow">
-          <h2 className="text-lg font-semibold text-black">
+      <form onSubmit={handleSubmit} className="space-y-8">
+        <div className="bg-white p-6 rounded-lg shadow-sm">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">
             Activity Information
           </h2>
-          {textFields.map(({ label, id, type }) => (
-            <div key={id} className="mb-4">
-              <label htmlFor={id} className="block mb-1 text-black font-medium">
-                {label} <span className="text-red-500">*</span>
-              </label>
-              {type === "textarea" ? (
-                <textarea
-                  id={id}
-                  name={id}
-                  value={formDataState[id]}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  rows={4}
-                  required
-                />
-              ) : (
-                <input
-                  type={type}
-                  id={id}
-                  name={id}
-                  value={formDataState[id]}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              )}
-            </div>
-          ))}
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-lg font-semibold text-black mb-4">Documents</h2>
-          <div className="border border-gray-200 p-4 rounded-md">
-            <ReusableFileUpload
-              fields={singleFileFields}
-              onFileChange={handleFileChange}
-            />
+          <div className="space-y-4">
+            {textFields.map(({ label, id, type }) => (
+              <div key={id}>
+                <label
+                  htmlFor={id}
+                  className="block mb-2 text-gray-700 font-medium"
+                >
+                  {label} <span className="text-red-500">*</span>
+                </label>
+                {type === "textarea" ? (
+                  <textarea
+                    id={id}
+                    name={id}
+                    value={formDataState[id]}
+                    onChange={handleChange}
+                    className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    rows={4}
+                    required
+                  />
+                ) : (
+                  <input
+                    type={type}
+                    id={id}
+                    name={id}
+                    value={formDataState[id]}
+                    onChange={handleChange}
+                    className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                )}
+              </div>
+            ))}
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-lg font-semibold text-black mb-4">
+        <div className="bg-white p-6 rounded-lg shadow-sm">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">
+            Required Documents
+          </h2>
+          <ReusableFileUpload
+            fields={singleFileFields}
+            onFileChange={handleFileChange}
+          />
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">
             Additional Files
           </h2>
-          <div className="border border-gray-200 p-4 rounded-md">
-            <ReusableMultiFileUpload
-              fields={multipleFileFields}
-              onFileChange={handleFileChange}
-            />
-          </div>
+          <ReusableMultiFileUpload
+            fields={multipleFileFields}
+            onFileChange={handleFileChange}
+          />
         </div>
 
-        <div className="text-right">
+        <div className="flex justify-end pt-4">
           <button
             type="submit"
             disabled={isSubmitting}
-            className={`bg-blue-600 text-white px-6 py-2 rounded-md text-base font-medium transition ${
+            className={`bg-blue-600 text-white px-6 py-3 rounded-lg text-base font-medium transition ${
               isSubmitting
                 ? "opacity-50 cursor-not-allowed"
                 : "hover:bg-blue-700"
@@ -775,47 +792,40 @@ export default function AddStudentAccomplishmentReport({ onBack }) {
   ];
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
-      {/* Back + Tab selector */}
-      <div className="flex-none flex items-center justify-between p-4 border-b">
-        <div className="border-red-600 border-2 rounded-lg flex space-x-4 p-2">
-          <button
-            onClick={onBack}
-            className="text-blue-600 hover:text-blue-800"
-          >
-            <FontAwesomeIcon icon={faLeftLong} /> Back
-          </button>
-        </div>
+    <div className="flex flex-col h-full overflow-y-auto">
+      {/* Header with tabs */}
+      <div className="bg-white shadow-sm py-4 px-6 flex items-center justify-between sticky top-0 z-10">
+        <button
+          onClick={onBack}
+          className="flex items-center text-blue-600 hover:text-blue-800 font-medium"
+        >
+          <FontAwesomeIcon icon={faLeftLong} className="mr-2" /> Back
+        </button>
 
-        <div className="border-red-600 flex items-center gap-4">
-          <h1>choose a form</h1>
-          {tabs.map((t) => (
+        <div className="flex items-center gap-2">
+          {tabs.map((tab) => (
             <button
-              key={t.key}
-              onClick={() => setFormType(t.key)}
-              className={
-                formType === t.key
-                  ? "px-4 py-2 bg-blue-600 text-white rounded-lg"
-                  : "px-4 py-2 bg-gray-100 text-gray-700 rounded-lg"
-              }
+              key={tab.key}
+              onClick={() => setFormType(tab.key)}
+              className={`px-4 py-2 rounded-md transition-colors ${
+                formType === tab.key
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
             >
-              {t.label}
+              {tab.label}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Scrollable Form Section */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="p-4">
-          {formType === "institutional_activity" && (
-            <StudentAddAccomplishedInstitutional />
-          )}
-          {formType === "external_activity" && (
-            <StudentAddAccomplishedExternal />
-          )}
-          {formType === "accomplishment" && <StudentAddAccomplishedProposal />}
-        </div>
+      {/* Form container with automatic scrolling */}
+      <div className="flex-1 flex flex-col">
+        {formType === "institutional_activity" && (
+          <StudentAddAccomplishedInstitutional />
+        )}
+        {formType === "external_activity" && <StudentAddAccomplishedExternal />}
+        {formType === "accomplishment" && <StudentAddAccomplishedProposal />}
       </div>
     </div>
   );
