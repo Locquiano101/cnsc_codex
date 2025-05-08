@@ -3,13 +3,20 @@ import { Users } from "../../models/users.js";
 // Create a new users
 export const CreateNewUser = async (req, res) => {
   try {
-    const { username, password, position, organization } = req.body;
+    const { username, password, position, delivery_unit, organization } =
+      req.body;
 
     if (!username || !password || !position) {
       return res.status(400).json({ message: "Required fields are missing." });
     }
 
-    const newUser = new Users({ username, password, position, organization });
+    const newUser = new Users({
+      username,
+      password,
+      position,
+      organization,
+      delivery_unit,
+    });
     await newUser.save();
 
     res.status(201).json(newUser);

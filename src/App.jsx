@@ -9,8 +9,10 @@ import StudentDevelopmentUnitPage from "./pages/admin/SDU/app_SDU";
 import NewsFeedPage from "./pages/public/newsfeed_page/app_main";
 import OrganizationProfilePage from "./pages/public/organization_page/organization_profile";
 import OrganizationPage from "./pages/public/organization_page/organizations";
+import DeanAdminPage from "./pages/admin/dean/app_dean";
+import OSSDCoordinatorPage from "./pages/admin/ossd_coordinator/app_ossd_coordinator";
 
-export const API_ROUTER = "http://localhost:8080/api";
+export const API_ROUTER = "http://192.168.1.17:8080/api";
 
 // Updated ProtectedRoute with allowedRoles prop
 const ProtectedRoute = ({ allowedRoles }) => {
@@ -77,6 +79,15 @@ export default function App() {
       {/* Protected routes per user role */}
       <Route element={<ProtectedRoute allowedRoles={["adviser"]} />}>
         <Route path="/admin/adviser" element={<AdviserAdminPage />} />
+      </Route>
+      <Route element={<ProtectedRoute allowedRoles={["dean"]} />}>
+        <Route path="/admin/dean" element={<DeanAdminPage />} />
+      </Route>
+      <Route element={<ProtectedRoute allowedRoles={["ossd coordinator"]} />}>
+        <Route
+          path="/admin/ossdCoordinator"
+          element={<OSSDCoordinatorPage />}
+        />
       </Route>
       <Route element={<ProtectedRoute allowedRoles={["student-leader"]} />}>
         <Route path="/admin/student-leader" element={<StudentLeaderPage />} />

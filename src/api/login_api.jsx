@@ -26,6 +26,10 @@ export const handleLogin = async (
       navigate("/admin/student-leader");
     } else if (role === "adviser") {
       navigate("/admin/adviser");
+    } else if (role === "dean") {
+      navigate("/admin/dean");
+    } else if (role === "ossd coordinator") {
+      navigate("/admin/OSSDCoordinator");
     } else if (role === "sdu") {
       navigate("/admin/student-development-unit");
     } else {
@@ -33,7 +37,7 @@ export const handleLogin = async (
     }
   } catch (err) {
     console.error("Login failed", err.response?.data || err.message);
-    setErrorMsg("Invalid username or password");
+    setErrorMsg("Invalid username or password", err.message);
   }
 };
 

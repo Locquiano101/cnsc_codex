@@ -95,6 +95,7 @@ const GetAllApprovedPost = ({ documentLocations, posts }) => {
   );
 };
 
+// A component to render documents at desktop sizes
 const DocumentRenderer = ({ filePath }) => {
   const isPdf = filePath.toLowerCase().endsWith(".pdf");
 
@@ -113,6 +114,7 @@ const DocumentRenderer = ({ filePath }) => {
   );
 };
 
+// The updated PostCard component with responsive file rendering
 const PostCard = ({
   post,
   className = "",
@@ -121,9 +123,26 @@ const PostCard = ({
   onEditClick = null,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const hasPhotos = post.content?.photos && post.content.photos.length > 0;
   const hasDocuments =
     post.content?.documents && post.content.documents.length > 0;
+
+  // Check if the device is mobile based on window width
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768); // 768px is typical tablet breakpoint
+    };
+
+    // Set initial value
+    checkMobile();
+
+    // Add event listener for window resize
+    window.addEventListener("resize", checkMobile);
+
+    // Cleanup
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   // Helper function to find the complete file path from orgFiles
   const getCompletePath = (fileName, fileType) => {
@@ -141,6 +160,11 @@ const PostCard = ({
       matchingFile ||
       `${post.organization.org_name}/StudentPost/${post.title}/${fileType}/${fileName}`
     );
+  };
+
+  // Get the base path for file rendering
+  const getBasePath = () => {
+    return `${post.organization.org_name}/StudentPost/${post.title}`;
   };
 
   return (
@@ -210,17 +234,29 @@ const PostCard = ({
           </div>
         )}
 
-        {/* Documents */}
+        {/* Documents - Rendered differently based on device type */}
         {hasDocuments && (
           <div className="flex flex-wrap gap-2 mt-2">
             {post.content.documents.map((document, index) => {
-              const docPath = getCompletePath(document, "documents");
-
-              return (
-                <div key={index} className="w-full p-1">
-                  <DocumentRenderer filePath={docPath} />
-                </div>
-              );
+              if (isMobile) {
+                // Use FileRenderer for mobile
+                return (
+                  <div key={index} className="w-full p-1">
+                    <FileRenderer
+                      basePath={getBasePath()}
+                      fileName={document}
+                    />
+                  </div>
+                );
+              } else {
+                // Use DocumentRenderer for desktop
+                const docPath = getCompletePath(document, "documents");
+                return (
+                  <div key={index} className="w-full p-1">
+                    <DocumentRenderer filePath={docPath} />
+                  </div>
+                );
+              }
             })}
           </div>
         )}
@@ -291,7 +327,7 @@ export default function NewsFeedPage() {
       </main>
 
       {/* Optional: Add filters, pagination, or other controls */}
-      <div className=" flex justify-center">
+      <div className="flex justify-center mt-6">
         <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">
           Load More Posts
         </button>

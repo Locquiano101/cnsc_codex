@@ -4,7 +4,7 @@ import { FileRenderer } from "../../../../components/file_renderer";
 import PopUp from "../../../../components/pop-ups";
 import { API_ROUTER } from "../../../../App";
 
-export default function EditProposalAdviserSection({ user, proposal, onBack }) {
+export default function EditProposalDeanSection({ user, proposal, onBack }) {
   const [loading, setLoading] = useState(false);
   const [popup, setPopup] = useState({ visible: false, title: "", text: "" });
 
@@ -55,7 +55,6 @@ export default function EditProposalAdviserSection({ user, proposal, onBack }) {
       files: proposal.meeting.photo_documentations || [],
     },
   ];
-
   const isAllApproved = () =>
     Object.values(docStatus).every((status) => status === "approved");
 
@@ -112,11 +111,12 @@ export default function EditProposalAdviserSection({ user, proposal, onBack }) {
           onClose={() => setPopup((p) => ({ ...p, visible: false }))}
         />
       )}
-
       <h2 className="text-2xl font-bold text-center">
         Proposal Title: {proposal.title}
       </h2>
+
       <p className="text-lg">
+        Organization: {proposal.organization.org_name} <br />
         Description: {proposal.description} <br />
         Event Date:{" "}
         {new Date(proposal.event_date).toLocaleDateString("en-US", {

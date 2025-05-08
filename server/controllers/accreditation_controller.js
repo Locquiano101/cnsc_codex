@@ -5,23 +5,45 @@ import { NodeEmail } from "../middleware/emailer.js";
 const verificationStore = {};
 
 export const SendConfirmationCodeAccreditation = async (req, res) => {
+  console.log("Request body:", req.body); // Add this
+
   const { org_email } = req.body;
+  console.log("Received email for OTP:", org_email); // 🔍 Debug log
 
   const generateNumericOTP = customAlphabet("0123456789", 6);
-  // Generate the OTP as a string (only numbers).leaug
   const otpString = generateNumericOTP();
-  // Optionally, convert to integer if needed.
   const otpInt = Number(otpString);
 
   verificationStore[org_email] = otpString;
-  // Define the email subject and message for the organization.
+
   const org_email_subject = "Organization Accreditation Confirmation";
   const org_email_message = `Hello, your accreditation OTP is ${otpString}. Please use this code to confirm your accreditation.`;
 
-  await NodeEmail(org_email, org_email_subject, org_email_message);
+  try {
+    const emailResult = await NodeEmail(
+      org_email,
+      org_email_subject,
+      org_email_message
+    );
 
-  res.status(200).json({ otp: otpInt, otpString });
+    // Debug: check if email sending returned success
+    if (emailResult?.success) {
+      console.log(`Email sent successfully to ${org_email}`);
+      res.status(200).json({ otp: otpInt, otpString });
+    } else {
+      console.error(`Failed to send email to ${org_email}`, emailResult);
+      res
+        .status(500)
+        .json({ error: "Failed to send confirmation code email." });
+    }
+  } catch (error) {
+    console.error(`Error sending email to ${org_email}:`, error);
+    res.status(500).json({
+      error: "An error occurred while sending the confirmation code.",
+    });
+  }
 };
+
 export const ConfirmAccreditation = async (req, res) => {
   const { org_email, code } = req.body;
   const storedCode = verificationStore[org_email];
@@ -95,9 +117,19 @@ export const SubmitAccreditation = async (req, res) => {
       parsedBody =
         typeof req.body === "string" ? JSON.parse(req.body) : req.body;
 
-      // Specifically handle org_type which might be double-stringified
+      // Specifically handle org_type which might be stringified
       if (typeof parsedBody.org_type === "string") {
-        parsedBody.org_type = JSON.parse(parsedBody.org_type);
+        try {
+          parsedBody.org_type = JSON.parse(parsedBody.org_type);
+          console.log("Parsed org_type:", parsedBody.org_type);
+        } catch (parseErr) {
+          console.error("Error parsing org_type:", parseErr);
+          return res.status(400).json({
+            message: "Invalid org_type format",
+            details: parseErr.message,
+            received: parsedBody.org_type,
+          });
+        }
       }
     } catch (e) {
       return res.status(400).json({
@@ -106,6 +138,7 @@ export const SubmitAccreditation = async (req, res) => {
       });
     }
 
+    // Extract all fields from parsedBody
     const {
       org_username,
       org_password,
@@ -120,16 +153,23 @@ export const SubmitAccreditation = async (req, res) => {
       adviser_email,
       adviser_department,
       accreditation_type = "recognition",
-      org_type, // Now properly parsed
     } = parsedBody;
+
+    // Extract and validate org_type separately
+    let org_type = parsedBody.org_type;
+
+    console.log("Original org_type:", org_type);
 
     // Validate org_type exists and has correct structure
     if (!org_type || typeof org_type !== "object") {
       return res.status(400).json({
         message: "org_type must be a valid object",
         received: org_type,
+        body: parsedBody,
       });
     }
+
+    console.log("Processed org_type:", org_type);
 
     // Modified to handle both formats (with space and with underscore)
     const fileFields = {
@@ -200,8 +240,6 @@ export const SubmitAccreditation = async (req, res) => {
       }
     }
 
-    const validClassifications = ["Local", "System-Wide"];
-
     // Step 1: Create accreditation record
     const accreditationStatus = new Accreditation({
       accreditation_type: accreditation_type || "recognition",
@@ -220,15 +258,29 @@ export const SubmitAccreditation = async (req, res) => {
         .json({ message: "Organization classification is required." });
     }
 
-    if (!["Local", "System-Wide"].includes(org_type.Classification)) {
-      return res
-        .status(400)
-        .json({ message: "Invalid organization classification." });
+    // Check for both "System-Wide" and "System-wide" (case variations)
+    if (
+      !["Local", "System-Wide", "System-wide"].includes(org_type.Classification)
+    ) {
+      return res.status(400).json({
+        message: "Invalid organization classification.",
+        received: org_type.Classification,
+      });
     }
 
-    sanitizedOrgType.Classification = org_type.Classification;
+    // Normalize classification to handle case variations
+    sanitizedOrgType.Classification =
+      org_type.Classification === "System-wide"
+        ? "System-Wide"
+        : org_type.Classification;
 
-    if (org_type.Classification === "Local") {
+    // Variable to store the delivery unit for users
+    let deliveryUnit =
+      sanitizedOrgType.Classification === "System-Wide"
+        ? "System-Wide"
+        : "Local"; // Default based on classification
+
+    if (sanitizedOrgType.Classification === "Local") {
       if (
         !org_type.Departments ||
         !Array.isArray(org_type.Departments) ||
@@ -237,6 +289,7 @@ export const SubmitAccreditation = async (req, res) => {
         return res.status(400).json({
           message:
             "At least one department is required for Local organizations.",
+          received: org_type,
         });
       }
 
@@ -248,7 +301,12 @@ export const SubmitAccreditation = async (req, res) => {
           Department: dep.Department || "",
           Course: dep.Course || "",
         }));
-    } else if (org_type.Classification === "System-Wide") {
+
+      // For Local orgs, set delivery_unit to the first department
+      if (sanitizedOrgType.Departments.length > 0) {
+        deliveryUnit = sanitizedOrgType.Departments[0].Department;
+      }
+    } else if (sanitizedOrgType.Classification === "System-Wide") {
       if (
         !org_type.Fields ||
         !Array.isArray(org_type.Fields) ||
@@ -257,6 +315,7 @@ export const SubmitAccreditation = async (req, res) => {
         return res.status(400).json({
           message:
             "At least one field is required for System-Wide organizations.",
+          received: org_type,
         });
       }
 
@@ -267,6 +326,8 @@ export const SubmitAccreditation = async (req, res) => {
           ? field.specializations.filter((spec) => spec) // Remove empty specializations
           : [],
       }));
+
+      // For System-Wide orgs, delivery_unit remains "System-Wide"
     }
 
     // Step 2: Create organization record with the sanitized org_type
@@ -295,9 +356,10 @@ export const SubmitAccreditation = async (req, res) => {
 
     await savedAccreditation.save();
 
-    // Step 4: Create user records
+    // Step 4: Create user records with the appropriate delivery_unit
     const orgUser = new Users({
       username: org_username,
+      delivery_unit: deliveryUnit, // Use the determined delivery_unit
       email: org_email,
       password: org_password,
       position: "student-leader",
@@ -307,6 +369,7 @@ export const SubmitAccreditation = async (req, res) => {
     const adviserUser = new Users({
       username: adviser_username,
       email: adviser_email,
+      delivery_unit: adviser_department, // Use the determined delivery_unit
       password: adviser_password,
       position: "adviser",
       organization: savedOrganization._id,
