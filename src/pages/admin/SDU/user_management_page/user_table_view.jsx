@@ -10,6 +10,7 @@ import {
   faSortDown,
 } from "@fortawesome/free-solid-svg-icons";
 import SearchableDropdown from "../../../../components/searchable_drop_down";
+import { College, CollegeSDU } from "../../../../components/programs";
 
 // ------------------- AddNewUser Modal -------------------
 function AddNewUser({
@@ -22,6 +23,19 @@ function AddNewUser({
 }) {
   const handleSubmit = () => {
     onSubmit(newUser); // Pass newUser when submitting
+  };
+
+  const handleCollegeChange = (collegeData) => {
+    const deliveryUnit = collegeData.delivery_unit;
+
+    onChange({
+      target: {
+        name: "delivery_unit",
+        value: deliveryUnit,
+      },
+    });
+
+    console.log("Selected delivery unit:", deliveryUnit);
   };
 
   return (
@@ -39,6 +53,16 @@ function AddNewUser({
 
         <div className="flex flex-col gap-4 w-full">
           {/* Username Field */}
+          <label className="flex gap-4 justify-between">
+            <span className="w-1/3">Name</span>
+            <input
+              name="name"
+              value={newUser.name}
+              onChange={onChange}
+              placeholder="name"
+              className="border p-2 rounded flex-3/4 text-black w-full"
+            />
+          </label>
           <label className="flex gap-4 justify-between">
             <span className="w-1/3">Username</span>
             <input
@@ -65,35 +89,54 @@ function AddNewUser({
               <option value="dean">Dean</option>
               <option value="SDU">SDU</option>
               <option value="OSSD">OSSD</option>
+              <option value="OSSD Coordinator">OSSD Coordinator</option>
             </select>
           </label>
-          {/* Organization Field */}
-          <label className="flex gap-4 justify-between items-center">
-            <span className="w-1/3">Organization</span>
-            <div className="flex-3/4 w-full">
-              <SearchableDropdown
-                options={organizations.map((org) => org.org_name)}
-                value={
-                  organizations.find((org) => org._id === newUser.organization)
-                    ?.org_name || ""
-                }
-                onChange={(selectedOrgName) => {
-                  const selected = organizations.find(
-                    (org) => org.org_name === selectedOrgName
-                  );
-                  onChange({
-                    target: {
-                      name: "organization",
-                      value: selected ? selected._id : "",
-                    },
-                  });
-                }}
-                placeholder={
-                  loadingOrganizations
-                    ? "Loading organizations..."
-                    : "Select Organization"
-                }
-              />
+
+          {/* Organization/College Field - Conditionally rendered based on position */}
+          <label className="flex gap-4 items-center">
+            {!["dean", "SDU", "OSSD", "OSSD Coordinator"].includes(
+              newUser.position
+            ) && <span className="w-1/3">Organization</span>}
+            <div
+              className={
+                ["dean", "SDU", "OSSD", "OSSD Coordinator"].includes(
+                  newUser.position
+                )
+                  ? "w-full"
+                  : "w-2/3"
+              }
+            >
+              {["dean", "OSSD", "SDU", "OSSD Coordinator"].includes(
+                newUser.position
+              ) ? (
+                <CollegeSDU formData={newUser} onChange={handleCollegeChange} />
+              ) : (
+                <SearchableDropdown
+                  options={organizations.map((org) => org.org_name)}
+                  value={
+                    organizations.find(
+                      (org) => org._id === newUser.organization
+                    )?.org_name || ""
+                  }
+                  onChange={(selectedOrgName) => {
+                    const selected = organizations.find(
+                      (org) => org.org_name === selectedOrgName
+                    );
+                    onChange({
+                      target: {
+                        name: "organization",
+                        value: selected ? selected._id : "",
+                      },
+                    });
+                  }}
+                  placeholder={
+                    loadingOrganizations
+                      ? "Loading organizations..."
+                      : "Select Organization"
+                  }
+                />
+              )}
             </div>
           </label>
 
@@ -135,6 +178,7 @@ function UserTableView({ onView, onEdit }) {
     username: "",
     position: "",
     organization: "",
+    delivery_unit: "",
     password: "password123", // Default password
   });
 
@@ -181,9 +225,30 @@ function UserTableView({ onView, onEdit }) {
 
   const handleAddUser = async (userToAdd) => {
     try {
+      // Create a clean payload object
+      const payload = {
+        name: userToAdd.name,
+        username: userToAdd.username,
+        position: userToAdd.position,
+        password: userToAdd.password,
+      };
+
+      // Handle different position types correctly
+      if (
+        ["dean", "SDU", "OSSD", "OSSD Coordinator"].includes(userToAdd.position)
+      ) {
+        // For special positions, use delivery_unit from the form
+        payload.delivery_unit = userToAdd.delivery_unit;
+      } else {
+        // For regular positions (student-leader, adviser), use organization
+        payload.organization = userToAdd.organization;
+      }
+
+      console.log("Sending payload:", payload);
+
       const { data } = await axios.post(
         `${API_ROUTER}/create-new-user`,
-        userToAdd
+        payload
       );
       console.log("Server response:", data);
       alert("User added successfully!");
@@ -193,11 +258,14 @@ function UserTableView({ onView, onEdit }) {
         username: "",
         position: "",
         organization: "",
+        delivery_unit: "",
         password: "password123",
       }); // Reset newUser form
     } catch (error) {
       console.error("Error adding user:", error);
-      alert("Failed to add user.");
+      alert(
+        `Failed to add user: ${error.response?.data?.message || error.message}`
+      );
     }
   };
 
@@ -260,7 +328,7 @@ function UserTableView({ onView, onEdit }) {
                 onClick={() => handleSort("organization")}
                 className="cursor-pointer text-start text-xs p-3 font-semibold text-gray-600 uppercase border-b"
               >
-                Organization {getSortIcon("organization")}
+                Organization/Department {getSortIcon("organization")}
               </th>
               <th className="text-start text-xs p-3 font-semibold text-gray-600 uppercase border-b">
                 Actions
@@ -281,7 +349,9 @@ function UserTableView({ onView, onEdit }) {
                     {u.position}
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {u.organization?.org_name || "No organization"}
+                    {u.organization?.org_name ||
+                      u.delivery_unit ||
+                      "Not specified"}
                   </td>
                   <td className="py-4 px-4 text-center text-sm font-medium">
                     <div className="flex justify-center gap-2">
@@ -337,11 +407,6 @@ export default function SDUAdminUserTableView({ user }) {
   const [mode, setMode] = useState("list");
   const [selectedUser, setSelectedUser] = useState(null);
 
-  const handleAdd = () => {
-    setSelectedUser(null);
-    setMode("add");
-  };
-
   const handleView = (user) => {
     setSelectedUser(user);
     setMode("view");
@@ -350,11 +415,6 @@ export default function SDUAdminUserTableView({ user }) {
   const handleEdit = (user) => {
     setSelectedUser(user);
     setMode("edit");
-  };
-
-  const handleBack = () => {
-    setSelectedUser(null);
-    setMode("list");
   };
 
   switch (mode) {

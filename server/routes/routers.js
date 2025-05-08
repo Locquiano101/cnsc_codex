@@ -21,6 +21,8 @@ import {
   GetAllUsernameInfo,
   GetAllOrganization,
   GetSingleInstitutiuonalAccomplishmentbyOrganization,
+  GetOrganizationsByDepartment,
+  GetProposalsByOrganizationsDean,
 } from "../controllers/general.js";
 
 import { UpdateProposalsNotesAdviser } from "../controllers/adviser_admin/document_controller.js";
@@ -68,6 +70,8 @@ router.get("/get-all-files", GetAllFile);
 router.get("/get-all-organization-files", GetAllOrganizationFile);
 router.get("/get-all-student-post", GetAllStudentPostFiles);
 
+router.post("/get-by-organization", GetOrganizationsByDepartment);
+
 router.get("/get-all-images", GetAllImageFile);
 router.get("/get-all-organization", GetAllOrganization);
 router.get("/get-all-username", GetAllUsername);
@@ -94,6 +98,7 @@ router.put("/process-accreditation-sdu/:id", UpdateAccreditationSDU);
 
 //Proposal Route
 router.get("/proposals/", GetProposals);
+router.post("/proposals/dean", GetProposalsByOrganizationsDean);
 router.get("/proposals/:organizationId", GetProposalsbyOrganization);
 router.get(
   "/proposals/:organizationId/:proposalId",

@@ -53,12 +53,21 @@ const OrganizationSchema = new mongoose.Schema(
 
 const UserSchema = new mongoose.Schema(
   {
+    name: { type: String },
+    delivery_unit: { type: String },
     username: { type: String },
     password: { type: String, minlength: 6 },
     position: {
       type: String,
       trim: true,
-      enum: ["student-leader", "adviser", "dean", "SDU", "OSSD"],
+      enum: [
+        "student-leader",
+        "adviser",
+        "dean",
+        "SDU",
+        "OSSD",
+        "OSSD Coordinator",
+      ],
     }, // adviser, student rep, ossd coordinator, dean, ossd &SDU head,
 
     organization: {

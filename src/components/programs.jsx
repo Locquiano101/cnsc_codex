@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import SearchableDropdown from "./searchable_drop_down";
+import SearchableDropdown, {
+  SearchableDropdownFlex,
+} from "./searchable_drop_down";
 
 // Define your departments data structure.
 // Make sure the keys match exactly how you expect them in formData.department.
@@ -129,6 +131,36 @@ export function CollegeCourseDepartments({
   );
 }
 
+export function CollegeSDU({ formData = {}, onChange = () => {} }) {
+  // Optionally, if the parent's formData might update externally,
+  // you can use a useEffect to update courseOptions when formData.department changes.
+
+  const handleDepartmentChange = (selected) => {
+    // Immediately update local course options.
+    // Update parent's state.
+    onChange({
+      ...formData,
+      delivery_unit: selected,
+    });
+  };
+
+  return (
+    <div className="  justify-between flex w-full  gap-4">
+      <div className=" mr-12">
+        <label>Department</label>
+      </div>
+
+      <div className="flex-1 w-2/3">
+        <SearchableDropdown
+          options={Object.keys(departments)}
+          onChange={handleDepartmentChange}
+          value={formData.department || ""}
+        />
+      </div>
+    </div>
+  );
+}
+
 export function College({ formData = {}, onChange = () => {} }) {
   // Optionally, if the parent's formData might update externally,
   // you can use a useEffect to update courseOptions when formData.department changes.
@@ -144,7 +176,7 @@ export function College({ formData = {}, onChange = () => {} }) {
 
   return (
     <div className="flex w-full justify-around gap-4">
-      <div className="flex flex-col gap-1 flex-1">
+      <div className="flex gap-1 flex-1">
         <label>
           Department <span className="text-red-500">*</span>
         </label>

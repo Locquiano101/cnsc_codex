@@ -185,7 +185,7 @@ function AdviserAccomplishmentReportTable({
   );
 }
 
-export default function AdviserAccomplishmentsTableView(storedUser) {
+export default function DeanAccomplishmentView(storedUser) {
   const [activityFilter, setActivityFilter] = useState("All");
   const [showAddForm, setShowAddForm] = useState(false);
   const [formData, setFormData] = useState({});

@@ -28,13 +28,6 @@ export const Login = async (req, res) => {
       return res.status(401).json({ message: "Invalid username or password" });
     }
 
-    // Log the organization information if available
-    if (user.organization) {
-      console.log("Organization:", user.organization);
-    } else {
-      console.log("No organization found for user:", username);
-    }
-
     // Validate password
     if (user.password !== password) {
       return res.status(401).json({ message: "Invalid username or password" });
@@ -59,12 +52,7 @@ export const Login = async (req, res) => {
 
     res.status(200).json({
       token,
-      user: {
-        id: user._id,
-        username: user.username,
-        position: user.position,
-        organization: organizationData,
-      },
+      user,
     });
   } catch (error) {
     console.error("Login error:", error);
@@ -102,6 +90,38 @@ export const GetAllOrganization = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+export const GetOrganizationsByDepartment = async (req, res) => {
+  try {
+    const { department } = req.body; // Get department from request body
+
+    // If no department is provided, return an error
+    if (!department) {
+      return res
+        .status(400)
+        .json({ message: "Department is required in request body" });
+    }
+
+    // Find organizations where adviser_department matches the requested department
+    // or where any department in org_type.Departments array matches
+    const organizations = await Organizations.find({
+      $or: [
+        { adviser_department: department },
+        { "org_type.Departments.Department": department },
+      ],
+    });
+
+    if (organizations.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No organizations found for this department" });
+    }
+
+    res.status(200).json(organizations);
+  } catch (error) {
+    console.error("Error fetching organizations by department:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
 
 export const GetAllUsernameInfo = async (req, res) => {
   try {
@@ -115,6 +135,7 @@ export const GetAllUsernameInfo = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
 export const GetProposals = async (req, res) => {
   try {
     const proposals = await Proposal.find()
@@ -147,6 +168,33 @@ export const GetProposalsbyOrganization = async (req, res) => {
       .json({ message: "Server error", error: err.message });
   }
 };
+
+// controllers/proposals.js
+export const GetProposalsByOrganizationsDean = async (req, res) => {
+  const { organizationIds } = req.body; // expecting an array
+
+  if (!Array.isArray(organizationIds) || organizationIds.length === 0) {
+    return res
+      .status(400)
+      .json({ message: "organizationIds must be a non-empty array." });
+  }
+
+  try {
+    const proposals = await Proposal.find({
+      organization: { $in: organizationIds },
+    })
+      .populate("organization") // populate only the 'name' field
+      .sort({ event_date: -1 }); // most recent first
+
+    return res.status(200).json({ proposals });
+  } catch (err) {
+    console.error("Error fetching proposals:", err);
+    return res
+      .status(500)
+      .json({ message: "Server error", error: err.message });
+  }
+};
+
 export const GetSingleProposalsbyOrganization = async (req, res) => {
   const { organizationId, proposalId } = req.params;
 
@@ -155,8 +203,9 @@ export const GetSingleProposalsbyOrganization = async (req, res) => {
       _id: proposalId,
       organization: organizationId,
     })
-      .populate("organization") // optional: only get name if needed
-      .exec();
+      .populate("organization")
+      .sort({ event_date: -1 }); // most recent first
+    // optional: only get name if needed
 
     if (!proposal) {
       return res.status(404).json({ message: "Proposal not found" });
