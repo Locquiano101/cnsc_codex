@@ -65,7 +65,6 @@ export default function StudentLeaderPage() {
   const navigate = useNavigate();
   const [storedUser, setStoredUser] = useState(null);
   const [activeContent, setActiveContent] = useState("accreditations");
-
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -92,6 +91,8 @@ export default function StudentLeaderPage() {
   const status = storedUser.organization.accreditation_overall;
   const validStatuses = ["Pending", "Revision Required"];
 
+  console.log(storedUser);
+  console.log(status);
   const renderContent = () => {
     if (validStatuses.includes(status)) {
       return <PendingOrRevisionUI status={status} storedUser={storedUser} />;
@@ -116,9 +117,9 @@ export default function StudentLeaderPage() {
   const handleClick = (key) => setActiveContent(key);
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen  overflow-hidden">
       {/* Sidebar */}
-      <div className="w-2/10 bg-brian-blue flex flex-col">
+      <div className="w-2/12 bg-brian-blue flex flex-col">
         {/* Logo & Welcome side-by-side */}
         <div className="flex h-24 bg-brian-blue text-cnsc-white-color gap-2 px-2  items-center">
           <img
@@ -139,7 +140,7 @@ export default function StudentLeaderPage() {
         </div>
 
         {/* Navigation */}
-        <div className="flex flex-col  text-sm  text-white">
+        <div className="flex flex-col w-1.45 text-white">
           {[
             { key: "home", icon: faHome, label: "Reports / Dashboard" },
             {
@@ -164,8 +165,8 @@ export default function StudentLeaderPage() {
                   : "hover:bg-[#2E4B6B] text-white"
               }`}
             >
-              <FontAwesomeIcon icon={icon} />
-              {label}
+              <FontAwesomeIcon icon={icon} className="flex-1" />
+              <p className="flex-3/4">{label}</p>
             </div>
           ))}
         </div>
@@ -180,9 +181,10 @@ export default function StudentLeaderPage() {
       </div>
 
       <div className="w-full flex flex-col flex-3/4">
-        <div className="h-24 bg-brian-blue/50 "></div>
         {/* Content */}
-        <div className="p-4 h-full ">{renderContent()}</div>
+        <div className="p-4 h-full box-border border-green-500 bg-brian-blue/10 flex flex-col border-12">
+          {renderContent()}
+        </div>
       </div>
     </div>
   );

@@ -9,6 +9,7 @@ import { FileRenderer } from "../../../../components/file_renderer";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { faEdit, faTrashAlt } from "@fortawesome/free-solid-svg-icons";
+import PopUp from "../../../../components/pop-ups";
 
 const fileFields = {
   proposal_document: { label: "Proposal", accept: ".pdf,.doc,.docx" },
@@ -33,6 +34,7 @@ export default function EditProposalStudentSection(selectedProposal) {
     description: selectedProposal.selectedProposal.description,
     event_date: selectedProposal.selectedProposal.event_date.slice(0, 10), // YYYY-MM-DD
   });
+  const [showPopup, setShowPopup] = useState(false);
 
   // File-editing state
   const [editing, setEditing] = useState({
@@ -152,6 +154,7 @@ export default function EditProposalStudentSection(selectedProposal) {
         formData
       );
       console.log("✅ Update success:", res.data);
+      setShowPopup(true);
     } catch (err) {
       console.error("❌ Update failed:", err);
     }
@@ -173,7 +176,10 @@ export default function EditProposalStudentSection(selectedProposal) {
       }));
     }
   };
-
+  const handleClosePopup = () => {
+    setShowPopup(false);
+    window.location.reload(); // or navigate somewhere
+  };
   const renderSection = (key, multiple = false) => {
     const statusKey = `${key}_status`;
     const noteKey = `${key}_note`;
@@ -184,7 +190,7 @@ export default function EditProposalStudentSection(selectedProposal) {
       selectedProposal.selectedProposal.meeting[noteKey] || "Up for checking";
 
     return (
-      <div key={key} className="space-y-2">
+      <div key={key} className="">
         <div className="flex justify-between items-center">
           <div className="flex flex-col">
             <h3 className="font-medium">
@@ -231,87 +237,96 @@ export default function EditProposalStudentSection(selectedProposal) {
   };
 
   return (
-    <div className="border h-full p-6 space-y-6 overflow-y-auto">
+    <div className="border bg-white h-11/12 p-6 space-y-6 overflow-y-auto">
+      {showPopup && (
+        <PopUp
+          title="Success!"
+          text="Your Proposal has been revised"
+          ButtonText="Confirm"
+          onClose={handleClosePopup}
+        />
+      )}
       <h1 className="text-2xl font-bold mb-6">Edit Proposal</h1>
       {/* Basic Information (now editable) */}
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">Basic Information</h2>
-
-        {/* Title */}
-        <div>
-          <div className="flex justify-between items-center">
-            <label className="block text-sm font-medium">Title</label>
-            <button
-              className="text-sm text-blue-600 hover:underline"
-              onClick={() => toggleBasicEdit("title")}
-            >
-              {basicEdit.title ? "Cancel" : "Edit"}
-            </button>
+        <div className="flex flex-wrap gap-8 ">
+          {/* Title */}
+          <div className="flex-1 rounded shadow-gray-500 shadow p-4">
+            <div className="flex justify-between items-center">
+              <label className="block text-sm font-medium">Title</label>
+              <button
+                className="text-sm text-blue-600 hover:underline"
+                onClick={() => toggleBasicEdit("title")}
+              >
+                {basicEdit.title ? "Cancel" : "Edit"}
+              </button>
+            </div>
+            {basicEdit.title ? (
+              <input
+                type="text"
+                value={basicInfo.title}
+                onChange={(e) =>
+                  setBasicInfo((b) => ({ ...b, title: e.target.value }))
+                }
+                className="w-full border rounded px-2 py-1"
+              />
+            ) : (
+              <p className="text-gray-800">{basicInfo.title}</p>
+            )}
           </div>
-          {basicEdit.title ? (
-            <input
-              type="text"
-              value={basicInfo.title}
-              onChange={(e) =>
-                setBasicInfo((b) => ({ ...b, title: e.target.value }))
-              }
-              className="w-full border rounded px-2 py-1"
-            />
-          ) : (
-            <p className="text-gray-800">{basicInfo.title}</p>
-          )}
-        </div>
 
-        {/* Event Date */}
-        <div>
-          <div className="flex justify-between items-center">
-            <label className="block text-sm font-medium">Event Date</label>
-            <button
-              className="text-sm text-blue-600 hover:underline"
-              onClick={() => toggleBasicEdit("event_date")}
-            >
-              {basicEdit.event_date ? "Cancel" : "Edit"}
-            </button>
+          {/* Event Date */}
+          <div className="flex-1 rounded shadow-gray-500 shadow  p-4">
+            <div className="flex justify-between items-center">
+              <label className="block text-sm font-medium">Event Date</label>
+              <button
+                className="text-sm text-blue-600 hover:underline"
+                onClick={() => toggleBasicEdit("event_date")}
+              >
+                {basicEdit.event_date ? "Cancel" : "Edit"}
+              </button>
+            </div>
+            {basicEdit.event_date ? (
+              <input
+                type="date"
+                value={basicInfo.event_date}
+                onChange={(e) =>
+                  setBasicInfo((b) => ({ ...b, event_date: e.target.value }))
+                }
+                className="w-full border rounded px-2 py-1"
+              />
+            ) : (
+              <p className="text-gray-800">{basicInfo.event_date}</p>
+            )}
           </div>
-          {basicEdit.event_date ? (
-            <input
-              type="date"
-              value={basicInfo.event_date}
-              onChange={(e) =>
-                setBasicInfo((b) => ({ ...b, event_date: e.target.value }))
-              }
-              className="w-full border rounded px-2 py-1"
-            />
-          ) : (
-            <p className="text-gray-800">{basicInfo.event_date}</p>
-          )}
-        </div>
 
-        {/* Description */}
-        <div>
-          <div className="flex justify-between items-center">
-            <label className="block text-sm font-medium">Description</label>
-            <button
-              className="text-sm text-blue-600 hover:underline"
-              onClick={() => toggleBasicEdit("description")}
-            >
-              {basicEdit.description ? "Cancel" : "Edit"}
-            </button>
+          {/* Description */}
+          <div className="flex-1 rounded shadow-gray-500 shadow p-4">
+            <div className="flex justify-between items-center">
+              <label className="block text-sm font-medium">Description</label>
+              <button
+                className="text-sm text-blue-600 hover:underline"
+                onClick={() => toggleBasicEdit("description")}
+              >
+                {basicEdit.description ? "Cancel" : "Edit"}
+              </button>
+            </div>
+            {basicEdit.description ? (
+              <textarea
+                rows={3}
+                value={basicInfo.description}
+                onChange={(e) =>
+                  setBasicInfo((b) => ({ ...b, description: e.target.value }))
+                }
+                className="w-full border rounded px-2 py-1"
+              />
+            ) : (
+              <p className="text-gray-800 whitespace-pre-line">
+                {basicInfo.description}
+              </p>
+            )}
           </div>
-          {basicEdit.description ? (
-            <textarea
-              rows={3}
-              value={basicInfo.description}
-              onChange={(e) =>
-                setBasicInfo((b) => ({ ...b, description: e.target.value }))
-              }
-              className="w-full border rounded px-2 py-1"
-            />
-          ) : (
-            <p className="text-gray-800 whitespace-pre-line">
-              {basicInfo.description}
-            </p>
-          )}
         </div>
       </div>
       {/* Meeting Documents */}

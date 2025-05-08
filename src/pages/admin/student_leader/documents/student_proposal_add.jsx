@@ -47,7 +47,7 @@ const documentDataFields = [
   { label: "Description", id: "description", type: "textarea" },
 ];
 
-export default function ProposalSubmitionStudentSection() {
+export default function ProposalSubmitionStudentSection({ onBack }) {
   const [uploadedFiles, setUploadedFiles] = useState({});
   const [showPopup, setShowPopup] = useState(false);
 
@@ -154,10 +154,13 @@ export default function ProposalSubmitionStudentSection() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto shadow-xl rounded-2xl bg-white flex flex-col h-screen ">
+    <div className="w-3/4 h-11/12 mx-auto shadow-xl rounded-2xl bg-white flex flex-col   ">
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b bg-blue-50 rounded-t-2xl">
-        <button className="text-blue-600 hover:text-blue-800 transition">
+        <button
+          className="text-blue-600 hover:text-blue-800 transition "
+          onClick={onBack}
+        >
           <FontAwesomeIcon icon={faLeftLong} className="text-xl" />
         </button>
         <h1 className="text-2xl font-bold text-gray-800 text-center flex-grow">

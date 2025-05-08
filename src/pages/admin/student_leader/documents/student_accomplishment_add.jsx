@@ -185,11 +185,7 @@ function StudentAddAccomplishedInstitutional() {
   };
 
   return (
-    <div className="w-full h-full overflow-auto px-4 py-6">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">
-        Add Institutional Collaboration Activity
-      </h1>
-
+    <div className="w-full h-full overflow-auto">
       {notification && (
         <Notification
           type={notification.type}
@@ -792,16 +788,17 @@ export default function AddStudentAccomplishmentReport({ onBack }) {
   ];
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto">
-      {/* Header with tabs */}
-      <div className="bg-white shadow-sm py-4 px-6 flex items-center justify-between sticky top-0 z-10">
+    <div className="flex flex-col w-full h-full  ">
+      <div className="  flex justify-between">
+        {/* Back button */}
         <button
           onClick={onBack}
-          className="flex items-center text-blue-600 hover:text-blue-800 font-medium"
+          className="flex items-center text-blue-600 hover:text-blue-800 font-medium mb-4"
         >
           <FontAwesomeIcon icon={faLeftLong} className="mr-2" /> Back
         </button>
 
+        {/* Tabs */}
         <div className="flex items-center gap-2">
           {tabs.map((tab) => (
             <button
@@ -819,8 +816,8 @@ export default function AddStudentAccomplishmentReport({ onBack }) {
         </div>
       </div>
 
-      {/* Form container with automatic scrolling */}
-      <div className="flex-1 flex flex-col">
+      {/* Content area */}
+      <div className="flex-1 overflow-y-auto">
         {formType === "institutional_activity" && (
           <StudentAddAccomplishedInstitutional />
         )}

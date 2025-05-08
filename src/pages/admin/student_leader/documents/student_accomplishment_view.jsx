@@ -44,12 +44,7 @@ function StudentAccomplishmentReportTable({
     };
   }, []);
 
-  const filterOptions = [
-    "All",
-    "Proposed Action Plan",
-    "Institutional Activity",
-    "External Activity",
-  ];
+  const filterOptions = ["All", "Proposed", "Institutional", "External"];
 
   return (
     <div className="h-full border-b-cnsc-blue-color ">
@@ -202,9 +197,9 @@ function StudentAccomplishmentReportTable({
 
 export default function StudentAccomplishmentsTableView({ user }) {
   const [editingAccomplishment, setEditingAccomplishment] = useState(null);
-
   const [activityFilter, setActivityFilter] = useState("All");
-  const [showAddForm, setShowAddForm] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [formData, setFormData] = useState({});
   const [fileData, setFileData] = useState({});
   const [accomplishmentsList, setAccomplishmentsList] = useState(null);
@@ -260,12 +255,28 @@ export default function StudentAccomplishmentsTableView({ user }) {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleAddSubmit = (e) => {
     e.preventDefault();
     console.log("Form Data:", formData);
     console.log("File Data:", fileData);
     // Submit to API here
-    setShowAddForm(false); // return to table view after submission
+    setIsAddModalOpen(false); // Close modal after submission
+    // Reset form data
+    setFormData({});
+    setFileData({});
+  };
+
+  const handleEditSubmit = (e) => {
+    e.preventDefault();
+    console.log("Editing accomplishment:", editingAccomplishment);
+    console.log("Updated Form Data:", formData);
+    console.log("Updated File Data:", fileData);
+    // Submit to API here
+    setIsEditModalOpen(false); // Close modal after submission
+    setEditingAccomplishment(null);
+    // Reset form data
+    setFormData({});
+    setFileData({});
   };
 
   // Filter activities based on selected filter
@@ -277,13 +288,34 @@ export default function StudentAccomplishmentsTableView({ user }) {
         );
 
   const handleAddAccomplishment = () => {
-    setEditingAccomplishment(null); // Clear editing
     setFormData({}); // Reset form data
-    setShowAddForm(true);
+    setFileData({}); // Reset file data
+    setIsAddModalOpen(true);
   };
+
   const handleEditAccomplishment = (activity) => {
-    setEditingAccomplishment(activity); // Set the activity you're editing
-    setShowAddForm(false); // Hide add form if it's open
+    setEditingAccomplishment(activity);
+    // Pre-fill form data with the selected accomplishment's data
+    setFormData({
+      title: activity.title || "",
+      description: activity.description || "",
+      activity_type: activity.activity_type || "",
+      // Add other fields as needed
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const closeAddModal = () => {
+    setIsAddModalOpen(false);
+    setFormData({});
+    setFileData({});
+  };
+
+  const closeEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditingAccomplishment(null);
+    setFormData({});
+    setFileData({});
   };
 
   if (!user) {
@@ -311,26 +343,81 @@ export default function StudentAccomplishmentsTableView({ user }) {
   }
 
   return (
-    <div className=" h-full">
-      {editingAccomplishment ? (
-        <RandomTest selectedAccomplishment={editingAccomplishment} />
-      ) : showAddForm ? (
-        <AddStudentAccomplishedActionPlan
-          onSubmit={handleSubmit}
-          onBack={() => setShowAddForm(false)}
-          formDataState={formData}
-          handleChange={handleChange}
-          handleFileChange={handleFileChange}
-        />
-      ) : (
-        <StudentAccomplishmentReportTable
-          activityFilter={activityFilter}
-          setActivityFilter={setActivityFilter}
-          filteredActivities={filteredActivities}
-          onAdd={handleAddAccomplishment}
-          onEdit={handleEditAccomplishment}
-        />
+    <div className="h-full">
+      {/* Main Table View */}
+      <StudentAccomplishmentReportTable
+        activityFilter={activityFilter}
+        setActivityFilter={setActivityFilter}
+        filteredActivities={filteredActivities}
+        onAdd={handleAddAccomplishment}
+        onEdit={handleEditAccomplishment}
+      />
+
+      {/* Add Accomplishment Modal */}
+      {isAddModalOpen && (
+        <Modal isOpen={isAddModalOpen} onClose={closeAddModal}>
+          <div className="bg-white p-4 w-full rounded-lg h-full overflow-y-auto">
+            <h2 className="text-xl font-bold mb-4">Add New Accomplishment</h2>
+            <AddStudentAccomplishedActionPlan
+              onSubmit={handleAddSubmit}
+              onBack={closeAddModal}
+              formDataState={formData}
+              handleChange={handleChange}
+              handleFileChange={handleFileChange}
+              isModal={true}
+            />
+          </div>
+        </Modal>
       )}
+
+      {/* Edit Accomplishment Modal */}
+      {isEditModalOpen && editingAccomplishment && (
+        <Modal isOpen={isEditModalOpen} onClose={closeEditModal}>
+          <div className="bg-white rounded-lg w-full h-full overflow-y-auto">
+            <RandomTest
+              selectedAccomplishment={editingAccomplishment}
+              onSubmit={handleEditSubmit}
+              onBack={closeEditModal}
+              formDataState={formData}
+              handleChange={handleChange}
+              handleFileChange={handleFileChange}
+              isModal={true}
+            />
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+// Modal Component
+function Modal({ isOpen, onClose, children }) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/10 backdrop-blur z-50 flex items-center justify-center">
+      <div className="bg-white rounded-lg shadow-xl overflow-hidden h-11/12 w-3/4">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+        {children}
+      </div>
     </div>
   );
 }

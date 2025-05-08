@@ -25,7 +25,7 @@ export const Login = async (req, res) => {
 
     // Check if user exists
     if (!user) {
-      return res.status(401).json({ message: "Invalid username or password" });
+      return res.status(401).json({ message: "username NotFound " });
     }
 
     // Validate password
