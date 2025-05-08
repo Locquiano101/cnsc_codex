@@ -238,6 +238,7 @@ export const GetAccomplishments = async (req, res) => {
       .json({ message: "Server error", error: err.message });
   }
 };
+
 export const GetAccomplishmentsbyOrganization = async (req, res) => {
   const { organizationId } = req.params;
 

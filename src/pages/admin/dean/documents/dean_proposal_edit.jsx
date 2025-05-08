@@ -69,8 +69,8 @@ export default function EditProposalDeanSection({ user, proposal, onBack }) {
     const body = {
       proposalId: proposal._id,
       approval_status: isAllApproved()
-        ? "Approved by the Adviser"
-        : "Revision from the Adviser",
+        ? "Approved by the Dean"
+        : "Revision from the Dean",
       meeting: {
         ...proposal.meeting,
         ...Object.fromEntries(

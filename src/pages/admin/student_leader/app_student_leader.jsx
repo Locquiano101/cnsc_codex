@@ -88,7 +88,7 @@ export default function StudentLeaderPage() {
     );
   }
 
-  const status = storedUser.organization.accreditation_overall;
+  const status = storedUser.organization.accreditation_status.over_all_status;
   const validStatuses = ["Pending", "Revision Required"];
 
   console.log(storedUser);

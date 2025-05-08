@@ -16,14 +16,13 @@ import { API_ROUTER } from "../../../App";
 import DeanOverview from "./ossd_home_page";
 import DeanOrganizationBoard from "./ossd_organization";
 import ProposalSectionDean from "./documents/ossd_proposal_view";
+import OssdAccomplishmentView from "./documents/ossd_accomplishment_view";
 
 export default function OSSDCoordinatorPage() {
   const [storedUser, setStoredUser] = useState(null);
-  const [activeContent, setActiveContent] = useState("proposals");
+  const [activeContent, setActiveContent] = useState("accomplishment");
   const [organizations, setOrganizations] = useState([]);
-  const [showDocumentSubmenu, setShowDocumentSubmenu] = useState(false);
-  const [activeDocumentSubContent, setActiveDocumentSubContent] =
-    useState("proposals");
+  useState("proposals");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -80,8 +79,8 @@ export default function OSSDCoordinatorPage() {
         return <DeanOverview organizations={organizations} />;
       case "organizations":
         return <DeanOrganizationBoard organizations={organizations} />;
-      case "post":
-        return <div className="p-4">Post content</div>;
+      case "accomplishment":
+        return <OssdAccomplishmentView organizations={organizations} />;
       case "proposals":
         return <ProposalSectionDean organization={organizations} />;
       case "settings":
@@ -111,7 +110,12 @@ export default function OSSDCoordinatorPage() {
           {[
             { key: "home", label: "Reports / Dashboard", icon: faHome },
             { key: "organizations", label: "Organizations", icon: faUsers },
-            { key: "proposals", label: "Proposals", icon: faFileAlt },
+            {
+              key: "accomplishment",
+              label: "Accomplishments",
+              icon: faFileAlt,
+            },
+            { key: "proposals", label: "Proposals", icon: faFolderOpen },
           ].map(({ key, label, icon }) => (
             <div key={key}>
               <div

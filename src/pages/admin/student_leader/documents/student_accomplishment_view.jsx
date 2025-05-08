@@ -206,8 +206,6 @@ export default function StudentAccomplishmentsTableView({ user }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  console.log(user);
-
   useEffect(() => {
     if (!user) return;
 
