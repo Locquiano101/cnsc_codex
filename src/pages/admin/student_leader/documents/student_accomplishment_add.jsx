@@ -17,6 +17,7 @@ const textFields = [
 
 function StudentAddAccomplishedInstitutional() {
   const [uploadedFiles, setUploadedFiles] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formDataState, setFormDataState] = useState({
     event_title: "",
     event_description: "",
@@ -105,6 +106,7 @@ function StudentAddAccomplishedInstitutional() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
     const formData = new FormData();
 
     // 1) text fields
@@ -153,16 +155,18 @@ function StudentAddAccomplishedInstitutional() {
     } catch (error) {
       console.error("Submission error:", error);
       // optionally show error popup here
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <section>
+    <div className="h-full">
       <h1 className="text-2xl font-bold text-black text-center mb-4">
         Add Institutional Collaboration Activity
       </h1>
 
-      <form onSubmit={handleSubmit} className="space-y-6 h-1/2 overflow-y-auto">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
           <h2 className="text-lg font-semibold text-black">
             Activity Information
@@ -218,8 +222,21 @@ function StudentAddAccomplishedInstitutional() {
             />
           </div>
         </div>
+        <div className="text-right">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className={`bg-black text-white px-6 py-2 rounded-md text-base font-medium transition ${
+              isSubmitting
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:bg-gray-800"
+            }`}
+          >
+            {isSubmitting ? "Submitting..." : "Submit Activity"}
+          </button>
+        </div>
       </form>
-    </section>
+    </div>
   );
 }
 
@@ -405,7 +422,7 @@ function StudentAddAccomplishedExternal() {
   };
 
   return (
-    <section>
+    <div className="h-full">
       <h1 className="text-2xl font-bold text-black text-center mb-4">
         Add External Accomplished Activity
       </h1>
@@ -422,7 +439,7 @@ function StudentAddAccomplishedExternal() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6 h-1/2 overflow-y-auto">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
           <h2 className="text-lg font-semibold text-black">
             Activity Information
@@ -493,7 +510,7 @@ function StudentAddAccomplishedExternal() {
           </button>
         </div>
       </form>
-    </section>
+    </div>
   );
 }
 
@@ -656,7 +673,7 @@ function StudentAddAccomplishedProposal() {
     }
   };
   return (
-    <section className="p-4">
+    <div className="h-full">
       <h1 className="text-2xl font-bold text-gray-800 text-center mb-6">
         Add Accomplished Action Plan
       </h1>
@@ -673,7 +690,7 @@ function StudentAddAccomplishedProposal() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl mx-auto">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4 bg-white p-6 rounded-lg shadow">
           <h2 className="text-lg font-semibold text-black">
             Activity Information
@@ -744,12 +761,12 @@ function StudentAddAccomplishedProposal() {
           </button>
         </div>
       </form>
-    </section>
+    </div>
   );
 }
 
 export default function AddStudentAccomplishmentReport({ onBack }) {
-  const [formType, setFormType] = useState("institutional_activity"); // Add this state
+  const [formType, setFormType] = useState("institutional_activity");
 
   const tabs = [
     { key: "institutional_activity", label: "Institutional Activity" },
@@ -758,9 +775,9 @@ export default function AddStudentAccomplishmentReport({ onBack }) {
   ];
 
   return (
-    <section className="flex flex-col bg-gray-50 h-screen space-y-4 overflow-y-auto">
+    <div className="h-screen flex flex-col bg-gray-50">
       {/* Back + Tab selector */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex-none flex items-center justify-between p-4 border-b">
         <div className="border-red-600 border-2 rounded-lg flex space-x-4 p-2">
           <button
             onClick={onBack}
@@ -789,13 +806,17 @@ export default function AddStudentAccomplishmentReport({ onBack }) {
       </div>
 
       {/* Scrollable Form Section */}
-      <div className="overflow-y-auto p-4 border h-full rounded">
-        {formType === "institutional_activity" && (
-          <StudentAddAccomplishedInstitutional />
-        )}
-        {formType === "external_activity" && <StudentAddAccomplishedExternal />}
-        {formType === "accomplishment" && <StudentAddAccomplishedProposal />}
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-4">
+          {formType === "institutional_activity" && (
+            <StudentAddAccomplishedInstitutional />
+          )}
+          {formType === "external_activity" && (
+            <StudentAddAccomplishedExternal />
+          )}
+          {formType === "accomplishment" && <StudentAddAccomplishedProposal />}
+        </div>
       </div>
-    </section>
+    </div>
   );
 }
