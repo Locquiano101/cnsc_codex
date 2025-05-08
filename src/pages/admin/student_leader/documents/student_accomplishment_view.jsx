@@ -52,7 +52,7 @@ function StudentAccomplishmentReportTable({
   ];
 
   return (
-    <div className=" max-h-[500px] border-b-cnsc-blue-color shadow-md h-110">
+    <div className="h-full border-b-cnsc-blue-color ">
       <div className="bg-[#1e4976] text-white p-3 flex justify-between items-center">
         <h1 className="font-medium">Accomplishments</h1>
         <div className="flex gap-2">
@@ -210,7 +210,6 @@ export default function StudentAccomplishmentsTableView({ user }) {
   const [accomplishmentsList, setAccomplishmentsList] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
 
   console.log(user);
 
@@ -312,7 +311,7 @@ export default function StudentAccomplishmentsTableView({ user }) {
   }
 
   return (
-    <div>
+    <div className=" h-full">
       {editingAccomplishment ? (
         <RandomTest selectedAccomplishment={editingAccomplishment} />
       ) : showAddForm ? (

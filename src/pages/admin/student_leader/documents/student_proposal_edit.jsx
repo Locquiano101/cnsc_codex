@@ -53,6 +53,32 @@ export default function EditProposalStudentSection(selectedProposal) {
     console.log(`[EditProposal] ${message}`);
   };
 
+  const handleCancel = () => {
+    setBasicInfo({
+      title: selectedProposal.selectedProposal.title,
+      description: selectedProposal.selectedProposal.description,
+      event_date: selectedProposal.selectedProposal.event_date.slice(0, 10),
+    });
+
+    setEditing({
+      proposal_document: false,
+      notice_document: false,
+      minutes_document: false,
+      photo_documentations: false,
+      resolution_document: false,
+    });
+
+    setBasicEdit({
+      title: false,
+      event_date: false,
+      description: false,
+    });
+
+    setNewFiles({});
+    window.location.reload();
+    logChange("Cancelled editing and reverted to original data.");
+  };
+
   const toggleEdit = (key) => {
     const now = !editing[key];
     setEditing((e) => ({ ...e, [key]: now }));
@@ -304,7 +330,10 @@ export default function EditProposalStudentSection(selectedProposal) {
       <div className=" w-full h-10 flex justify-end gap-2">
         {
           <div className=" h-10 flex justify-end w-fit">
-            <button className="px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow transition-all">
+            <button
+              onClick={handleCancel}
+              className="px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow transition-all"
+            >
               CANCEL
             </button>
           </div>

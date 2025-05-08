@@ -64,7 +64,7 @@ function PendingOrRevisionUI({ status, storedUser }) {
 export default function StudentLeaderPage() {
   const navigate = useNavigate();
   const [storedUser, setStoredUser] = useState(null);
-  const [activeContent, setActiveContent] = useState("post");
+  const [activeContent, setActiveContent] = useState("accreditations");
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -179,10 +179,10 @@ export default function StudentLeaderPage() {
         </button>
       </div>
 
-      <div className="w-full flex-3/4">
+      <div className="w-full flex flex-col flex-3/4">
         <div className="h-24 bg-brian-blue/50 "></div>
         {/* Content */}
-        <div className="p-4">{renderContent()}</div>
+        <div className="p-4 h-full ">{renderContent()}</div>
       </div>
     </div>
   );
