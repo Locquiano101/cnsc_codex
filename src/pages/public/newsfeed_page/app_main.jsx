@@ -7,7 +7,7 @@ export default function NewsFeedPage() {
   return (
     <div className="w-full min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="fixed top-0 left-0 w-full bg-red-700 text-white flex items-center justify-between px-4 md:px-8 h-16 shadow-md z-50">
+      <header className="fixed top-0 left-0 w-full bg-cnsc-primary-color text-white flex items-center justify-between px-4 md:px-8 h-16 shadow-md z-50">
         {/* Hamburger Menu */}
         <button className="text-white md:hidden">
           <svg
@@ -27,11 +27,11 @@ export default function NewsFeedPage() {
         </button>
 
         {/* Logo */}
-        <div className="flex-grow text-center">
+        <div className="flex-grow h- text-center">
           <img
-            src="public/general/cnsc_codex.png" // <-- replace with your logo path
+            src="public/general/cnsc_codex_ver_2.svg" // <-- replace with your logo path
             alt="Logo"
-            className="h-15 inline"
+            className="h-24 inline"
           />
         </div>
 

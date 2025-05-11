@@ -9,7 +9,7 @@ import { FileRenderer } from "../../../../components/file_renderer";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { faEdit, faTrashAlt } from "@fortawesome/free-solid-svg-icons";
-import PopUp from "../../../../components/pop-ups";
+import { PopUp } from "../../../../components/pop-ups";
 
 const fileFields = {
   proposal_document: { label: "Proposal", accept: ".pdf,.doc,.docx" },

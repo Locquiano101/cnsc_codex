@@ -285,6 +285,50 @@ export const GetAllOrganizationFile = async (req, res) => {
   }
 };
 
+export const GetOrganizationFiles = async (req, res) => {
+  const { organization } = req.body;
+
+  if (!organization) {
+    return res
+      .status(400)
+      .json({ error: "Organization name is required in the request body." });
+  }
+
+  const orgDir = path.join(process.cwd(), "../public", organization);
+
+  async function getFilesRecursively(dir) {
+    let results = [];
+    const list = await fsPromises.readdir(dir, { withFileTypes: true });
+
+    for (const file of list) {
+      const fullPath = path.join(dir, file.name);
+      if (file.isDirectory()) {
+        results = results.concat(await getFilesRecursively(fullPath));
+      } else {
+        results.push(fullPath);
+      }
+    }
+
+    return results;
+  }
+
+  try {
+    const allFiles = await getFilesRecursively(orgDir);
+    const relativePaths = allFiles.map((file) =>
+      path
+        .relative(path.join(process.cwd(), "public"), file)
+        .replace(/\\/g, "/")
+    );
+
+    return res.status(200).json({ [organization]: relativePaths });
+  } catch (error) {
+    console.error("Error reading files:", error);
+    return res
+      .status(500)
+      .json({ error: "Could not read files for the specified organization." });
+  }
+};
+
 export const GetAllStudentPostFiles = async (req, res) => {
   const baseDir = path.join(process.cwd(), "../public");
 

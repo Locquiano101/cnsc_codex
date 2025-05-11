@@ -80,7 +80,7 @@ export default function OSSDCoordinatorPage() {
       case "organizations":
         return <DeanOrganizationBoard organizations={organizations} />;
       case "accomplishment":
-        return <OssdAccomplishmentView organizations={organizations} />;
+        return <OssdAccomplishmentView storedUser={organizations} />;
       case "proposals":
         return <ProposalSectionDean organization={organizations} />;
       case "settings":

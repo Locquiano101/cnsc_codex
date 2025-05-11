@@ -19,3 +19,12 @@ export const FetchAccreditationByIdAPI = async (accreditation_id) => {
     console.error("Error fetching accreditation:", error);
   }
 };
+
+export const FetchAllOrganization = async () => {
+  try {
+    const response = await axios.get(`${API_ROUTER}/get-all-organization`);
+    console.log(response.data);
+  } catch (error) {
+    console.error("Error fetching accreditation:", error);
+  }
+};

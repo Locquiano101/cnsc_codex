@@ -12,7 +12,7 @@ import OrganizationPage from "./pages/public/organization_page/organizations";
 import DeanAdminPage from "./pages/admin/dean/app_dean";
 import OSSDCoordinatorPage from "./pages/admin/ossd_coordinator/app_ossd_coordinator";
 
-export const API_ROUTER = "http://localhost:8080/api";
+export const API_ROUTER = "http://192.168.1.12:8080/api";
 
 // Updated ProtectedRoute with allowedRoles prop
 const ProtectedRoute = ({ allowedRoles }) => {
@@ -72,7 +72,7 @@ export default function App() {
       <Route path="/NewsFeed" element={<NewsFeedPage />} />
       <Route path="/organization" element={<OrganizationPage />} />
       <Route
-        path="/organization/profile"
+        path="/organization/profile/:orgName"
         element={<OrganizationProfilePage />}
       />
 

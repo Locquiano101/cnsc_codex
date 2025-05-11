@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import PopUp from "../../../../components/pop-ups";
+import { PopUp } from "../../../../components/pop-ups";
 import {
   ReusableFileUpload,
   ReusableMultiFileUpload,

@@ -1,227 +1,139 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SearchableDropdown from "../../../components/searchable_drop_down";
 import { Link } from "react-router-dom";
-
-const Organizations = [
-  {
-    name: "Tech Club",
-    logo: "/general/ccms_sg_logo.jpg",
-    type: "system-wide",
-    department: "Computer Science",
-  },
-  {
-    name: "Global Innovators",
-    logo: "/general/ccms_sg_logo.jpg",
-    type: "system-wide",
-    department: "All Departments",
-  },
-  {
-    name: "Eco Warriors",
-    logo: "/general/ccms_sg_logo.jpg",
-    type: "system-wide",
-    department: "All Departments",
-  },
-  {
-    name: "Business Society",
-    logo: "/general/ccms_sg_logo.jpg",
-    type: "local",
-    department: "Business Administration",
-  },
-  {
-    name: "Engineering Innovators",
-    logo: "/general/ccms_sg_logo.jpg",
-    type: "local",
-    department: "Engineering",
-  },
-  {
-    name: "EduCare Club",
-    logo: "/general/ccms_sg_logo.jpg",
-    type: "local",
-    department: "Education",
-  },
-  {
-    name: "Arts Hub",
-    logo: "/general/ccms_sg_logo.jpg",
-    type: "local",
-    department: "Arts and Sciences",
-  },
-  {
-    name: "Math Wizards",
-    logo: "/general/ccms_sg_logo.jpg",
-    type: "local",
-    department: "Arts and Sciences",
-  },
-  {
-    name: "Tech Titans",
-    logo: "/general/ccms_sg_logo.jpg",
-    type: "local",
-    department: "Computing and Multimedia Studies",
-  },
-  {
-    name: "Hospitality Guild",
-    logo: "/general/ccms_sg_logo.jpg",
-    type: "local",
-    department: "Business Administration",
-  },
-  {
-    name: "Agro Youth",
-    logo: "/general/ccms_sg_logo.jpg",
-    type: "local",
-    department: "Agriculture and Natural Resources",
-  },
-  {
-    name: "Future Educators Circle",
-    logo: "/general/ccms_sg_logo.jpg",
-    type: "local",
-    department: "Education",
-  },
-  {
-    name: "ElectroMech Club",
-    logo: "/general/ccms_sg_logo.jpg",
-    type: "local",
-    department: "Engineering",
-  },
-  {
-    name: "Sea Scholars",
-    logo: "/general/ccms_sg_logo.jpg",
-    type: "local",
-    department: "Fisheries and Marine Sciences",
-  },
-];
-
-export const departments = {
-  "College of Arts and Sciences": [
-    "Bachelor of Science in Biology",
-    "Bachelor of Science in Applied Mathematics",
-    "Bachelor of Science in Development Communication",
-    "Bachelor of Arts in English Language Studies",
-    "Bachelor of Arts in Sociology",
-  ],
-  "College of Computing and Multimedia Studies": [
-    "Bachelor of Science in Information Technology",
-    "Bachelor of Science in Information Systems",
-  ],
-  "College of Business and Public Administration": [
-    "Bachelor of Science in Business Administration – Business Economics",
-    "Bachelor of Science in Business Administration – Financial Management",
-    "Bachelor of Science in Business Administration – Marketing Management",
-    "Bachelor of Science in Business Administration – Human Resource Management",
-    "Bachelor of Science in Accountancy",
-    "Bachelor of Science in Hospitality Management",
-    "Bachelor of Science in Office Administration",
-    "Bachelor of Science in Entrepreneurship",
-    "Bachelor in Public Administration",
-  ],
-  "College of Engineering": [
-    "Bachelor of Science in Civil Engineering",
-    "Bachelor of Science in Electrical Engineering",
-    "Bachelor of Science in Mechanical Engineering",
-  ],
-  "College of Education": [
-    "Bachelor of Elementary Education",
-    "Bachelor of Secondary Education – Major in English",
-    "Bachelor of Secondary Education – Major in Filipino",
-    "Bachelor of Secondary Education – Major in Mathematics",
-    "Bachelor of Secondary Education – Major in Social Studies",
-    "Bachelor of Secondary Education – Major in Sciences",
-    "Bachelor of Technology and Livelihood Education – Home Economics",
-    "Bachelor of Physical Education",
-  ],
-  "College of Trades and Technology": [
-    "Bachelor of Technical-Vocational Teacher Education – Garments Fashion and Design",
-    "Bachelor of Technical-Vocational Teacher Education – Food Service and Management",
-    "Bachelor of Technical-Vocational Teacher Education – Automotive Technology",
-    "Bachelor of Technical-Vocational Teacher Education – Electrical Technology",
-    "Bachelor of Science in Industrial Technology – Automotive Technology",
-    "Bachelor of Science in Industrial Technology – Electrical Technology",
-    "Bachelor of Science in Industrial Technology – Computer Technology",
-    "Bachelor of Science in Industrial Technology – Electronics Technology",
-  ],
-  "College of Agriculture and Natural Resources": [
-    "Bachelor of Science in Agriculture – Crop Science",
-    "Bachelor of Science in Agriculture – Animal Science",
-    "Bachelor of Science in Environmental Science",
-    "Bachelor in Agricultural Technology",
-    "Bachelor of Science in Agricultural and Biosystems Engineering",
-  ],
-  "Institute of Fisheries and Marine Sciences": [
-    "Bachelor of Science in Fisheries",
-  ],
-  "Alternative Track": [
-    "Bachelor of Science in Entrepreneurship (Agricultural Production Track)",
-  ],
-};
+import axios from "axios";
+import { API_ROUTER } from "../../../App";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 
 export default function NewsFeedSidePanel() {
   const [selectedOption, setSelectedOption] = useState("system-wide");
   const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [Organizations, setOrganizations] = useState([]);
 
   const filteredOrganizations = Organizations.filter((org) => {
+    const orgClass = org.org_class?.toLowerCase() || "";
+    const isSystemWide = orgClass === "system-wide";
+    const isLocal = orgClass === "local";
+
     if (selectedOption === "system-wide") {
-      return org.type === "system-wide";
+      return isSystemWide;
     }
-    return (
-      org.type === "local" &&
-      (!selectedDepartment || org.department === selectedDepartment)
-    );
+
+    if (isLocal) {
+      if (selectedDepartment) {
+        return org.org_type?.Departments?.some(
+          (dept) => dept.Department === selectedDepartment
+        );
+      }
+      return true; // show all locals if no department selected
+    }
+
+    return false;
   });
 
-  return (
-    <div className="w-full max-w-xs h-[90vh] px-2 py-4 sticky top-0">
-      <div className="relative max-h-[90vh] shadow-md">
-        {/* Yellow background layer */}
-        <div className="absolute inset-0 bg-cnsc-secondary-color z-0" />
+  useEffect(() => {
+    const FetchAllOrganization = async () => {
+      try {
+        const response = await axios.get(`${API_ROUTER}/get-all-organization`);
+        setOrganizations(response.data);
+      } catch (error) {
+        console.error("Error fetching organizations:", error);
+      }
+    };
 
-        {/* Scrollable content on top */}
+    FetchAllOrganization();
+  }, []);
+
+  // Fixed departmentOptions logic
+  const departmentOptions = Array.from(
+    new Set(
+      Organizations.flatMap(
+        (org) => org.org_type?.Departments?.map((d) => d.Department) || []
+      )
+    )
+  ).filter(Boolean); // remove undefined or empty
+
+  return (
+    <div className="w-full h-[90vh]  sticky top-0">
+      <div className="relative max-h-[90vh] shadow-md">
+        <div className="absolute inset-0 bg-cnsc-secondary-color z-0" />
         <div className="relative z-10 bg-cnsc-primary-color top-4 left-4 p-4 max-h-[90vh] overflow-hidden rounded">
           <h2 className="text-cnsc-white-color mb-4 text-2xl font-bold text-center">
             STUDENT ORGANIZATIONS
           </h2>
 
-          {/* Type Selector */}
-          <div className="mb-4 bg-white">
-            <select
-              value={selectedOption}
-              onChange={(e) => {
-                setSelectedOption(e.target.value);
-                setSelectedDepartment(""); // Reset department when switching
-              }}
-              className="w-full p-2 rounded bg-white"
-            >
-              <option value="system-wide">System-wide</option>
-              <option value="local">Local</option>
-            </select>
+          {/* Replace dropdown with radio buttons */}
+          <div className="mb-4 bg-white p-3 rounded ">
+            <div className="flex items-center  justify-around">
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  value="system-wide"
+                  checked={selectedOption === "system-wide"}
+                  onChange={() => {
+                    setSelectedOption("system-wide");
+                    setSelectedDepartment("");
+                  }}
+                  className="mr-2"
+                />
+                <span>System-wide</span>
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  value="local"
+                  checked={selectedOption === "local"}
+                  onChange={() => {
+                    setSelectedOption("local");
+                    setSelectedDepartment("");
+                  }}
+                  className="mr-2"
+                />
+                <span>Local</span>
+              </label>
+            </div>
           </div>
 
-          {/* Department Filter (only for local) */}
-          {selectedOption === "local" && (
-            <div className="mb-4">
-              <SearchableDropdown
-                options={Object.keys(departments)}
-                value={selectedDepartment}
-                onChange={setSelectedDepartment}
-                placeholder="Select department"
-                className="bg-white"
+          {/* Department List (only for local) */}
+          {selectedOption === "local" && departmentOptions.length > 0 && (
+            <div className="relative">
+              <div className="mb-4">
+                <SearchableDropdown
+                  options={departmentOptions}
+                  value={selectedDepartment}
+                  onChange={setSelectedDepartment}
+                  placeholder="Select department"
+                  className="bg-white"
+                />
+              </div>
+              <FontAwesomeIcon
+                icon={faChevronDown}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-500"
               />
             </div>
           )}
 
           {/* Scrollable Organization List */}
-          <div className="overflow-y-auto max-h-[calc(90vh-240px)] pr-1 space-y-2">
+          <div className="overflow-y-auto min-h-[calc(90vh-240px)] pr-1 space-y-2">
             {filteredOrganizations.map((org) => (
               <Link
-                to="/organization/profile"
-                key={org.name}
+                to={`/organization/profile/${org.org_name}`}
+                key={org._id}
                 className="flex items-center space-x-2 bg-white p-2 rounded shadow"
               >
                 <img
-                  src="/general/cnsc_codex.png"
-                  alt={org.name}
-                  className="w-10 h-10"
+                  src={`${org.org_name}/Accreditation/Accreditation/photos/${
+                    org.logo || "default_logo.png"
+                  }`}
+                  alt={org.org_name}
+                  className="w-10 h-10 object-cover aspect-square rounded-full"
                 />
                 <div>
-                  <p className="font-semibold">{org.name}</p>
-                  <p className="text-sm text-gray-600">{org.department}</p>
+                  <p className="font-semibold">{org.org_name}</p>
+                  <p className="text-sm text-gray-600">
+                    {org.org_type?.Departments?.[0]?.Department || "N/A"}
+                  </p>
                 </div>
               </Link>
             ))}

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { FileRenderer } from "../../../../components/file_renderer";
-import PopUp from "../../../../components/pop-ups";
+import { PopUp } from "../../../../components/pop-ups";
 import { API_ROUTER } from "../../../../App";
 
 export default function EditProposalAdviserSection({ user, proposal, onBack }) {

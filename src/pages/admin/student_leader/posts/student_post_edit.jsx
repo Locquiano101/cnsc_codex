@@ -1,6 +1,6 @@
 // Common utilities for both forms
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import PopUp from "../../../../components/pop-ups";
+import { PopUp } from "../../../../components/pop-ups";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import {
   ReusableFileUpload,

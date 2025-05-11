@@ -42,7 +42,7 @@ const GetAllApprovedPost = ({ documentLocations, posts }) => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[400px]">
+      <div className="flex justify-center items-center min-h-[500px]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
@@ -102,7 +102,7 @@ const DocumentRenderer = ({ filePath }) => {
   return (
     <div className="w-full border h-full flex flex-col">
       {isPdf && (
-        <div className="w-full h-72">
+        <div className="w-full h-[30rem]">
           <iframe
             src={`/${filePath}#toolbar=0&navpanes=0&scrollbar=0`}
             className="w-full h-full"

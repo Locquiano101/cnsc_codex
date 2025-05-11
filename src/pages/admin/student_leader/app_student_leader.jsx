@@ -1,20 +1,29 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { HandleLogout } from "../../../api/login_api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faAdd,
+  faComment,
+  faCommentAlt,
+  faFile,
   faFileAlt,
   faFolderOpen,
   faGears,
   faHome,
+  faIcons,
   faPenToSquare,
+  faPerson,
+  faPersonArrowUpFromLine,
+  faPersonRifle,
   faRightFromBracket,
+  faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import StudentProposalTableView from "./documents/student_proposal_view";
 import StudentAdminHomePage from "./student_admin_home_page";
 import StudentAccomplishmentsTableView from "./documents/student_accomplishment_view";
 import StudentPosting from "./posts/student_posts_view";
+import StudentFiles from "./file_manager/file_view";
 
 function PendingOrRevisionUI({ status, storedUser }) {
   return (
@@ -64,7 +73,7 @@ function PendingOrRevisionUI({ status, storedUser }) {
 export default function StudentLeaderPage() {
   const navigate = useNavigate();
   const [storedUser, setStoredUser] = useState(null);
-  const [activeContent, setActiveContent] = useState("accreditations");
+  const [activeContent, setActiveContent] = useState("documents");
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -101,8 +110,10 @@ export default function StudentLeaderPage() {
     switch (activeContent) {
       case "home":
         return <StudentAdminHomePage />;
-      case "documents":
+      case "proposals":
         return <StudentProposalTableView user={storedUser} />;
+      case "documents":
+        return <StudentFiles user={storedUser} />;
       case "accreditations":
         return <StudentAccomplishmentsTableView user={storedUser} />;
       case "post":
@@ -128,7 +139,7 @@ export default function StudentLeaderPage() {
             )}/Accreditation/Accreditation/photos/${encodeURIComponent(
               storedUser.organization.logo
             )}`}
-            className="h-10 w-auto rounded-full"
+            className="h-10 w-auto rounded-full aspect-square"
             alt="Logo"
           />
           <div className="flex flex-col ">
@@ -145,15 +156,17 @@ export default function StudentLeaderPage() {
             { key: "home", icon: faHome, label: "Reports / Dashboard" },
             {
               key: "accreditations",
-              icon: faFolderOpen,
+              icon: faFile,
               label: "Accomplishments",
             },
-            { key: "documents", icon: faFileAlt, label: "Documents" },
+            { key: "proposals", icon: faFileAlt, label: "Proposals" },
+            { key: "documents", icon: faFolderOpen, label: "Documents" },
             {
               key: "post",
               icon: faPenToSquare,
               label: "Post",
             },
+            { key: "chat", icon: faComment, label: "Chats" },
             { key: "settings", icon: faGears, label: "Settings" },
           ].map(({ key, icon, label }) => (
             <div
@@ -181,8 +194,20 @@ export default function StudentLeaderPage() {
       </div>
 
       <div className="w-full flex flex-col flex-3/4">
-        {/* Content */}
-        <div className="p-4 h-full box-border border-green-500 bg-brian-blue/10 flex flex-col border-12">
+        <div className="h-24 bg-brian-blue/50 flex items-center justify-end">
+          <div className="shadow-lg shadow-black mr-4 m-4 rounded-xl bg-gray-200 p-4">
+            <Link
+              to={`/organization/profile/${storedUser.organization.org_name}`}
+              className="text-md"
+            >
+              <span className="mr-4">
+                <FontAwesomeIcon icon={faUser} />
+              </span>
+              Go to Public Profile
+            </Link>
+          </div>
+        </div>
+        <div className=" bg-brian-blue/10 flex flex-col overflow-hidden ">
           {renderContent()}
         </div>
       </div>

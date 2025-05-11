@@ -37,18 +37,8 @@ export const Login = async (req, res) => {
     const token = jwt.sign(
       { userId: user._id, username: user.username, position: user.position },
       JWT_SECRET,
-      { expiresIn: "1d" }
+      { expiresIn: "1hr" }
     );
-
-    // Prepare the organization data with accreditation overall status if available
-    const organizationData = user.organization
-      ? {
-          ...user.organization.toObject(),
-          accreditation_overall: user.organization.accreditation_status
-            ? user.organization.accreditation_status.over_all_status
-            : null,
-        }
-      : null;
 
     res.status(200).json({
       token,
@@ -90,6 +80,25 @@ export const GetAllOrganization = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
+export const GetOrganizationByOrgName = async (req, res) => {
+  try {
+    const { orgname } = req.params;
+
+    // Find one organization with the matching orgname
+    const organization = await Organizations.findOne({ org_name: orgname });
+
+    if (!organization) {
+      return res.status(404).json({ message: "Organization not found" });
+    }
+
+    res.status(200).json(organization);
+  } catch (error) {
+    console.error("Error fetching organization:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
 export const GetOrganizationsByDepartment = async (req, res) => {
   try {
     const { department } = req.body; // Get department from request body
@@ -218,6 +227,41 @@ export const GetSingleProposalsbyOrganization = async (req, res) => {
       message: "Server error",
       error: err.message,
     });
+  }
+};
+
+export const GetAccomplishmentsByOrganizationsDean = async (req, res) => {
+  const { organizationIds } = req.body; // expecting an array
+
+  if (!Array.isArray(organizationIds) || organizationIds.length === 0) {
+    return res
+      .status(400)
+      .json({ message: "organizationIds must be a non-empty array." });
+  }
+
+  try {
+    const InstitutionalActivity = await InstutionalAccomplisments.find({
+      organization: { $in: organizationIds },
+    }).sort({ createdAt: -1 });
+
+    const ExternalActivity = await ExternalAccomplishments.find({
+      organization: { $in: organizationIds },
+    }).sort({ createdAt: -1 });
+
+    const ProposedActivity = await ProposedAccomplishments.find({
+      organization: { $in: organizationIds },
+    }).sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      InstitutionalActivity,
+      ExternalActivity,
+      ProposedActivity,
+    });
+  } catch (err) {
+    console.error("Error fetching accomplishments:", err);
+    return res
+      .status(500)
+      .json({ message: "Server error", error: err.message });
   }
 };
 

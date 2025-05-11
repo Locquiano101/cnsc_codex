@@ -13,7 +13,60 @@ export const FileRenderer = ({ basePath, fileName }) => {
   const url = encodeURI(raw);
 
   const [showModal, setShowModal] = useState(false);
+  console.log(url);
+  if (isImage) {
+    return (
+      <div className="object-cover rounded-lg flex-shrink-0 flex flex-wrap shadow-md relative">
+        <img
+          src={url}
+          alt={fileName}
+          className="h-100 w-auto rounded-lg object-cover cursor-pointer"
+          onClick={() => setShowModal(true)}
+        />
 
+        {showModal && (
+          <div
+            className="fixed inset-0 bg-black/25 w-full bg-opacity-70 flex items-center justify-center z-50"
+            onClick={() => setShowModal(false)}
+          >
+            <div className="relative" onClick={(e) => e.stopPropagation()}>
+              <FontAwesomeIcon
+                icon={faClose}
+                className="text-[52px] font-black text-red-600 absolute top-2 right-4 cursor-pointer"
+                onClick={() => setShowModal(false)}
+              />
+              <img
+                src={url}
+                alt={fileName}
+                className="max-h-[90vh] max-w-[90vw] rounded-lg shadow-lg"
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className=" p-2 w-full flex flex-col justify-center items-center rounded-lg shadow-md bg-white">
+      <FontAwesomeIcon icon={faFileAlt} className="text-[3rem] font-black" />
+      <a
+        href={url}
+        target="_blank"
+        rel="noreferrer"
+        className="text-blue-600 text-md underline h-full"
+      >
+        (preview) - {fileName}
+      </a>
+    </div>
+  );
+};
+
+export const FileRendererAll = ({ basePath, fileName }) => {
+  const isImage = /\.(jpe?g|png|gif|bmp|webp|svg)$/i.test(fileName);
+  const url = encodeURI(basePath);
+
+  const [showModal, setShowModal] = useState(false);
   if (isImage) {
     return (
       <div className="object-cover rounded-lg flex-shrink-0 shadow-md relative">
@@ -48,7 +101,7 @@ export const FileRenderer = ({ basePath, fileName }) => {
   }
 
   return (
-    <div className=" p-2 w-full flex flex-col justify-center items-center rounded-lg shadow-md bg-white">
+    <div className=" p-2 w-full flex flex-col justify-center items-center rounded-lg  bg-white">
       <FontAwesomeIcon icon={faFileAlt} className="text-[3rem] font-black" />
       <a
         href={url}
