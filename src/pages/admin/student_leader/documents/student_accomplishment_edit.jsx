@@ -159,7 +159,7 @@ function EditInstitutionalAccomplishment({ selectedAccomplishment }) {
       key === "photo_documentations" ? "photo_documentation" : key;
 
     return (
-      <div key={key} className="space-y-2">
+      <div key={key}>
         <div className="flex justify-between items-center">
           <div className="flex flex-col">
             <h3 className="font-medium">
@@ -211,17 +211,15 @@ function EditInstitutionalAccomplishment({ selectedAccomplishment }) {
     );
   };
   return (
-    <div className="border h-full p-6 space-y-6 overflow-y-auto">
+    <div className=" h-full space-y-6 overflow-y-auto">
       <h1 className="text-2xl font-bold mb-6 text-center">
         Edit Institutional Accomplishment
       </h1>
 
-      {/* Basic Information */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Basic Information</h2>
-
+      <h2 className="text-xl font-semibold">Basic Information</h2>
+      <div className="space-y-4 gap-6 flex justify-between">
         {/* Event Title */}
-        <div>
+        <div className="flex-1 shadow-lg rounded-lg p-4">
           <div className="flex justify-between items-center">
             <label className="text-sm font-medium">Event Title</label>
             <button
@@ -251,7 +249,7 @@ function EditInstitutionalAccomplishment({ selectedAccomplishment }) {
         </div>
 
         {/* Event Date */}
-        <div>
+        <div className="flex-1 shadow-lg rounded-lg p-4">
           <div className="flex justify-between items-center">
             <label className="text-sm font-medium">Event Date</label>
             <button
@@ -281,7 +279,7 @@ function EditInstitutionalAccomplishment({ selectedAccomplishment }) {
         </div>
 
         {/* Event Description */}
-        <div>
+        <div className="flex-1 shadow-lg rounded-lg p-4">
           <div className="flex justify-between items-center">
             <label className="text-sm font-medium">Event Description</label>
             <button
@@ -895,7 +893,7 @@ function EditProposedPlanAccomplishment({ selectedAccomplishment }) {
   };
 
   return (
-    <div className="border h-full p-6 space-y-6 overflow-y-auto">
+    <div className="border h-full space-y-6 overflow-y-auto">
       <h1 className="text-2xl font-bold mb-6 text-center">
         Edit Proposed Plan Accomplishment
       </h1>
@@ -1039,7 +1037,7 @@ export default function RandomTest({ selectedAccomplishment }) {
   const activityType = selectedAccomplishment.activity_type;
 
   return (
-    <>
+    <div className=" flex p-6 flex-col">
       {activityType === "Institutional" && (
         <EditInstitutionalAccomplishment
           selectedAccomplishment={selectedAccomplishment}
@@ -1055,6 +1053,6 @@ export default function RandomTest({ selectedAccomplishment }) {
           selectedAccomplishment={selectedAccomplishment}
         />
       )}
-    </>
+    </div>
   );
 }

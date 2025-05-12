@@ -43,44 +43,30 @@ function StudentAddAccomplishedInstitutional() {
     event_title: "",
     event_description: "",
     event_date: "",
-    organization: "",
+    activity_type: "Institutional Activity",
+    over_all_status: "Pending",
+    event_status: "Pending",
   });
-
-  useEffect(() => {
-    const userString = localStorage.getItem("user");
-    if (userString) {
-      try {
-        const user = JSON.parse(userString);
-        if (user?.organization?._id) {
-          const orgId = user.organization._id;
-          const orgName = user.organization.org_name;
-          setFormDataState((prev) => ({
-            ...prev,
-            organization: orgId,
-            organization_name: orgName,
-          }));
-        }
-      } catch (err) {
-        console.error("Failed parsing user from storage:", err);
-      }
-    }
-  }, []);
 
   const fileFields = {
     narrative_report: {
       label: "Narrative Report",
       accept: ".pdf,.doc,.docx",
     },
-    attendance_sheet: {
-      label: "Attendance Sheet",
+    official_invitation: {
+      label: "Official Invitation",
       accept: ".pdf,.doc,.docx",
     },
-    certificate: {
-      label: "Certificate",
+    liquidation_report: {
+      label: "Liquidation Report",
+      accept: ".pdf,.doc,.docx",
+    },
+    cm063_documents: {
+      label: "CMO 63 Documents",
       accept: ".pdf,.doc,.docx",
       multiple: true,
     },
-    photo_documentations: {
+    photo_documentation: {
       label: "Photo Documentation",
       accept: "image/*",
       multiple: true,
@@ -89,11 +75,13 @@ function StudentAddAccomplishedInstitutional() {
 
   const singleFileFields = {
     narrative_report: fileFields.narrative_report,
-    attendance_sheet: fileFields.attendance_sheet,
+    official_invitation: fileFields.official_invitation,
+    liquidation_report: fileFields.liquidation_report,
   };
+
   const multipleFileFields = {
-    certificate: fileFields.certificate,
-    photo_documentations: fileFields.photo_documentations,
+    cm063_documents: fileFields.cm063_documents,
+    photo_documentation: fileFields.photo_documentation,
   };
 
   const handleChange = (e) => {
@@ -119,20 +107,16 @@ function StudentAddAccomplishedInstitutional() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setNotification(null);
+
     const formData = new FormData();
 
-    // 1) text fields
+    // Append text fields
     Object.entries(formDataState).forEach(([key, value]) => {
       formData.append(key, value);
     });
-    formData.append("activity_type", "Institutional");
 
-    // 2) metadata
-    formData.append("orgFolder", formDataState.organization_name);
-    formData.append("orgDocumentClassification", "InstitutionalAccomplishment");
-    formData.append("orgDocumentTitle", formDataState.event_title);
-
-    // 3A) append file binaries
+    // Append file binaries
     Object.entries(uploadedFiles).forEach(([fieldKey, fileOrFiles]) => {
       const files = Array.isArray(fileOrFiles) ? fileOrFiles : [fileOrFiles];
       files.forEach((file) => {
@@ -143,11 +127,11 @@ function StudentAddAccomplishedInstitutional() {
       });
     });
 
-    // 3B) append file names
+    // Append file names
     Object.entries(uploadedFiles).forEach(([fieldKey, fileOrFiles]) => {
       const files = Array.isArray(fileOrFiles) ? fileOrFiles : [fileOrFiles];
       files.forEach((file) => {
-        formData.append(fieldKey, file.name);
+        formData.append(`documents[${fieldKey}]`, file.name);
       });
     });
 
@@ -157,6 +141,7 @@ function StudentAddAccomplishedInstitutional() {
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
+
       setNotification({
         type: "success",
         message: "Submission successful!",
@@ -167,8 +152,9 @@ function StudentAddAccomplishedInstitutional() {
         event_title: "",
         event_description: "",
         event_date: "",
-        organization: formDataState.organization,
-        organization_name: formDataState.organization_name,
+        activity_type: "Institutional Activity",
+        over_all_status: "Pending",
+        event_status: "Pending",
       });
       setUploadedFiles({});
     } catch (error) {
@@ -179,17 +165,12 @@ function StudentAddAccomplishedInstitutional() {
       });
     } finally {
       setIsSubmitting(false);
-      // Scroll to top to show notification
       window.scrollTo(0, 0);
     }
   };
 
   return (
-    <div className="w-full h-full overflow-auto px-4 py-6">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">
-        Add Institutional Collaboration Activity
-      </h1>
-
+    <div className="w-full h-full overflow-auto">
       {notification && (
         <Notification
           type={notification.type}
@@ -198,7 +179,7 @@ function StudentAddAccomplishedInstitutional() {
         />
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4  overflow-y-auto">
+      <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto">
         <div className="bg-white p-6 rounded-lg shadow-sm">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">
             Activity Information
@@ -792,16 +773,17 @@ export default function AddStudentAccomplishmentReport({ onBack }) {
   ];
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto">
-      {/* Header with tabs */}
-      <div className="bg-white shadow-sm py-4 px-6 flex items-center justify-between sticky top-0 z-10">
+    <div className="flex flex-col w-full h-full  ">
+      <div className="  flex justify-between">
+        {/* Back button */}
         <button
           onClick={onBack}
-          className="flex items-center text-blue-600 hover:text-blue-800 font-medium"
+          className="flex items-center text-blue-600 hover:text-blue-800 font-medium mb-4"
         >
           <FontAwesomeIcon icon={faLeftLong} className="mr-2" /> Back
         </button>
 
+        {/* Tabs */}
         <div className="flex items-center gap-2">
           {tabs.map((tab) => (
             <button
@@ -819,8 +801,8 @@ export default function AddStudentAccomplishmentReport({ onBack }) {
         </div>
       </div>
 
-      {/* Form container with automatic scrolling */}
-      <div className="flex-1 flex flex-col">
+      {/* Content area */}
+      <div className="flex-1 overflow-y-auto">
         {formType === "institutional_activity" && (
           <StudentAddAccomplishedInstitutional />
         )}

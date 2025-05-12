@@ -190,7 +190,7 @@ export default function ProcessAccreditationSection({
                         onChange={() => handleStatusChange(index, "revision")}
                         className="mr-2"
                       />
-                      Approved
+                      Revision
                     </label>
                   </div>
                 </div>

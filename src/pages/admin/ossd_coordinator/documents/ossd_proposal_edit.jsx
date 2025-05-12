@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { FileRenderer } from "../../../../components/file_renderer";
-import PopUp from "../../../../components/pop-ups";
+import { PopUp } from "../../../../components/pop-ups";
 import { API_ROUTER } from "../../../../App";
 
 export default function EditProposalDeanSection({ user, proposal, onBack }) {
@@ -69,8 +69,8 @@ export default function EditProposalDeanSection({ user, proposal, onBack }) {
     const body = {
       proposalId: proposal._id,
       approval_status: isAllApproved()
-        ? "Approved by the Adviser"
-        : "Revision from the Adviser",
+        ? "Approved by the OSSD Coordinator"
+        : "Revision from the OSSD Coordinator",
       meeting: {
         ...proposal.meeting,
         ...Object.fromEntries(

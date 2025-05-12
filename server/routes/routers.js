@@ -8,6 +8,7 @@ import {
   GetAllImageFile,
   GetAllOrganizationFile,
   GetAllStudentPostFiles,
+  GetOrganizationFiles,
 } from "../middleware/files.js";
 
 import {
@@ -23,6 +24,8 @@ import {
   GetSingleInstitutiuonalAccomplishmentbyOrganization,
   GetOrganizationsByDepartment,
   GetProposalsByOrganizationsDean,
+  GetAccomplishmentsByOrganizationsDean,
+  GetOrganizationByOrgName,
 } from "../controllers/general.js";
 
 import { UpdateProposalsNotesAdviser } from "../controllers/adviser_admin/document_controller.js";
@@ -59,6 +62,10 @@ import {
   RevisionPosts,
   GetAllPosts,
 } from "../controllers/posts.js";
+import {
+  AddPinnedFiles,
+  GetFileNames,
+} from "../controllers/file_controller.js";
 
 const upload = multer();
 
@@ -68,7 +75,9 @@ const router = express.Router();
 router.post("/login", Login);
 router.get("/get-all-files", GetAllFile);
 router.get("/get-all-organization-files", GetAllOrganizationFile);
+router.post("/get-organization-files", GetOrganizationFiles);
 router.get("/get-all-student-post", GetAllStudentPostFiles);
+router.get("/get-org/:orgname", GetOrganizationByOrgName);
 
 router.post("/get-by-organization", GetOrganizationsByDepartment);
 
@@ -77,12 +86,15 @@ router.get("/get-all-organization", GetAllOrganization);
 router.get("/get-all-username", GetAllUsername);
 router.get("/get-all-username-info", GetAllUsernameInfo);
 
+router.get("/get-pinned-files/:organizationId", GetFileNames);
+
 router.post("/create-new-user", CreateNewUser);
 
 /*ACCREDITATION ROUTE*/
 router.get("/get-accreditation", GetAllAccreditations);
 router.get("/get-accreditation/:id", GetAccreditationById);
 router.post("/confirm-verification-accreditation", ConfirmAccreditation);
+router.post("/pin-files", AddPinnedFiles);
 
 router.post(
   "/send-verification-accreditation",
@@ -114,6 +126,11 @@ router.post(
 router.put(
   `/update-proposals-adviser/:proposalId`,
   UpdateProposalsNotesAdviser
+);
+
+router.post(
+  `/get-accomplishments-ossd/`,
+  GetAccomplishmentsByOrganizationsDean
 );
 
 //Accomplishment Route

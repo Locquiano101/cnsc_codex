@@ -1,91 +1,105 @@
-import React, { useState } from "react";
+import axios from "axios";
+import { React } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-
-const Organizations = [
-  {
-    logo: "/general/ccms_its_logo.jpg",
-    name: "Information Technology Society",
-  },
-  {
-    logo: "/general/ccms_sg_logo.jpg",
-    name: "CCMS - Student Government",
-  },
-  {
-    logo: "/general/ussg_logo.jpg",
-    name: "Union of Supreme Student Government",
-  },
-  {
-    logo: "/general/ussg_logo.jpg",
-    name: "Union of Supreme Student Government",
-  },
-  {
-    logo: "/general/ussg_logo.jpg",
-    name: "Union of Supreme Student Government",
-  },
-  {
-    logo: "/general/ussg_logo.jpg",
-    name: "Union of Supreme Student Government",
-  },
-  {
-    logo: "/general/ussg_logo.jpg",
-    name: "Union of Supreme Student Government",
-  },
-  {
-    logo: "/general/ussg_logo.jpg",
-    name: "Union of Supreme Student Government",
-  },
-  {
-    logo: "/general/ussg_logo.jpg",
-    name: "Union of Supreme Student Government",
-  },
-  {
-    logo: "/general/ussg_logo.jpg",
-    name: "Union of Supreme Student Government",
-  },
-  // Add more...
-];
+import { API_ROUTER } from "../../../App";
 
 export default function OrganizationPage() {
-  return (
-    <div className="container mx-auto px-4 py-28">
-      <h1 className="text-4xl font-extrabold text-center text-cnsc-primary-color mb-16">
-        Recognized Student Organizations
-      </h1>
+  const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [organizations, setOrganizations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-      <div className="flex flex-wrap justify-center gap-10 bg-gray-100 p-20 rounded- shadow-2xs">
-        {Organizations.map((org, index) => (
-          <Link
-            to="/organization/profile"
-            key={index}
-            className="relative w-48 h-48 rounded-full bg-white border-2 border-gray-200 shadow-xl overflow-hidden group transition-all duration-500 hover:w-[25rem] hover:shadow-2xl hover:scale-[1.03]"
-          >
-            {/* Glow Ring Animation */}
-            <div className="absolute top-0 left-0 w-full h-full rounded-full bg-gradient-to-br from-cnsc-primary-color to-cnsc-secondary-color opacity-0 group-hover:opacity-20 blur-md z-0 transition-all duration-500" />
+  useEffect(() => {
+    const fetchAllOrganizations = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`${API_ROUTER}/get-all-organization`);
+        console.log("Fetched organizations:", response.data);
+        setOrganizations(response.data);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching organizations:", error);
+        setError("Failed to load organizations");
+        setLoading(false);
+      }
+    };
 
-            {/* Logo */}
-            <div className="w-48 h-48 flex items-center justify-center bg-white border-r border-gray-200 rounded-full z-10">
-              <img
-                src={org.logo}
-                alt={org.name}
-                className="w-32 h-32 object-cover rounded-full border-4 border-white shadow-md group-hover:scale-105 transition-transform duration-300"
-              />
-            </div>
+    fetchAllOrganizations();
+  }, []);
 
-            {/* Text Slide In */}
-            <div className="absolute left-48 top-0 h-full w-[calc(100%-12rem)] flex flex-col justify-center px-6 opacity-0 group-hover:opacity-100 translate-x-8 group-hover:translate-x-0 transition-all duration-500 ease-in-out">
-              <h2 className="text-xl font-bold text-cnsc-primary-color">
-                {org.name}
-              </h2>
-              <p className="text-sm text-gray-700 mt-1">
-                <strong>Established:</strong> 2020
-              </p>
-              <p className="text-sm text-gray-700">
-                <strong>Location:</strong> Main Campus
-              </p>
-            </div>
-          </Link>
-        ))}
+  if (loading) {
+    return (
+      <div className="container mx-auto pt-28 text-center">
+        <p className="text-lg">Loading organizations...</p>
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto pt-28 text-center">
+        <p className="text-lg text-red-600">{error}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto pt-28 px-4">
+      <h1 className="text-2xl font-bold text-center mb-8">Organizations</h1>
+
+      {organizations.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-lg text-gray-600">No organizations found.</p>
+        </div>
+      ) : (
+        <div className="flex flex-wrap gap-6 justify-center">
+          {organizations.map((org, index) => (
+            <Link
+              to={`/organization/profile/${org.org_name}`}
+              key={index}
+              className="group flex items-center h-48 transition-all duration-500 ease-in-out rounded-full overflow-hidden border border-gray-300 shadow cursor-pointer"
+              onMouseEnter={() => setHoveredIndex(index)}
+              onMouseLeave={() => setHoveredIndex(null)}
+            >
+              {/* Logo Section */}
+              <div
+                className={`h-full w-48 flex justify-center items-center bg-white border-r border-gray-200 transition-all duration-500 ${
+                  hoveredIndex === index ? "rounded-l-full" : "rounded-full"
+                }`}
+              >
+                <img
+                  src={`/${org.org_name}/Accreditation/Accreditation/photos/${org.logo}`}
+                  alt={`${org.org_name} logo`}
+                  className="w-48 h-48 rounded-full object-cover"
+                />
+              </div>
+
+              {/* Info Section */}
+              <div
+                className={`h-full flex items-center text-sm transition-all duration-500 overflow-hidden ${
+                  hoveredIndex === index
+                    ? "opacity-100 px-4 w-64"
+                    : "opacity-0 px-0 w-0"
+                }`}
+              >
+                <div className="text-gray-700 space-y-1">
+                  <p className="font-semibold">{org.org_name}</p>
+                  <p className="text-xs">Classification: {org.org_class}</p>
+                  {org.org_class === "Local" &&
+                    org.org_type?.Departments &&
+                    org.org_type.Departments.length > 0 && (
+                      <p className="text-xs">
+                        <strong>Department:</strong>{" "}
+                        {org.org_type.Departments[0].Department}
+                      </p>
+                    )}
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

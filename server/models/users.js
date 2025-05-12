@@ -94,8 +94,22 @@ const PostSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+const FileSchema = new mongoose.Schema(
+  {
+    organization: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "organizations",
+    },
+    pinned_files: {
+      type: Array,
+    },
+  },
+  { timestamps: true }
+);
+
 const Users = mongoose.model("user", UserSchema);
 const Posts = mongoose.model("Posts", PostSchema);
+const PinnedFiles = mongoose.model("Pinned Files", FileSchema);
 const Organizations = mongoose.model("organizations", OrganizationSchema);
 
 const Accreditation = mongoose.model(
@@ -103,4 +117,4 @@ const Accreditation = mongoose.model(
   AccreditationStatusSchema
 );
 
-export { Users, Posts, Organizations, Accreditation };
+export { Users, Posts, PinnedFiles, Organizations, Accreditation };

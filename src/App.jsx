@@ -72,7 +72,7 @@ export default function App() {
       <Route path="/NewsFeed" element={<NewsFeedPage />} />
       <Route path="/organization" element={<OrganizationPage />} />
       <Route
-        path="/organization/profile"
+        path="/organization/profile/:orgName"
         element={<OrganizationProfilePage />}
       />
 
