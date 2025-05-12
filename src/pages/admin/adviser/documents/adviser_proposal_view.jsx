@@ -201,7 +201,7 @@ function ViewProposalAdviserTableSection({ onView, onEdit, user }) {
 
       {/* Table */}
       <div className="overflow-hidden border border-gray-200 h-120">
-        <div className="overflow-y-auto h-full">
+        <div className="overflow-y-auto h-full ">
           <table className="min-w-full text-sm text-gray-800">
             <thead className="bg-gray-100 text-xs uppercase tracking-wide text-gray-600 sticky top-0 z-10">
               <tr>
