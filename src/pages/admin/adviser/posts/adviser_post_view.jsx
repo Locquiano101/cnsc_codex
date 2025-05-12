@@ -97,7 +97,7 @@ export const DocumentRenderer = ({ basePath, fileName }) => {
   const isPdf = fileName.endsWith(".pdf");
 
   return (
-    <div className="w-full border h-full flex flex-col">
+    <div className="w-full  h-full flex flex-col">
       {isPdf && (
         <div className="w-full h-72">
           <iframe
@@ -113,7 +113,6 @@ export const DocumentRenderer = ({ basePath, fileName }) => {
 
 export const PostCard = ({
   post,
-  className = "",
   maxImagesToShow = 4,
   basePath = "/content",
   onEditClick = null,
@@ -125,21 +124,28 @@ export const PostCard = ({
 
   return (
     <>
-      <div className={`rounded-xl shadow-md px-8 py-6 relative ${className}`}>
-        <div className="border absolute top-4 right-4">
-          {onEditClick && (
-            <button
-              onClick={() => setIsEditing(true)}
-              className="text-xs px-6 py-2 bg-blue-500 text-white  rounded-full hover:bg-blue-600"
-            >
-              Edit
-            </button>
+      <div
+        className={`rounded-xl shadow-md shadow-gray-500 px-8 py-6 relative h-fit `}
+      >
+        <div className="absolute shadow-md shadow-gray-500 p-2 rounded top-4 right-4 flex flex-col gap-2">
+          <div className="flex gap-4 ">
+            {onEditClick && (
+              <button
+                onClick={() => setIsEditing(true)}
+                className="text-xs px-6 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600"
+              >
+                Edit
+              </button>
+            )}
+            <h1>status: {post.status}</h1>
+          </div>
+
+          {post.revision_notes && (
+            <div className="border">
+              <h1>notes: {post.revision_notes}</h1>
+            </div>
           )}
-          <h1>status: {post.status}</h1>
-          <h1>status: {post.revision_notes}</h1>
-        </div>{" "}
-        {/* Edit Button */}
-        {/* Profile and Org Name */}
+        </div>
         <div className="flex items-center space-x-3">
           <img
             src={`/${post.organization.org_name}/Accreditation/Accreditation/photos/${post.organization.logo}`}
