@@ -5,9 +5,8 @@ import {
   ReusableFileUpload,
   ReusableMultiFileUpload,
 } from "../../../../components/reusable_file_upload";
-import { FileRenderer } from "../../../../components/file_renderer";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
+import { FileRenderer } from "../../../../components/file_renderer";
 import { faEdit, faTrashAlt } from "@fortawesome/free-solid-svg-icons";
 import { PopUp } from "../../../../components/pop-ups";
 
@@ -118,8 +117,6 @@ export default function EditProposalStudentSection(selectedProposal) {
     };
 
     const imageExts = ["jpg", "jpeg", "png", "gif", "bmp", "webp", "svg"];
-    const photos = [];
-    const documents = [];
 
     const formData = new FormData();
     formData.append("title", updatedProposal.title);
@@ -130,20 +127,42 @@ export default function EditProposalStudentSection(selectedProposal) {
     formData.append("orgDocumentClassification", "Proposals");
     formData.append("orgDocumentTitle", updatedProposal.title);
 
-    // 📌 Append files under correct backend keys
-    Object.entries(updatedMeeting).forEach(([fieldName, fileOrArr]) => {
+    // Track which fields were updated
+    const updatedFields = [];
+
+    // Handle files properly
+    Object.entries(newFiles).forEach(([fieldName, fileOrArr]) => {
+      // Skip if there's no file to update
+      if (!fileOrArr || (Array.isArray(fileOrArr) && fileOrArr.length === 0)) {
+        return;
+      }
+
+      // Add this field to updated fields list
+      updatedFields.push(fieldName);
+
       const files = Array.isArray(fileOrArr) ? fileOrArr : [fileOrArr];
+
       files.forEach((file) => {
         if (!(file instanceof File)) return;
 
         const ext = file.name.split(".").pop().toLowerCase();
         const isImage = imageExts.includes(ext);
 
-        formData.append(isImage ? "photo" : "document", file); // ✅ this matches backend
-        formData.append(fieldName, file.name); // ✅ tells backend which doc/photo this is
+        // Add file to the appropriate collection (photo or document)
+        formData.append(isImage ? "photo" : "document", file);
+
+        // Add the original filename so we can match it on the server
+        formData.append(`${fieldName}_filename`, file.name);
       });
     });
 
+    // Add each updated field to the formData
+    updatedFields.forEach((field) => {
+      formData.append("updated_fields", field);
+    });
+
+    // Log what we're sending for debugging
+    console.log("Updated fields:", updatedFields);
     for (let [key, val] of formData.entries()) {
       console.log("→", key, val);
     }
@@ -157,8 +176,10 @@ export default function EditProposalStudentSection(selectedProposal) {
       setShowPopup(true);
     } catch (err) {
       console.error("❌ Update failed:", err);
+      console.error("Error details:", err.response?.data || err.message);
     }
   };
+
   const basePath = `/${selectedProposal.selectedProposal.organization.org_name}/Proposals/${basicInfo.title}`;
 
   const isAnythingEditing =

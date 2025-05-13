@@ -17,7 +17,6 @@ const ensureDirExists = (dir) => {
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    // Build the base upload path using process.cwd() and orgFolder from the request body
     const baseDir = path.join(
       process.cwd(),
       "../public",
@@ -96,6 +95,8 @@ export const UploadMultipleFiles = (req, res, next) => {
       const { orgFolder } = req.body;
       const documents = req.files?.document;
       const photos = req.files?.photo;
+
+      console.log(orgFolder);
 
       if (!orgFolder || (!documents && !photos)) {
         return res.status(400).json({

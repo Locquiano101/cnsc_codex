@@ -73,7 +73,7 @@ function PendingOrRevisionUI({ status, storedUser }) {
 export default function StudentLeaderPage() {
   const navigate = useNavigate();
   const [storedUser, setStoredUser] = useState(null);
-  const [activeContent, setActiveContent] = useState("documents");
+  const [activeContent, setActiveContent] = useState("proposals");
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -100,8 +100,6 @@ export default function StudentLeaderPage() {
   const status = storedUser.organization.accreditation_status.over_all_status;
   const validStatuses = ["Pending", "Revision Required"];
 
-  console.log(storedUser);
-  console.log(status);
   const renderContent = () => {
     if (validStatuses.includes(status)) {
       return <PendingOrRevisionUI status={status} storedUser={storedUser} />;

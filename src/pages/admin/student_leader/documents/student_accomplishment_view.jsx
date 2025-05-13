@@ -8,7 +8,7 @@ import {
   faFilter,
   faChevronDown,
 } from "@fortawesome/free-solid-svg-icons";
-import AddStudentAccomplishedActionPlan from "./student_accomplishment_add";
+import AddStudentAccomplishmentReport from "./student_accomplishment_add";
 import LongDateFormat from "../../../../api/formatter";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -356,7 +356,8 @@ export default function StudentAccomplishmentsTableView({ user }) {
         <Modal isOpen={isAddModalOpen} onClose={closeAddModal}>
           <div className="bg-white p-4 w-full rounded-lg h-full overflow-y-auto">
             <h2 className="text-xl font-bold mb-4">Add New Accomplishment</h2>
-            <AddStudentAccomplishedActionPlan
+            <AddStudentAccomplishmentReport
+              user={user}
               onSubmit={handleAddSubmit}
               onBack={closeAddModal}
               formDataState={formData}

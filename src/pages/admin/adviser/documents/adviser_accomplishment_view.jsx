@@ -2,21 +2,20 @@ import { useState, useRef, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faEye,
-  faP,
   faPencil,
-  faPlus,
   faFilter,
   faChevronDown,
 } from "@fortawesome/free-solid-svg-icons";
 import { API_ROUTER } from "../../../../App";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import LongDateFormat from "../../../../api/formatter";
+import EditAccomplishmentSection from "./adviser_accomplishment_edit";
 
 function AdviserAccomplishmentReportTable({
   activityFilter,
   setActivityFilter,
   filteredActivities,
+  onEdit,
 }) {
   // Add state for dropdown visibility
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
@@ -136,10 +135,10 @@ function AdviserAccomplishmentReportTable({
                     {activity.event_description ?? "N/A"}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {activity.event_status ? (
+                    {activity.over_all_status ? (
                       <span className="flex items-center">
                         <span className="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
-                        <span>{activity.event_status}</span>
+                        <span>{activity.over_all_status}</span>
                       </span>
                     ) : (
                       <span className="flex items-center">
@@ -159,7 +158,7 @@ function AdviserAccomplishmentReportTable({
                       </button>
                       <button
                         className="p-1.5 bg-[#dc3545] hover:bg-[#c82333] text-white rounded-full transition-colors duration-150 shadow-sm"
-                        onClick={() => console.log("Edit", activity)}
+                        onClick={() => onEdit(activity)}
                         title="Edit"
                       >
                         <FontAwesomeIcon icon={faPencil} size="sm" />
@@ -171,7 +170,7 @@ function AdviserAccomplishmentReportTable({
             ) : (
               <tr>
                 <td
-                  colSpan="5"
+                  colSpan="6"
                   className="px-6 py-10 text-center text-sm text-gray-500 italic"
                 >
                   No accomplishments found matching the selected filter.
@@ -185,24 +184,23 @@ function AdviserAccomplishmentReportTable({
   );
 }
 
-export default function AdviserAccomplishmentsTableView(storedUser) {
+export default function AdviserAccomplishmentsTableView({ user }) {
   const [activityFilter, setActivityFilter] = useState("All");
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [selectedAccomplishment, setSelectedAccomplishment] = useState(null);
   const [formData, setFormData] = useState({});
   const [fileData, setFileData] = useState({});
   const [accomplishmentsList, setAccomplishmentsList] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
-
-  console.log(storedUser);
 
   useEffect(() => {
     async function getAccomplishmentByOrgID() {
       try {
         setLoading(true);
         const response = await axios.get(
-          `${API_ROUTER}/accomplishments/${storedUser.user.organization._id}`
+          `${API_ROUTER}/accomplishments/${user.organization._id}`
         );
         const {
           InstitutionalActivity = [],
@@ -216,6 +214,7 @@ export default function AdviserAccomplishmentsTableView(storedUser) {
           ...ProposedActivity,
         ];
 
+        console.log(allActivities);
         setAccomplishmentsList(allActivities);
       } catch (err) {
         console.error(err);
@@ -226,7 +225,7 @@ export default function AdviserAccomplishmentsTableView(storedUser) {
     }
 
     getAccomplishmentByOrgID();
-  }, [storedUser]);
+  }, [user]);
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -250,6 +249,50 @@ export default function AdviserAccomplishmentsTableView(storedUser) {
     setShowAddForm(false); // return to table view after submission
   };
 
+  const handleEditAccomplishment = (accomplishment) => {
+    setSelectedAccomplishment(accomplishment);
+    setShowEditForm(true);
+  };
+
+  const handleBack = () => {
+    setShowAddForm(false);
+    setShowEditForm(false);
+    setSelectedAccomplishment(null);
+
+    // Refresh the list after edits
+    if (user && user.organization) {
+      getAccomplishmentByOrgID();
+    }
+  };
+
+  // Define the function here for use in useEffect
+  async function getAccomplishmentByOrgID() {
+    try {
+      setLoading(true);
+      const response = await axios.get(
+        `${API_ROUTER}/accomplishments/${user.organization._id}`
+      );
+      const {
+        InstitutionalActivity = [],
+        ExternalActivity = [],
+        ProposedActivity = [],
+      } = response.data;
+
+      const allActivities = [
+        ...InstitutionalActivity,
+        ...ExternalActivity,
+        ...ProposedActivity,
+      ];
+
+      setAccomplishmentsList(allActivities);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to fetch accomplishments data");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   // Filter activities based on selected filter
   const filteredActivities =
     activityFilter === "All"
@@ -262,7 +305,7 @@ export default function AdviserAccomplishmentsTableView(storedUser) {
     setShowAddForm(true);
   };
 
-  if (!storedUser) {
+  if (!user) {
     return (
       <div className="flex items-center justify-center h-screen">
         Loading user data...
@@ -286,24 +329,36 @@ export default function AdviserAccomplishmentsTableView(storedUser) {
     );
   }
 
+  // Show different components based on state
+  if (showEditForm && selectedAccomplishment) {
+    return (
+      <EditAccomplishmentSection
+        user={user}
+        accomplishment={selectedAccomplishment}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  if (showAddForm) {
+    return (
+      <AddAdviserAccomplishedActionPlan
+        onSubmit={handleSubmit}
+        onBack={handleBack}
+        formDataState={formData}
+        handleChange={handleChange}
+        handleFileChange={handleFileChange}
+      />
+    );
+  }
+
   return (
-    <div>
-      {showAddForm ? (
-        <AddAdviserAccomplishedActionPlan
-          onSubmit={handleSubmit}
-          onBack={() => setShowAddForm(false)}
-          formDataState={formData}
-          handleChange={handleChange}
-          handleFileChange={handleFileChange}
-        />
-      ) : (
-        <AdviserAccomplishmentReportTable
-          activityFilter={activityFilter}
-          setActivityFilter={setActivityFilter}
-          filteredActivities={filteredActivities}
-          onAdd={handleAddAccomplishment}
-        />
-      )}
-    </div>
+    <AdviserAccomplishmentReportTable
+      activityFilter={activityFilter}
+      setActivityFilter={setActivityFilter}
+      filteredActivities={filteredActivities}
+      onEdit={handleEditAccomplishment}
+      onAdd={handleAddAccomplishment}
+    />
   );
 }
