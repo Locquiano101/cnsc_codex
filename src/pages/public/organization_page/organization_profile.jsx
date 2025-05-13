@@ -263,6 +263,24 @@ export default function OrganizationProfilePage() {
           </div>
         )}
       </div>
+
+      {/* Floating buttons - visible on small screens only */}
+      <div className="fixed bottom-4 right-4 flex gap-3 z-50 md:hidden  flex-col">
+        <a
+          href="#"
+          className="flex items-center gap-2 bg-cyan-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm hover:bg-cyan-700"
+        >
+          <FontAwesomeIcon icon={faFileAlt} className="text-lg" />
+          Documents
+        </a>
+        <a
+          href="#"
+          className="flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-lg shadow-lg text-sm hover:bg-orange-600"
+        >
+          <FontAwesomeIcon icon={faCalendarAlt} className="text-lg" />
+          Event Calendar
+        </a>
+      </div>
     </>
   );
 }

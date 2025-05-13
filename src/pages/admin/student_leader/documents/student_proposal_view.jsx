@@ -79,7 +79,11 @@ function ProposalView({ onAdd, onView, onEdit, user }) {
   if (error) return <p className="p-4 text-red-500">{error}</p>;
 
   return (
+<<<<<<< HEAD
+    <div className="  h-screen flex flex-col overflow-hidden p-5 shadow-2xl">
+=======
     <div className=" h-full flex flex-col overflow-hidden">
+>>>>>>> eb57cb93f7a1415e05800fb4ce04206ab6568e76
       <div className="bg-brian-blue text-white p-3 flex justify-between items-center">
         <h1 className="font-medium">Proposals</h1>
         <button
@@ -92,33 +96,29 @@ function ProposalView({ onAdd, onView, onEdit, user }) {
       </div>
 
       {/* Table container with fixed header and scrollable body */}
-      <div className="flex flex-col overflow-hidden">
-        {/* Table header (fixed) */}
-        <div className="overflow-hidden">
-          <table className="w-full bg-white border-collapse">
-            <thead className="bg-gray-50 text-sm">
-              <tr className="bg-gray-50">
-                <th className="text-start text-xs p-3 font-semibold text-gray-600 uppercase border-b">
+      <div className="overflow-hidden border border-gray-200 rounded">
+        <div className="max-h-[400px] overflow-y-auto">
+          <table className="w-full table-fixed border-collapse">
+            {/* Fixed Header */}
+            <thead className="sticky top-0 bg-gray-50 z-10 text-sm">
+              <tr>
+                <th className="text-start text-xs p-3 font-semibold text-gray-600 uppercase border-b w-1/4">
                   Title
                 </th>
-                <th className="text-start text-xs p-3 font-semibold text-gray-600 uppercase border-b">
+                <th className="text-start text-xs p-3 font-semibold text-gray-600 uppercase border-b w-1/3">
                   Description
                 </th>
-                <th className="text-start text-xs p-3 font-semibold text-gray-600 uppercase border-b">
+                <th className="text-start text-xs p-3 font-semibold text-gray-600 uppercase border-b w-1/4">
                   Status
                 </th>
-                <th className="text-start text-xs p-3 font-semibold text-gray-600 uppercase border-b">
+                <th className="text-start text-xs p-3 font-semibold text-gray-600 uppercase border-b w-1/6">
                   Actions
                 </th>
               </tr>
             </thead>
-          </table>
-        </div>
 
-        {/* Scrollable body */}
-        <div className="overflow-y-auto flex-grow">
-          <table className="w-full bg-white border-collapse">
-            <tbody className="divide-y divide-gray-200">
+            {/* Scrollable Body */}
+            <tbody className="divide-y divide-gray-200 bg-white">
               {currentProposals.length > 0 ? (
                 currentProposals.map((p) => (
                   <tr
@@ -134,7 +134,7 @@ function ProposalView({ onAdd, onView, onEdit, user }) {
                     >
                       {p.description}
                     </td>
-                    <td className="px-4 py-4 flex flex-wrap whitespace-nowrap text-sm text-gray-600">
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
                       <span className="flex items-center">
                         <span
                           className={`w-2 h-2 rounded-full mr-2 ${

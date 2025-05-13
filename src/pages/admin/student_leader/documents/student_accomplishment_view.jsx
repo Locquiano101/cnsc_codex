@@ -47,8 +47,8 @@ function StudentAccomplishmentReportTable({
   const filterOptions = ["All", "Proposed", "Institutional", "External"];
 
   return (
-    <div className="h-full border-b-cnsc-blue-color ">
-      <div className="bg-[#1e4976] text-white p-3 flex justify-between items-center">
+    <div className=" border-b-cnsc-blue-color p-5 h-screen">
+      <div className="bg-[#1e4976] text-white p-3 flex justify-between items-center ">
         <h1 className="font-medium">Accomplishments</h1>
         <div className="flex gap-2">
           {/* Dropdown filter */}
