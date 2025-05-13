@@ -75,11 +75,7 @@ export default function AdviserAdminPage() {
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Sidebar */}
-<<<<<<< HEAD
-      <aside className="w-1l2 bg-[#1B3A57] flex flex-col pt-6 text-white">
-=======
       <aside className="w-2/10 bg-[#1B3A57] flex flex-col pt-6 text-white">
->>>>>>> b241818e478f228b1e859e17cf2f78edd1ac48cd
         <div className="flex items-center px-6 mb-6">
           <img
             src="/general/cnsc_codex_ver_2.png"
