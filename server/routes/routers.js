@@ -162,7 +162,7 @@ router.post(
 );
 
 router.post(
-  "/submit-proposed-accomplishment/:accomplishmentId",
+  "/submit-proposed-accomplishment",
   UploadMultipleFiles,
   SubmitProposedAccomplishments
 );

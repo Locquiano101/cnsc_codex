@@ -35,7 +35,7 @@ const Notification = ({ type, message, onClose }) => {
   );
 };
 
-function StudentAddAccomplishedInstitutional() {
+function StudentAddAccomplishedInstitutional({ user }) {
   const [uploadedFiles, setUploadedFiles] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notification, setNotification] = useState(null);
@@ -116,6 +116,11 @@ function StudentAddAccomplishedInstitutional() {
       formData.append(key, value);
     });
 
+    formData.append("orgFolder", user.organization.org_name);
+    formData.append("organization", user.organization._id);
+    formData.append("orgDocumentClassification", "Instutional");
+    formData.append("orgDocumentTitle", formDataState.event_title);
+
     // Append file binaries
     Object.entries(uploadedFiles).forEach(([fieldKey, fileOrFiles]) => {
       const files = Array.isArray(fileOrFiles) ? fileOrFiles : [fileOrFiles];
@@ -135,17 +140,23 @@ function StudentAddAccomplishedInstitutional() {
       });
     });
 
+    // DEBUG LOGGING
+    console.log("Submitting Form Data:");
+    for (let pair of formData.entries()) {
+      console.log(`${pair[0]}:`, pair[1]);
+    }
+
     try {
       const { data } = await axios.post(
         `${API_ROUTER}/submit-instutional-accomplishment`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
-
-      setNotification({
-        type: "success",
-        message: "Submission successful!",
-      });
+      console.log({ data }),
+        setNotification({
+          type: "success",
+          message: "Submission successful!",
+        });
 
       // Reset form after successful submission
       setFormDataState({
@@ -257,7 +268,7 @@ function StudentAddAccomplishedInstitutional() {
   );
 }
 
-function StudentAddAccomplishedExternal() {
+function StudentAddAccomplishedExternal({ user }) {
   const [uploadedFiles, setUploadedFiles] = useState({});
   const [formDataState, setFormDataState] = useState({
     event_title: "",
@@ -364,9 +375,9 @@ function StudentAddAccomplishedExternal() {
     Object.entries(formDataState).forEach(([key, value]) => {
       formData.append(key, value);
     });
-    formData.append("activity_type", "External");
+    formData.append("activity_type", "External Activity");
 
-    formData.append("orgFolder", formDataState.organization_name);
+    formData.append("orgFolder", user.organization.org_name);
     formData.append("orgDocumentClassification", "ExternalAccomplishment");
     formData.append("orgDocumentTitle", formDataState.event_title);
 
@@ -515,7 +526,7 @@ function StudentAddAccomplishedExternal() {
   );
 }
 
-function StudentAddAccomplishedProposal() {
+function StudentAddAccomplishedProposal({ user }) {
   const [uploadedFiles, setUploadedFiles] = useState({});
   const [formDataState, setFormDataState] = useState({
     event_title: "",
@@ -613,11 +624,9 @@ function StudentAddAccomplishedProposal() {
       formData.append(key, value);
     });
     formData.append("activity_type", "Proposed Plan");
-
-    formData.append("orgFolder", formDataState.organization_name);
-    formData.append("orgDocumentClassification", "ProposedActivity");
+    formData.append("orgFolder", user.organization.org_name);
+    formData.append("orgDocumentClassification", "ProposedPlan");
     formData.append("orgDocumentTitle", formDataState.event_title);
-
     // 2) Append file binaries
     Object.entries(uploadedFiles).forEach(([fieldKey, fileOrFiles]) => {
       const files = Array.isArray(fileOrFiles) ? fileOrFiles : [fileOrFiles];
@@ -763,7 +772,7 @@ function StudentAddAccomplishedProposal() {
   );
 }
 
-export default function AddStudentAccomplishmentReport({ onBack }) {
+export default function AddStudentAccomplishmentReport({ onBack, user }) {
   const [formType, setFormType] = useState("institutional_activity");
 
   const tabs = [
@@ -804,10 +813,14 @@ export default function AddStudentAccomplishmentReport({ onBack }) {
       {/* Content area */}
       <div className="flex-1 overflow-y-auto">
         {formType === "institutional_activity" && (
-          <StudentAddAccomplishedInstitutional />
+          <StudentAddAccomplishedInstitutional user={user} />
         )}
-        {formType === "external_activity" && <StudentAddAccomplishedExternal />}
-        {formType === "accomplishment" && <StudentAddAccomplishedProposal />}
+        {formType === "external_activity" && (
+          <StudentAddAccomplishedExternal user={user} />
+        )}
+        {formType === "accomplishment" && (
+          <StudentAddAccomplishedProposal user={user} />
+        )}
       </div>
     </div>
   );

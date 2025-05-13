@@ -47,7 +47,7 @@ const documentDataFields = [
   { label: "Description", id: "description", type: "textarea" },
 ];
 
-export default function ProposalSubmitionStudentSection({ onBack }) {
+export default function ProposalSubmitionStudentSection({ onBack, user }) {
   const [uploadedFiles, setUploadedFiles] = useState({});
   const [showPopup, setShowPopup] = useState(false);
 

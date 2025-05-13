@@ -443,7 +443,7 @@ function EditExternalAccomplishment({ selectedAccomplishment }) {
     formData.append("event_description", basicInfo.event_description);
     formData.append("event_date", basicInfo.event_date);
     formData.append("organization", basicInfo.organization);
-    formData.append("activity_type", "External");
+    formData.append("activity_type", "External Activity");
 
     // Metadata
     formData.append("orgFolder", basicInfo.organization_name);
@@ -781,11 +781,11 @@ function EditProposedPlanAccomplishment({ selectedAccomplishment }) {
     formData.append("event_description", basicInfo.event_description);
     formData.append("event_date", basicInfo.event_date);
     formData.append("organization", basicInfo.organization);
-    formData.append("activity_type", "ProposedPlan");
+    formData.append("activity_type", "Proposed Plan");
 
     // Metadata
     formData.append("orgFolder", basicInfo.organization_name);
-    formData.append("orgDocumentClassification", "ProposedPlanAccomplishment");
+    formData.append("orgDocumentClassification", "Proposed Plan");
     formData.append("orgDocumentTitle", basicInfo.event_title);
 
     // Append files
@@ -812,17 +812,17 @@ function EditProposedPlanAccomplishment({ selectedAccomplishment }) {
       console.log(key, val);
     }
 
-    // try {
-    //   const { data } = await axios.post(
-    //     `${API_ROUTER}/submit-proposed-plan-accomplishment`,
-    //     formData,
-    //     { headers: { "Content-Type": "multipart/form-data" } }
-    //   );
-    //   console.log("✅ Submission successful:", data);
-    //   alert("Proposed Plan Accomplishment updated successfully!");
-    // } catch (err) {
-    //   console.error("❌ Submission failed:", err);
-    // }
+    try {
+      const { data } = await axios.post(
+        `${API_ROUTER}/update-proposed-accomplishment/${selectedAccomplishment._id}`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+      console.log("✅ Submission successful:", data);
+      alert("Proposed Plan Accomplishment updated successfully!");
+    } catch (err) {
+      console.error("❌ Submission failed:", err);
+    }
   };
 
   const isAnythingEditing =
@@ -1038,12 +1038,12 @@ export default function RandomTest({ selectedAccomplishment }) {
 
   return (
     <div className=" flex p-6 flex-col">
-      {activityType === "Institutional" && (
+      {activityType === "Institutional Activity" && (
         <EditInstitutionalAccomplishment
           selectedAccomplishment={selectedAccomplishment}
         />
       )}
-      {activityType === "External" && (
+      {activityType === "External Activity" && (
         <EditExternalAccomplishment
           selectedAccomplishment={selectedAccomplishment}
         />

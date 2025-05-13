@@ -1,16 +1,27 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { FileRenderer } from "../../../../components/file_renderer";
 import { API_ROUTER } from "../../../../App";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faAdd,
+  faCross,
   faDeleteLeft,
   faEye,
   faPencil,
   faTrash,
+  faX,
 } from "@fortawesome/free-solid-svg-icons";
 import ProposalSubmissionStudentSection from "./student_proposal_add";
 import EditProposalStudentSection from "./student_proposal_edit";
+
+const fileFields = {
+  proposal_document: { label: "Proposal" },
+  notice_document: { label: "Notice of Meeting" },
+  minutes_document: { label: "Meeting Minutes" },
+  photo_documentations: { label: "Photo Documentations", multiple: true },
+  resolution_document: { label: "Resolution Document", multiple: true },
+};
 
 function ProposalView({ onAdd, onView, onEdit, user }) {
   const [proposals, setProposals] = useState([]);
@@ -68,7 +79,11 @@ function ProposalView({ onAdd, onView, onEdit, user }) {
   if (error) return <p className="p-4 text-red-500">{error}</p>;
 
   return (
+<<<<<<< HEAD
     <div className="  h-screen flex flex-col overflow-hidden p-5 shadow-2xl">
+=======
+    <div className=" h-full flex flex-col overflow-hidden">
+>>>>>>> eb57cb93f7a1415e05800fb4ce04206ab6568e76
       <div className="bg-brian-blue text-white p-3 flex justify-between items-center">
         <h1 className="font-medium">Proposals</h1>
         <button
@@ -239,6 +254,108 @@ function ProposalView({ onAdd, onView, onEdit, user }) {
   );
 }
 
+function ViewProposalCard({ proposal, onBack }) {
+  if (!proposal) return <div>No proposal data available</div>;
+
+  const basePath = `/${proposal.organization.org_name}/Proposals/${proposal.title}`;
+
+  const renderSection = (key, multiple = false) => {
+    const statusKey = `${key}_status`;
+    const noteKey = `${key}_note`;
+
+    const status = proposal.meeting[statusKey] || "Pending";
+    const note = proposal.meeting[noteKey] || "Up for checking";
+
+    return (
+      <div key={key} className="mb-6 bg-white p-4 rounded-lg shadow ">
+        <div className="mb-3">
+          <h3 className="font-medium text-lg">
+            {fileFields[key].label}{" "}
+            <span className="text-sm text-gray-500">({status})</span>
+          </h3>
+          <span className="text-xs text-gray-600 italic">Note: {note}</span>
+        </div>
+
+        {multiple ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {proposal.meeting[key]?.map((f, i) => (
+              <FileRenderer key={i} basePath={basePath} fileName={f} />
+            ))}
+          </div>
+        ) : (
+          proposal.meeting[key] && (
+            <FileRenderer
+              basePath={basePath}
+              fileName={proposal.meeting[key]}
+            />
+          )
+        )}
+      </div>
+    );
+  };
+
+  // Format date for display
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  return (
+    <div className="bg-gray-50 relative rounded-lg h-3/4 px-10 py-6 shadow-lg max-w-4xl mx-auto">
+      {/* Fixed Close Button */}
+      <div className="absolute top-4 right-4 z-10">
+        <FontAwesomeIcon
+          icon={faX}
+          className="text-xl font-bold text-red-500 cursor-pointer"
+          onClick={onBack}
+        />
+      </div>
+
+      {/* Scrollable Content */}
+      <div className="overflow-auto h-full pr-2">
+        {/* Proposal Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-4 rounded-t-lg mb-6">
+          <h1 className="text-2xl font-bold">{proposal.title}</h1>
+          <div className="flex flex-wrap gap-4 mt-2 text-sm">
+            <div>
+              <span className="opacity-80">Organization:</span>{" "}
+              {proposal.organization.org_name}
+            </div>
+            <div>
+              <span className="opacity-80">Status:</span>{" "}
+              {proposal.approval_status}
+            </div>
+            <div>
+              <span className="opacity-80">Event Date:</span>{" "}
+              {formatDate(proposal.event_date)}
+            </div>
+          </div>
+        </div>
+
+        {/* Description Card */}
+        <div className="mb-6 bg-white p-4 rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-2">Description</h2>
+          <p className="text-gray-800 whitespace-pre-line">
+            {proposal.description}
+          </p>
+        </div>
+
+        {/* Meeting Documents */}
+        <h2 className="text-xl font-semibold mb-4">Meeting Documents</h2>
+        {renderSection("proposal_document")}
+        {renderSection("notice_document")}
+        {renderSection("minutes_document")}
+        {renderSection("photo_documentations", true)}
+        {renderSection("resolution_document", true)}
+      </div>
+    </div>
+  );
+}
+
 export default function StudentProposalTableView(user) {
   const [mode, setMode] = useState("list"); // list | view | edit | add
   const [selectedProposal, setSelectedProposal] = useState(null);
@@ -280,6 +397,11 @@ export default function StudentProposalTableView(user) {
             selectedProposal={selectedProposal}
             onBack={handleBack}
           />
+        </div>
+      )}
+      {mode === "view" && (
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center z-50">
+          <ViewProposalCard proposal={selectedProposal} onBack={handleBack} />
         </div>
       )}
 

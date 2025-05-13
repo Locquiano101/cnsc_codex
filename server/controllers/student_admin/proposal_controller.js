@@ -65,6 +65,7 @@ export const SubmitProposalsStudent = async (req, res) => {
       .json({ message: "Server error", error: err.message });
   }
 };
+
 export const UpdateProposalsStudent = async (req, res) => {
   try {
     const proposalId = req.params.proposalId;
@@ -75,20 +76,30 @@ export const UpdateProposalsStudent = async (req, res) => {
 
     const { organization_id, title, event_date, description } = req.body;
 
+    // Get the list of updated fields
+    const updatedFields = req.body.updated_fields
+      ? Array.isArray(req.body.updated_fields)
+        ? req.body.updated_fields
+        : [req.body.updated_fields]
+      : [];
+
+    console.log("Updated fields received:", updatedFields);
+
     const docFiles = req.files?.document || [];
     const photoFiles = req.files?.photo || [];
 
-    // Helper to resolve filename based on original name in req.body
-    const resolveFile = (bucket, originalName) => {
-      const match = bucket.find((f) => f.originalname === originalName);
-      return match ? match.filename : originalName;
-    };
+    console.log(
+      "Document files received:",
+      docFiles.map((f) => f.originalname)
+    );
+    console.log(
+      "Photo files received:",
+      photoFiles.map((f) => f.originalname)
+    );
 
-    const resolveMultiple = (bucket, field) => {
-      const value = req.body[field];
-      if (!value) return proposal.meeting[field];
-      const names = Array.isArray(value) ? value : [value];
-      return names.map((name) => resolveFile(bucket, name));
+    // Helper to find a file by its original name from the filename field
+    const findFileByOriginalName = (files, originalName) => {
+      return files.find((f) => f.originalname === originalName);
     };
 
     // Update basic fields
@@ -98,57 +109,73 @@ export const UpdateProposalsStudent = async (req, res) => {
     proposal.event_date = event_date;
     proposal.description = description;
 
-    // Flags to check if fields were updated
-    const isNoticeDocUpdated = !!req.body.notice_document;
-    const isMinutesDocUpdated = !!req.body.minutes_document;
-    const isProposalDocUpdated = !!req.body.proposal_document;
+    // Create a clone of the existing meeting object
+    const updatedMeeting = { ...proposal.meeting };
 
-    // Update meeting fields
-    proposal.meeting = {
-      ...proposal.meeting,
+    // Process document fields
+    const documentFields = [
+      "proposal_document",
+      "notice_document",
+      "minutes_document",
+    ];
 
-      proposal_document: isProposalDocUpdated
-        ? resolveFile(docFiles, req.body.proposal_document)
-        : proposal.meeting.proposal_document,
+    documentFields.forEach((field) => {
+      // Check if there's a filename field for this document
+      const filenameField = `${field}_filename`;
 
-      proposal_document_note: isProposalDocUpdated
-        ? "Revision Applied Student Leader"
-        : proposal.meeting.proposal_document_note,
+      if (req.body[filenameField]) {
+        const originalName = req.body[filenameField];
+        const file = findFileByOriginalName(docFiles, originalName);
 
-      proposal_document_status: isProposalDocUpdated
-        ? "Revision Applied Student Leader"
-        : proposal.meeting.proposal_document_status,
+        if (file) {
+          // Update the document field with the new filename
+          updatedMeeting[field] = file.filename;
 
-      notice_document: isNoticeDocUpdated
-        ? resolveFile(docFiles, req.body.notice_document)
-        : proposal.meeting.notice_document,
-      notice_document_note: isNoticeDocUpdated
-        ? "Revision Applied Student Leader"
-        : proposal.meeting.notice_document_note,
-      notice_document_status: isNoticeDocUpdated
-        ? "Revision Applied Student Leader"
-        : proposal.meeting.notice_document_status,
+          // Update the corresponding status and note
+          updatedMeeting[`${field}_status`] = "Revision Applied Student Leader";
+          updatedMeeting[`${field}_note`] = "Revision Applied Student Leader";
 
-      minutes_document: isMinutesDocUpdated
-        ? resolveFile(docFiles, req.body.minutes_document)
-        : proposal.meeting.minutes_document,
+          console.log(`Updated ${field} with file: ${file.filename}`);
+        }
+      }
+    });
 
-      minutes_document_note: isMinutesDocUpdated
-        ? "Revision Applied Student Leader"
-        : proposal.meeting.minutes_document_note,
+    // Handle resolution_document (can be multiple)
+    if (req.body["resolution_document_filename"]) {
+      const filenames = Array.isArray(req.body["resolution_document_filename"])
+        ? req.body["resolution_document_filename"]
+        : [req.body["resolution_document_filename"]];
 
-      minutes_document_status: isMinutesDocUpdated
-        ? "Revision Applied Student Leader"
-        : proposal.meeting.minutes_document_status,
+      const resolvedFiles = filenames
+        .map((name) => findFileByOriginalName(docFiles, name))
+        .filter(Boolean)
+        .map((file) => file.filename);
 
-      resolution_document: req.body.resolution_document
-        ? resolveMultiple(docFiles, "resolution_document")
-        : proposal.meeting.resolution_document,
+      if (resolvedFiles.length > 0) {
+        updatedMeeting.resolution_document = resolvedFiles;
+        console.log(`Updated resolution_document with files:`, resolvedFiles);
+      }
+    }
 
-      photo_documentations: req.body.photo_documentations
-        ? resolveMultiple(photoFiles, "photo_documentations")
-        : proposal.meeting.photo_documentations,
-    };
+    // Handle photo_documentations (can be multiple)
+    if (req.body["photo_documentations_filename"]) {
+      const filenames = Array.isArray(req.body["photo_documentations_filename"])
+        ? req.body["photo_documentations_filename"]
+        : [req.body["photo_documentations_filename"]];
+
+      const resolvedFiles = filenames
+        .map((name) => findFileByOriginalName(photoFiles, name))
+        .filter(Boolean)
+        .map((file) => file.filename);
+
+      if (resolvedFiles.length > 0) {
+        updatedMeeting.photo_documentations = resolvedFiles;
+        console.log(`Updated photo_documentations with files:`, resolvedFiles);
+      }
+    }
+
+    // Update the meeting object
+    proposal.meeting = updatedMeeting;
 
     const updatedProposal = await proposal.save();
 
