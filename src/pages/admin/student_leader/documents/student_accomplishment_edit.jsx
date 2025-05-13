@@ -1038,12 +1038,12 @@ export default function RandomTest({ selectedAccomplishment }) {
 
   return (
     <div className=" flex p-6 flex-col">
-      {activityType === "Institutional Activity" && (
+      {activityType === "Institutional" && (
         <EditInstitutionalAccomplishment
           selectedAccomplishment={selectedAccomplishment}
         />
       )}
-      {activityType === "External Activity" && (
+      {activityType === "External" && (
         <EditExternalAccomplishment
           selectedAccomplishment={selectedAccomplishment}
         />
