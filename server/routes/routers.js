@@ -66,6 +66,11 @@ import {
   AddPinnedFiles,
   GetFileNames,
 } from "../controllers/file_controller.js";
+import {
+  UpdateExternalAccomplishmentNotesAdviser,
+  UpdateInternalAccomplishmentNotesAdviser,
+  UpdateProposalAccomplishmentNotesAdviser,
+} from "../controllers/adviser_admin/accomplishment_controller.js";
 
 const upload = multer();
 
@@ -161,13 +166,29 @@ router.post(
   UpdateExternalAccomplishments
 );
 
+// adviser note
+router.post(
+  "/update-proposed-accomplishment/adviser/:accomplishmentId",
+  UpdateProposalAccomplishmentNotesAdviser
+);
+router.post(
+  "/update-institutional-accomplishment/adviser/:accomplishmentId",
+  UpdateInternalAccomplishmentNotesAdviser
+);
+
+router.post(
+  "/update-external-accomplishment/adviser/:accomplishmentId",
+  UpdateExternalAccomplishmentNotesAdviser
+);
+
 router.post(
   "/submit-proposed-accomplishment",
   UploadMultipleFiles,
   SubmitProposedAccomplishments
 );
+
 router.post(
-  "/submit-instutional-accomplishment",
+  "/submit-institutional-accomplishment",
   UploadMultipleFiles,
   SubmitInstutionalAccomplisments
 );

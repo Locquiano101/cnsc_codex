@@ -9,7 +9,7 @@ import {
   faChevronDown,
 } from "@fortawesome/free-solid-svg-icons";
 import AddStudentAccomplishmentReport from "./student_accomplishment_add";
-import LongDateFormat from "../../../../api/formatter";
+import { LongDateFormat, LongDateFormatVer2 } from "../../../../api/formatter";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { API_ROUTER } from "../../../../App";
@@ -114,6 +114,9 @@ function StudentAccomplishmentReportTable({
               <th className="p-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
                 Status
               </th>
+              <th className="p-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                Last Update
+              </th>
               <th className="p-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
                 Actions
               </th>
@@ -145,11 +148,28 @@ function StudentAccomplishmentReportTable({
                   >
                     {activity.event_description ?? "N/A"}
                   </td>
+
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                     {activity.over_all_status ? (
                       <span className="flex items-center">
-                        <span className="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
-                        <span>{activity.over_all_status}</span>
+                        <span
+                          className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                            activity.over_all_status ===
+                            "Approved by the Adviser"
+                              ? "bg-blue-100 text-Blue-700"
+                              : activity.over_all_status ===
+                                "Approved by the Dean"
+                              ? "bg-blue-100 text-blue-700"
+                              : activity.over_all_status ===
+                                "Approved by the OSSD Coordinator"
+                              ? "bg-green-100 text-green-700"
+                              : activity.over_all_status === "Pending"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : "bg-red-100 text-red-700"
+                          }`}
+                        >
+                          {activity.over_all_status}
+                        </span>
                       </span>
                     ) : (
                       <span className="flex items-center">
@@ -157,6 +177,11 @@ function StudentAccomplishmentReportTable({
                         <span className="text-gray-500">N/A</span>
                       </span>
                     )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    <span className="px-2 inline-flex text-xs leading-5 font-semibold ">
+                      {LongDateFormatVer2(new Date(activity.updatedAt))}
+                    </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex justify-center space-x-2">
@@ -376,6 +401,7 @@ export default function StudentAccomplishmentsTableView({ user }) {
             <RandomTest
               selectedAccomplishment={editingAccomplishment}
               onSubmit={handleEditSubmit}
+              onClose={() => setIsEditing(false)}
               onBack={closeEditModal}
               formDataState={formData}
               handleChange={handleChange}

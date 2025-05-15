@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faHome,
@@ -17,6 +17,7 @@ import {
   faPersonCircleQuestion,
   faPencilAlt,
   faPenAlt,
+  faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { HandleLogout } from "../../../api/login_api";
 import ProposalTableAdviserSection from "./documents/adviser_proposal_view";
@@ -69,13 +70,12 @@ export default function AdviserAdminPage() {
     { key: "post", label: "Post", icon: faPenAlt },
     { key: "proposals", label: "Proposals", icon: faFileAlt },
     { key: "accomplishments", label: "Accomplishments", icon: faCheckCircle },
-    { key: "settings", label: "Settings", icon: faGears },
   ];
 
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Sidebar */}
-      <aside className="w-2/10 bg-[#1B3A57] flex flex-col pt-6 text-white">
+      <aside className="w-64 bg-[#1B3A57] flex flex-col pt-6 text-white shrink-0">
         <div className="flex items-center px-6 mb-6">
           <img
             src="/general/cnsc_codex_ver_2.png"
@@ -86,7 +86,6 @@ export default function AdviserAdminPage() {
             Welcome, Adviser {storedUser.organization.adviser_name}
           </h1>
         </div>
-
         {/* Navigation Items */}
         <nav className="flex flex-col space-y-1 text-sm font-medium">
           {navItems.map(({ key, label, icon }) => (
@@ -116,10 +115,25 @@ export default function AdviserAdminPage() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto bg-gray-50">
-        <div className="h-24 bg-brian-blue/50" />
-        <div className="p-4  h-full">{renderContent()}</div>
-      </main>
+
+      <div className="w-full flex flex-col flex-3/4">
+        <div className="h-24 bg-brian-blue/50 flex items-center justify-end">
+          <div className="shadow-lg shadow-black mr-4 m-4 rounded-xl bg-gray-200 p-4">
+            <Link
+              to={`/organization/profile/${storedUser.organization.org_name}`}
+              className="text-md"
+            >
+              <span className="mr-4">
+                <FontAwesomeIcon icon={faUser} />
+              </span>
+              Go to Public Profile
+            </Link>
+          </div>
+        </div>
+        <div className="flex-1 overflow-auto">
+          <div className="p-4 h-full">{renderContent()}</div>
+        </div>
+      </div>
     </div>
   );
 }

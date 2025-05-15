@@ -4,7 +4,7 @@ import EditSectionBase from "../../../../components/edit_form";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit } from "@fortawesome/free-solid-svg-icons";
 import { FileRenderer } from "../../../../components/file_renderer";
-import LongDateFormat from "../../../../api/formatter";
+import { LongDateFormat } from "../../../../api/formatter";
 
 import {
   ReusableFileUpload,
@@ -13,7 +13,7 @@ import {
 import { Accomplishments } from "../../../../../server/models/documents";
 import { API_ROUTER } from "../../../../App";
 
-function EditInstitutionalAccomplishment({ selectedAccomplishment }) {
+function EditInstitutionalAccomplishment({ selectedAccomplishment, onClose }) {
   const [basicInfo, setBasicInfo] = useState({
     event_title: selectedAccomplishment.event_title,
     event_description: selectedAccomplishment.event_description,
@@ -23,7 +23,7 @@ function EditInstitutionalAccomplishment({ selectedAccomplishment }) {
     Accomplishment_id: selectedAccomplishment._id,
   });
 
-  const basePath = `/${basicInfo.organization_name}/InstitutionalAccomplishment/${basicInfo.event_title}`;
+  const basePath = `/${basicInfo.organization_name}/Institutional/${basicInfo.event_title}`;
   const [editing, setEditing] = useState({
     narrative_report: false,
     attendance_sheet: false,
@@ -137,6 +137,7 @@ function EditInstitutionalAccomplishment({ selectedAccomplishment }) {
       );
       console.log("✅ Submission successful:", data);
       alert("Institutional Accomplishment submitted successfully!");
+      onClose();
     } catch (err) {
       console.error("❌ Submission failed:", err);
     }
@@ -351,7 +352,7 @@ function EditExternalAccomplishment({ selectedAccomplishment }) {
     organization_name: selectedAccomplishment.organization.org_name,
     Accomplishment_id: selectedAccomplishment._id,
   });
-  const basePath = `/${basicInfo.organization_name}/ExternalAccomplishment/${basicInfo.event_title}`;
+  const basePath = `/${basicInfo.organization_name}/External/${basicInfo.event_title}`;
   const [editing, setEditing] = useState({
     official_invitation: false,
     narrative_report: false,
@@ -443,7 +444,7 @@ function EditExternalAccomplishment({ selectedAccomplishment }) {
     formData.append("event_description", basicInfo.event_description);
     formData.append("event_date", basicInfo.event_date);
     formData.append("organization", basicInfo.organization);
-    formData.append("activity_type", "External Activity");
+    formData.append("activity_type", "External");
 
     // Metadata
     formData.append("orgFolder", basicInfo.organization_name);
@@ -698,7 +699,7 @@ function EditProposedPlanAccomplishment({ selectedAccomplishment }) {
     organization: selectedAccomplishment.organization._id,
     organization_name: selectedAccomplishment.organization.org_name,
   });
-  const basePath = `/${basicInfo.organization_name}/ProposedActivity/${basicInfo.event_title}`;
+  const basePath = `/${basicInfo.organization_name}/Proposed/${basicInfo.event_title}`;
   const [editing, setEditing] = useState({
     approved_proposal: false,
     resolution: false,

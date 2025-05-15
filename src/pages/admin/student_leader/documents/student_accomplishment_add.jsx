@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { API_ROUTER } from "../../../../App";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faLeftLong, faCheckCircle } from "@fortawesome/free-solid-svg-icons";
+import { faCheckCircle, faLeftLong } from "@fortawesome/free-solid-svg-icons";
 import {
   ReusableFileUpload,
   ReusableMultiFileUpload,
@@ -43,7 +43,7 @@ function StudentAddAccomplishedInstitutional({ user }) {
     event_title: "",
     event_description: "",
     event_date: "",
-    activity_type: "Institutional Activity",
+    activity_type: "Institutional",
     over_all_status: "Pending",
     event_status: "Pending",
   });
@@ -53,15 +53,11 @@ function StudentAddAccomplishedInstitutional({ user }) {
       label: "Narrative Report",
       accept: ".pdf,.doc,.docx",
     },
-    official_invitation: {
+    attendance_sheet: {
       label: "Official Invitation",
       accept: ".pdf,.doc,.docx",
     },
-    liquidation_report: {
-      label: "Liquidation Report",
-      accept: ".pdf,.doc,.docx",
-    },
-    cm063_documents: {
+    certificate: {
       label: "CMO 63 Documents",
       accept: ".pdf,.doc,.docx",
       multiple: true,
@@ -74,14 +70,27 @@ function StudentAddAccomplishedInstitutional({ user }) {
   };
 
   const singleFileFields = {
-    narrative_report: fileFields.narrative_report,
-    official_invitation: fileFields.official_invitation,
-    liquidation_report: fileFields.liquidation_report,
+    narrative_report: {
+      label: "Narrative Report",
+      accept: ".pdf,.doc,.docx",
+    },
+    attendance_sheet: {
+      label: "Official Invitation",
+      accept: ".pdf,.doc,.docx",
+    },
   };
 
   const multipleFileFields = {
-    cm063_documents: fileFields.cm063_documents,
-    photo_documentation: fileFields.photo_documentation,
+    certificate: {
+      label: "CMO 63 Documents",
+      accept: ".pdf,.doc,.docx",
+      multiple: true,
+    },
+    photo_documentations: {
+      label: "Photo Documentations",
+      accept: "image/*",
+      multiple: true,
+    },
   };
 
   const handleChange = (e) => {
@@ -98,9 +107,13 @@ function StudentAddAccomplishedInstitutional({ user }) {
       });
       return;
     }
+
+    // Get the field definition from either singleFileFields or multipleFileFields
+    const fieldDef = singleFileFields[fieldKey] || multipleFileFields[fieldKey];
+
     setUploadedFiles((prev) => ({
       ...prev,
-      [fieldKey]: fileFields[fieldKey].multiple ? Array.from(files) : files[0],
+      [fieldKey]: fieldDef?.multiple ? Array.from(files) : files[0],
     }));
   };
 
@@ -118,7 +131,7 @@ function StudentAddAccomplishedInstitutional({ user }) {
 
     formData.append("orgFolder", user.organization.org_name);
     formData.append("organization", user.organization._id);
-    formData.append("orgDocumentClassification", "Instutional");
+    formData.append("orgDocumentClassification", "Institutional");
     formData.append("orgDocumentTitle", formDataState.event_title);
 
     // Append file binaries
@@ -136,7 +149,7 @@ function StudentAddAccomplishedInstitutional({ user }) {
     Object.entries(uploadedFiles).forEach(([fieldKey, fileOrFiles]) => {
       const files = Array.isArray(fileOrFiles) ? fileOrFiles : [fileOrFiles];
       files.forEach((file) => {
-        formData.append(`documents[${fieldKey}]`, file.name);
+        formData.append(fieldKey, file.name);
       });
     });
 
@@ -148,22 +161,22 @@ function StudentAddAccomplishedInstitutional({ user }) {
 
     try {
       const { data } = await axios.post(
-        `${API_ROUTER}/submit-instutional-accomplishment`,
+        `${API_ROUTER}/submit-institutional-accomplishment`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
-      console.log({ data }),
-        setNotification({
-          type: "success",
-          message: "Submission successful!",
-        });
+      console.log({ data });
+      setNotification({
+        type: "success",
+        message: "Submission successful!",
+      });
 
       // Reset form after successful submission
       setFormDataState({
         event_title: "",
         event_description: "",
         event_date: "",
-        activity_type: "Institutional Activity",
+        activity_type: "Institutional",
         over_all_status: "Pending",
         event_status: "Pending",
       });
@@ -375,10 +388,10 @@ function StudentAddAccomplishedExternal({ user }) {
     Object.entries(formDataState).forEach(([key, value]) => {
       formData.append(key, value);
     });
-    formData.append("activity_type", "External Activity");
+    formData.append("activity_type", "External");
 
     formData.append("orgFolder", user.organization.org_name);
-    formData.append("orgDocumentClassification", "ExternalAccomplishment");
+    formData.append("orgDocumentClassification", "External");
     formData.append("orgDocumentTitle", formDataState.event_title);
 
     // 2) Append file binaries
@@ -625,7 +638,7 @@ function StudentAddAccomplishedProposal({ user }) {
     });
     formData.append("activity_type", "Proposed Plan");
     formData.append("orgFolder", user.organization.org_name);
-    formData.append("orgDocumentClassification", "ProposedPlan");
+    formData.append("orgDocumentClassification", "Proposed");
     formData.append("orgDocumentTitle", formDataState.event_title);
     // 2) Append file binaries
     Object.entries(uploadedFiles).forEach(([fieldKey, fileOrFiles]) => {
@@ -645,6 +658,11 @@ function StudentAddAccomplishedProposal({ user }) {
         formData.append(fieldKey, file.name);
       });
     });
+
+    // Debug
+    for (let [key, val] of formData.entries()) {
+      console.log(key, val);
+    }
 
     try {
       const { data } = await axios.post(

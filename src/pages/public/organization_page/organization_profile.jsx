@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 
 import {
   faArrowLeft,
+  faCalendarAlt,
   faFileAlt,
   faUser,
   faUserShield,

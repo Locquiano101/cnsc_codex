@@ -13,14 +13,13 @@ export const FileRenderer = ({ basePath, fileName }) => {
   const url = encodeURI(raw);
 
   const [showModal, setShowModal] = useState(false);
-  console.log(url);
   if (isImage) {
     return (
-      <div className="object-cover rounded-lg flex-shrink-0 flex flex-wrap shadow-md relative">
+      <div className="object-cover  rounded-lg flex-shrink-0 flex flex-wrap relative">
         <img
           src={url}
           alt={fileName}
-          className="h-100 w-auto rounded-lg object-cover cursor-pointer"
+          className="h-100 w-auto mx-2 rounded-lg object-cover cursor-pointer"
           onClick={() => setShowModal(true)}
         />
 
@@ -32,13 +31,13 @@ export const FileRenderer = ({ basePath, fileName }) => {
             <div className="relative" onClick={(e) => e.stopPropagation()}>
               <FontAwesomeIcon
                 icon={faClose}
-                className="text-[52px] font-black text-red-600 absolute top-2 right-4 cursor-pointer"
+                className="text-[32px]  text-red-600 absolute top-2 right-4 cursor-pointer"
                 onClick={() => setShowModal(false)}
               />
               <img
                 src={url}
                 alt={fileName}
-                className="max-h-[90vh] max-w-[90vw] rounded-lg shadow-lg"
+                className="h-full w-full  rounded-lg shadow-lg"
               />
             </div>
           </div>
@@ -48,7 +47,7 @@ export const FileRenderer = ({ basePath, fileName }) => {
   }
 
   return (
-    <div className=" p-2 w-full flex flex-col justify-center items-center rounded-lg shadow-md bg-white">
+    <div className=" p-2 w-full space-y-4 flex flex-col justify-center items-center rounded-lg shadow-md bg-white">
       <FontAwesomeIcon icon={faFileAlt} className="text-[3rem] font-black" />
       <a
         href={url}
