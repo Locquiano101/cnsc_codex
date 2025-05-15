@@ -28,9 +28,10 @@ export const SubmitProposedAccomplishments = async (req, res) => {
       evaluation_summary,
       sample_evaluations,
       activity_type,
-      photo_documentation,
+      photo_documentations,
     } = req.body;
 
+    console.log(req.body);
     const accomplishment = new ProposedAccomplishments({
       organization,
       over_all_status: "Pending",
@@ -50,9 +51,9 @@ export const SubmitProposedAccomplishments = async (req, res) => {
         sample_evaluations: Array.isArray(sample_evaluations)
           ? sample_evaluations
           : [sample_evaluations].filter(Boolean),
-        photo_documentation: Array.isArray(photo_documentation)
-          ? photo_documentation
-          : [photo_documentation].filter(Boolean),
+        photo_documentation: Array.isArray(photo_documentations)
+          ? photo_documentations
+          : [photo_documentations].filter(Boolean),
 
         // Optional: add default notes/statuses like your proposal model does
         attendance_sheet_note: "",
@@ -86,7 +87,6 @@ export const SubmitInstutionalAccomplisments = async (req, res) => {
   try {
     const {
       organization,
-      status,
       event_title,
       event_description,
       event_date,

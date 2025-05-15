@@ -15,14 +15,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { API_ROUTER } from "../../../App";
 import DeanOverview from "./ossd_home_page";
 import DeanOrganizationBoard from "./ossd_organization";
-import ProposalSectionDean from "./documents/ossd_proposal_view";
 import OssdAccomplishmentView from "./documents/ossd_accomplishment_view";
+import ProposalsEditOSSD from "./documents/ossd_proposal_view";
 
 export default function OSSDCoordinatorPage() {
   const [storedUser, setStoredUser] = useState(null);
-  const [activeContent, setActiveContent] = useState("accomplishment");
+  const [activeContent, setActiveContent] = useState("proposals");
   const [organizations, setOrganizations] = useState([]);
-  useState("proposals");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,7 +31,6 @@ export default function OSSDCoordinatorPage() {
       return;
     }
     const user = JSON.parse(localStorage.getItem("user"));
-    console.log(user);
     setStoredUser(user);
   }, [navigate]);
 
@@ -44,7 +42,6 @@ export default function OSSDCoordinatorPage() {
         const response = await axios.post(`${API_ROUTER}/get-by-organization`, {
           department,
         });
-        console.log(response.data);
         setOrganizations(response.data);
       } catch (error) {
         console.error("Failed to fetch organizations:", error);
@@ -55,11 +52,6 @@ export default function OSSDCoordinatorPage() {
 
   const handleClick = (key) => {
     setActiveContent(key);
-    if (key === "documents") {
-      setShowDocumentSubmenu((prev) => !prev);
-    } else {
-      setShowDocumentSubmenu(false);
-    }
   };
 
   const handleLogout = () => {
@@ -80,11 +72,14 @@ export default function OSSDCoordinatorPage() {
       case "organizations":
         return <DeanOrganizationBoard organizations={organizations} />;
       case "accomplishment":
-        return <OssdAccomplishmentView storedUser={organizations} />;
+        return (
+          <OssdAccomplishmentView
+            storedUser={storedUser}
+            organizations={organizations}
+          />
+        );
       case "proposals":
-        return <ProposalSectionDean organization={organizations} />;
-      case "settings":
-        return <div className="p-4">Settings content</div>;
+        return <ProposalsEditOSSD organization={organizations} />;
       default:
         return <div className="p-4">Invalid selection</div>;
     }
@@ -92,8 +87,8 @@ export default function OSSDCoordinatorPage() {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      {/* Sidebar */}
-      <aside className="w-1/3 max-w-xs bg-[#1B3A57] flex flex-col pt-6 text-white">
+      {/* Sidebar - Fixed width */}
+      <aside className="w-64 bg-[#1B3A57] flex flex-col pt-6 text-white shrink-0">
         <div className="flex items-center px-6 mb-6">
           <img
             src="/general/cnsc_codex_ver_2.png"
@@ -132,20 +127,7 @@ export default function OSSDCoordinatorPage() {
             </div>
           ))}
         </nav>
-        <hr className="mx-4 my-2" />
-        <div key="logs" className="text-sm font-medium">
-          <div
-            onClick={() => handleClick("logs")}
-            className={`flex items-center gap-3 px-6 py-3 cursor-pointer transition ${
-              activeContent === "logs"
-                ? "bg-[#DFE4EB] text-[#1B3A57] font-semibold"
-                : "hover:bg-[#2E4B6B] text-white"
-            }`}
-          >
-            <FontAwesomeIcon icon={faClockRotateLeft} />
-            Logs
-          </div>
-        </div>
+
         {/* Logout */}
         <div
           onClick={handleLogout}
@@ -157,8 +139,8 @@ export default function OSSDCoordinatorPage() {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 bg-gray-100 p-6 overflow-y-auto">
-        {renderContent()}
+      <div className="flex-1 overflow-auto">
+        <div className="p-4 h-full">{renderContent()}</div>
       </div>
     </div>
   );

@@ -79,11 +79,7 @@ function ProposalView({ onAdd, onView, onEdit, user }) {
   if (error) return <p className="p-4 text-red-500">{error}</p>;
 
   return (
-<<<<<<< HEAD
-    <div className="  h-screen flex flex-col overflow-hidden p-5 shadow-2xl">
-=======
     <div className=" h-full flex flex-col overflow-hidden">
->>>>>>> eb57cb93f7a1415e05800fb4ce04206ab6568e76
       <div className="bg-brian-blue text-white p-3 flex justify-between items-center">
         <h1 className="font-medium">Proposals</h1>
         <button

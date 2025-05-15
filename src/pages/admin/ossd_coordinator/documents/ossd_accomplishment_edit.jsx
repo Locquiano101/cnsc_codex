@@ -1,1054 +1,1129 @@
-import { useState, useRef, useEffect } from "react";
-import { API_ROUTER } from "../../../../App";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faEdit,
-  faPencil,
-  faFilter,
-  faChevronDown,
-} from "@fortawesome/free-solid-svg-icons";
+import { API_ROUTER } from "../../../../App";
 import { FileRenderer } from "../../../../components/file_renderer";
-import LongDateFormat from "../../../../api/formatter";
-function EditInstitutionalAccomplishment({ selectedAccomplishment }) {
-  const [basicInfo, setBasicInfo] = useState({
-    event_title: selectedAccomplishment.event_title,
-    event_description: selectedAccomplishment.event_description,
-    event_date: selectedAccomplishment.event_date.split("T")[0], // Format date for input
-    organization: selectedAccomplishment.organization._id,
-    organization_name: selectedAccomplishment.organization.org_name,
-    Accomplishment_id: selectedAccomplishment._id,
-  });
+import { PopUp } from "../../../../components/pop-ups";
+function EditInstitutionalAccomplisheditmentOSSD({ accomplishment, onBack }) {
+  const [loading, setLoading] = useState(false);
+  const [popup, setPopup] = useState({ visible: false, title: "", text: "" });
 
-  const basePath = `/${basicInfo.organization_name}/InstitutionalAccomplishment/${basicInfo.event_title}`;
-  const [editing, setEditing] = useState({
-    narrative_report: false,
-    attendance_sheet: false,
-    certificate: false,
-    photo_documentations: false,
-  });
+  // basePath to access files, encode URI components to avoid malformed URLs
+  const basePath = `/${accomplishment.organization?.org_name}/InstitutionalAccomplishment/${accomplishment.event_title}`;
 
-  const [basicEdit, setBasicEdit] = useState({
-    event_title: false,
-    event_description: false,
-    event_date: false,
-  });
-
-  const [uploadedFiles, setUploadedFiles] = useState({});
-
-  const fileFields = {
-    narrative_report: { label: "Narrative Report", accept: ".pdf,.doc,.docx" },
-    attendance_sheet: { label: "Attendance Sheet", accept: ".pdf,.doc,.docx" },
-    certificate: {
-      label: "Certificate",
-      accept: ".pdf,.doc,.docx",
-      multiple: true,
-    },
-    photo_documentations: {
-      label: "Photo Documentation",
-      accept: "image/*",
-      multiple: true,
-    },
+  // Create helper functions to safely check if documents exist
+  const documentExists = (doc) => {
+    return doc !== undefined && doc !== null && doc !== "";
   };
 
-  const logChange = (message) => {
-    console.log(`[EditInstitutional] ${message}`);
+  const hasDocuments = (docArray) => {
+    return Array.isArray(docArray) && docArray.length > 0;
   };
 
-  const toggleEdit = (key) => {
-    const now = !editing[key];
-    setEditing((e) => ({ ...e, [key]: now }));
-    logChange(`${now ? "Entered" : "Exited"} edit mode for "${key}".`);
+  // Initialize statuses based on existing statuses in accomplishment or fallback to 'pending'
+  const initialStatus = {
+    narrative:
+      accomplishment.documents?.narrative_status ||
+      (documentExists(accomplishment.documents?.narrative_report)
+        ? "pending"
+        : null),
+
+    attendance:
+      accomplishment.documents?.attendance_status ||
+      (documentExists(accomplishment.documents?.attendance_sheet)
+        ? "pending"
+        : null),
+
+    documentation:
+      accomplishment.documents?.documentation_status ||
+      (hasDocuments(accomplishment.documents?.photo_documentation)
+        ? "pending"
+        : null),
+
+    certificate:
+      accomplishment.documents?.certificate_status ||
+      (hasDocuments(accomplishment.documents?.certificate) ? "pending" : null),
   };
 
-  const toggleBasicEdit = (field) => {
-    setBasicEdit((prev) => ({ ...prev, [field]: !prev[field] }));
-    if (basicEdit[field]) {
-      // Reset to original value if cancelling edit
-      setBasicInfo((prev) => ({
-        ...prev,
-        [field]:
-          selectedAccomplishment[field] ||
-          (field === "event_date"
-            ? selectedAccomplishment[field].split("T")[0]
-            : ""),
-      }));
-    }
+  // Initialize revision notes based on existing notes, fallback to empty string
+  const initialNotes = {
+    narrative: accomplishment.documents?.narrative_notes || "",
+    attendance: accomplishment.documents?.attendance_notes || "",
+    documentation: accomplishment.documents?.documentation_notes || "",
+    certificate: accomplishment.documents?.certificate_notes || "",
   };
 
-  const handleFileChange = (key, files) => {
-    const arr = files instanceof FileList ? Array.from(files) : files;
-    setUploadedFiles((prev) => ({ ...prev, [key]: arr }));
+  const [docStatus, setDocStatus] = useState(initialStatus);
+  const [revisionNotes, setRevisionNotes] = useState(initialNotes);
 
-    if (!arr || arr.length === 0) {
-      logChange(`Cleared selection for "${key}".`);
-    } else {
-      logChange(`Selected ${arr.length} file(s) for "${key}".`);
-    }
-  };
+  // If accomplishment changes, update states accordingly
+  useEffect(() => {
+    setDocStatus({
+      narrative:
+        accomplishment.documents?.narrative_status ||
+        (documentExists(accomplishment.documents?.narrative_report)
+          ? "pending"
+          : null),
 
-  const handleUpdate = async () => {
-    const formData = new FormData();
+      attendance:
+        accomplishment.documents?.attendance_status ||
+        (documentExists(accomplishment.documents?.attendance_sheet)
+          ? "pending"
+          : null),
 
-    // Append text fields
-    formData.append("event_title", basicInfo.event_title);
-    formData.append("event_description", basicInfo.event_description);
-    formData.append("event_date", basicInfo.event_date);
-    formData.append("organization", basicInfo.organization);
-    formData.append("activity_type", "Institutional");
+      documentation:
+        accomplishment.documents?.documentation_status ||
+        (hasDocuments(accomplishment.documents?.photo_documentation)
+          ? "pending"
+          : null),
 
-    // Metadata
-    formData.append("orgFolder", basicInfo.organization_name);
-    formData.append("orgDocumentClassification", "InstitutionalAccomplishment");
-    formData.append("orgDocumentTitle", basicInfo.event_title);
-
-    // Append files
-    Object.entries(uploadedFiles).forEach(([key, files]) => {
-      const arr = Array.isArray(files) ? files : [files];
-      arr.forEach((file) => {
-        if (!file) return;
-        const isImage = file.type.startsWith("image/");
-        formData.append(isImage ? "photo" : "document", file);
-      });
+      certificate:
+        accomplishment.documents?.certificate_status ||
+        (hasDocuments(accomplishment.documents?.certificate)
+          ? "pending"
+          : null),
     });
 
-    // File names
-    Object.entries(uploadedFiles).forEach(([key, files]) => {
-      const arr = Array.isArray(files) ? files : [files];
-      arr.forEach((file) => {
-        if (!file) return;
-        formData.append(key, file.name);
-      });
+    setRevisionNotes({
+      narrative: accomplishment.documents?.narrative_notes || "",
+      attendance: accomplishment.documents?.attendance_notes || "",
+      documentation: accomplishment.documents?.documentation_notes || "",
+      certificate: accomplishment.documents?.certificate_notes || "",
     });
+  }, [accomplishment]);
 
-    // Debug
-    for (let [key, val] of formData.entries()) {
-      console.log(key, val);
-    }
-
-    try {
-      const { data } = await axios.post(
-        `${API_ROUTER}/update-instutional-accomplishment/${basicInfo.Accomplishment_id}`,
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
-      console.log("✅ Submission successful:", data);
-      alert("Institutional Accomplishment submitted successfully!");
-    } catch (err) {
-      console.error("❌ Submission failed:", err);
-    }
-  };
-
-  const isAnythingEditing =
-    Object.values(editing).includes(true) ||
-    Object.values(basicEdit).includes(true);
-
-  const renderSection = (key, multiple = false) => {
-    const statusKey = `${key}_status`;
-    const noteKey = `${key}_note`;
-
-    const status = selectedAccomplishment.documents?.[statusKey] || "Pending";
-    const note =
-      selectedAccomplishment.documents?.[noteKey] || "Up for checking";
-
-    // Fixed: Adjusted key name for photo_documentations to match backend data structure
-    const documentKey =
-      key === "photo_documentations" ? "photo_documentation" : key;
-
-    return (
-      <div key={key}>
-        <div className="flex justify-between items-center">
-          <div className="flex flex-col">
-            <h3 className="font-medium">
-              {fileFields[key].label}{" "}
-              <span className="text-sm text-gray-500">({status})</span>
-            </h3>
-            <span className="text-xs text-gray-600 italic">Note: {note}</span>
-          </div>
-          <button
-            className="text-sm text-blue-600 hover:underline flex items-center"
-            onClick={() => toggleEdit(key)}
-          >
-            <FontAwesomeIcon icon={faEdit} className="mr-1" />
-            {editing[key] ? "Cancel" : "Edit"}
-          </button>
-        </div>
-
-        {!editing[key] ? (
-          multiple ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {/* Fixed: Use the corrected key name and ensure array handling */}
-              {(Array.isArray(selectedAccomplishment.documents?.[documentKey])
-                ? selectedAccomplishment.documents?.[documentKey]
-                : selectedAccomplishment.documents?.[documentKey]
-                ? [selectedAccomplishment.documents?.[documentKey]]
-                : []
-              ).map((f, i) => (
-                <FileRenderer key={i} basePath={basePath} fileName={f} />
-              ))}
-            </div>
-          ) : (
-            <FileRenderer
-              basePath={basePath}
-              fileName={selectedAccomplishment.documents?.[documentKey]}
-            />
-          )
-        ) : multiple ? (
-          <ReusableMultiFileUpload
-            fields={{ [key]: fileFields[key] }}
-            onFileChange={handleFileChange}
-          />
-        ) : (
-          <ReusableFileUpload
-            fields={{ [key]: fileFields[key] }}
-            onFileChange={handleFileChange}
-          />
-        )}
-      </div>
-    );
-  };
-  return (
-    <div className=" h-full space-y-6 overflow-y-auto">
-      <h1 className="text-2xl font-bold mb-6 text-center">
-        Edit Institutional Accomplishment
-      </h1>
-
-      <h2 className="text-xl font-semibold">Basic Information</h2>
-      <div className="space-y-4 gap-6 flex justify-between">
-        {/* Event Title */}
-        <div className="flex-1 shadow-lg rounded-lg p-4">
-          <div className="flex justify-between items-center">
-            <label className="text-sm font-medium">Event Title</label>
-            <button
-              className="text-sm text-blue-600 hover:underline"
-              onClick={() => toggleBasicEdit("event_title")}
-            >
-              {basicEdit.event_title ? "Cancel" : "Edit"}
-            </button>
-          </div>
-          {basicEdit.event_title ? (
-            <input
-              type="text"
-              value={basicInfo.event_title}
-              onChange={(e) =>
-                setBasicInfo((prev) => ({
-                  ...prev,
-                  event_title: e.target.value,
-                }))
-              }
-              className="w-full border rounded px-2 py-1"
-            />
-          ) : (
-            <p className="text-gray-800">
-              {selectedAccomplishment.event_title}
-            </p>
-          )}
-        </div>
-
-        {/* Event Date */}
-        <div className="flex-1 shadow-lg rounded-lg p-4">
-          <div className="flex justify-between items-center">
-            <label className="text-sm font-medium">Event Date</label>
-            <button
-              className="text-sm text-blue-600 hover:underline"
-              onClick={() => toggleBasicEdit("event_date")}
-            >
-              {basicEdit.event_date ? "Cancel" : "Edit"}
-            </button>
-          </div>
-          {basicEdit.event_date ? (
-            <input
-              type="date"
-              value={basicInfo.event_date}
-              onChange={(e) =>
-                setBasicInfo((prev) => ({
-                  ...prev,
-                  event_date: e.target.value,
-                }))
-              }
-              className="w-full border rounded px-2 py-1"
-            />
-          ) : (
-            <p className="text-gray-800">
-              {LongDateFormat(selectedAccomplishment.event_date)}
-            </p>
-          )}
-        </div>
-
-        {/* Event Description */}
-        <div className="flex-1 shadow-lg rounded-lg p-4">
-          <div className="flex justify-between items-center">
-            <label className="text-sm font-medium">Event Description</label>
-            <button
-              className="text-sm text-blue-600 hover:underline"
-              onClick={() => toggleBasicEdit("event_description")}
-            >
-              {basicEdit.event_description ? "Cancel" : "Edit"}
-            </button>
-          </div>
-          {basicEdit.event_description ? (
-            <textarea
-              rows={3}
-              value={basicInfo.event_description}
-              onChange={(e) =>
-                setBasicInfo((prev) => ({
-                  ...prev,
-                  event_description: e.target.value,
-                }))
-              }
-              className="w-full border rounded px-2 py-1"
-            />
-          ) : (
-            <p className="text-gray-800 whitespace-pre-line">
-              {selectedAccomplishment.event_description}
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Files Section */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Uploaded Files</h2>
-        <div className="space-y-6">
-          {renderSection("narrative_report")}
-          {renderSection("attendance_sheet")}
-          {renderSection("certificate", true)}
-          {renderSection("photo_documentations", true)}
-        </div>
-      </div>
-
-      {/* Buttons */}
-      <div className="w-full h-10 flex justify-end gap-2">
-        <div className="h-10 flex justify-end w-fit">
-          <button className="px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow transition-all">
-            CANCEL
-          </button>
-        </div>
-        {isAnythingEditing && (
-          <div className="h-10 flex justify-end w-fit">
-            <button
-              onClick={handleUpdate}
-              className="px-5 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow transition-all"
-            >
-              UPDATE
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function EditExternalAccomplishment({ selectedAccomplishment }) {
-  const [basicInfo, setBasicInfo] = useState({
-    event_title: selectedAccomplishment.event_title,
-    event_description: selectedAccomplishment.event_description,
-    event_date: selectedAccomplishment.event_date.split("T")[0], // Format date for input
-    organization: selectedAccomplishment.organization._id,
-    organization_name: selectedAccomplishment.organization.org_name,
-    Accomplishment_id: selectedAccomplishment._id,
-  });
-  const basePath = `/${basicInfo.organization_name}/ExternalAccomplishment/${basicInfo.event_title}`;
-  const [editing, setEditing] = useState({
-    official_invitation: false,
-    narrative_report: false,
-    liquidation_report: false,
-    photo_documentation: false,
-    cm063_documents: false,
-    echo_seminar_documents: false,
-  });
-
-  const [basicEdit, setBasicEdit] = useState({
-    event_title: false,
-    event_description: false,
-    event_date: false,
-  });
-
-  const [uploadedFiles, setUploadedFiles] = useState({});
-
-  const fileFields = {
-    official_invitation: {
-      label: "Official Invitation",
-      accept: ".pdf",
-    },
-    narrative_report: {
+  const documentsConfig = [
+    {
+      key: "narrative",
       label: "Narrative Report",
-      accept: ".pdf",
+      files: documentExists(accomplishment.documents?.narrative_report)
+        ? [accomplishment.documents.narrative_report]
+        : [],
     },
-    liquidation_report: {
-      label: "Liquidation Report",
-      accept: ".pdf",
+    {
+      key: "attendance",
+      label: "Attendance Sheet",
+      files: documentExists(accomplishment.documents?.attendance_sheet)
+        ? [accomplishment.documents.attendance_sheet]
+        : [],
     },
-    photo_documentation: {
+    {
+      key: "documentation",
       label: "Photo Documentation",
-      accept: "image/*",
-      multiple: true,
+      files: hasDocuments(accomplishment.documents?.photo_documentation)
+        ? accomplishment.documents.photo_documentation
+        : [],
     },
-    cm063_documents: {
-      label: "CMO 63 Documents",
-      accept: ".pdf",
-      multiple: true,
+    {
+      key: "certificate",
+      label: "Certificates",
+      files: hasDocuments(accomplishment.documents?.certificate)
+        ? accomplishment.documents.certificate
+        : [],
     },
-    echo_seminar_documents: {
-      label: "Echo Seminar Documents",
-      accept: ".pdf",
-      multiple: true,
-    },
+  ];
+
+  const isAllApproved = () => {
+    // Get all non-null statuses
+    const activeDocuments = documentsConfig.filter(
+      (doc) => doc.files.length > 0
+    );
+    if (activeDocuments.length === 0) return false;
+
+    // Check if all active documents are approved
+    return activeDocuments.every((doc) => docStatus[doc.key] === "approved");
   };
 
-  const logChange = (message) => {
-    console.log(`[EditInstitutional] ${message}`);
-  };
-
-  const toggleEdit = (key) => {
-    const now = !editing[key];
-    setEditing((e) => ({ ...e, [key]: now }));
-    logChange(`${now ? "Entered" : "Exited"} edit mode for "${key}".`);
-  };
-
-  const toggleBasicEdit = (field) => {
-    setBasicEdit((prev) => ({ ...prev, [field]: !prev[field] }));
-    if (basicEdit[field]) {
-      // Reset to original value if cancelling edit
-      setBasicInfo((prev) => ({
-        ...prev,
-        [field]:
-          selectedAccomplishment[field] ||
-          (field === "event_date"
-            ? selectedAccomplishment[field].split("T")[0]
-            : ""),
-      }));
+  const handleChange = (key, type, value) => {
+    if (type === "status") {
+      setDocStatus((prev) => ({ ...prev, [key]: value }));
+      // Clear notes when status changes to approved
+      if (value === "approved") {
+        setRevisionNotes((prev) => ({ ...prev, [key]: "" }));
+      }
+    } else if (type === "note") {
+      setRevisionNotes((prev) => ({ ...prev, [key]: value }));
     }
   };
 
-  const handleFileChange = (key, files) => {
-    const arr = files instanceof FileList ? Array.from(files) : files;
-    setUploadedFiles((prev) => ({ ...prev, [key]: arr }));
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
 
-    if (!arr || arr.length === 0) {
-      logChange(`Cleared selection for "${key}".`);
-    } else {
-      logChange(`Selected ${arr.length} file(s) for "${key}".`);
-    }
-  };
+    // Create update object that matches the expected structure
+    const documentUpdates = {};
 
-  const handleUpdate = async () => {
-    const formData = new FormData();
-
-    // Append text fields
-    formData.append("event_title", basicInfo.event_title);
-    formData.append("event_description", basicInfo.event_description);
-    formData.append("event_date", basicInfo.event_date);
-    formData.append("organization", basicInfo.organization);
-    formData.append("activity_type", "External");
-
-    // Metadata
-    formData.append("orgFolder", basicInfo.organization_name);
-    formData.append("orgDocumentClassification", "ExternalAccomplishment");
-    formData.append("orgDocumentTitle", basicInfo.event_title);
-
-    // Append files
-    Object.entries(uploadedFiles).forEach(([key, files]) => {
-      const arr = Array.isArray(files) ? files : [files];
-      arr.forEach((file) => {
-        if (!file) return;
-        const isImage = file.type.startsWith("image/");
-        formData.append(isImage ? "photo" : "document", file);
-      });
+    // Add status and notes fields directly to the documents object
+    Object.entries(docStatus).forEach(([key, status]) => {
+      if (status !== null) {
+        documentUpdates[`${key}_status`] = status;
+        documentUpdates[`${key}_notes`] = revisionNotes[key];
+      }
     });
 
-    // File names
-    Object.entries(uploadedFiles).forEach(([key, files]) => {
-      const arr = Array.isArray(files) ? files : [files];
-      arr.forEach((file) => {
-        if (!file) return;
-        formData.append(key, file.name);
-      });
-    });
-
-    // Debug
-    for (let [key, val] of formData.entries()) {
-      console.log(key, val);
+    // Keep existing document references
+    if (accomplishment.documents?.narrative_report) {
+      documentUpdates.narrative_report =
+        accomplishment.documents.narrative_report;
     }
+
+    if (accomplishment.documents?.attendance_sheet) {
+      documentUpdates.attendance_sheet =
+        accomplishment.documents.attendance_sheet;
+    }
+
+    if (hasDocuments(accomplishment.documents?.photo_documentation)) {
+      documentUpdates.photo_documentation =
+        accomplishment.documents.photo_documentation;
+    }
+
+    if (hasDocuments(accomplishment.documents?.certificate)) {
+      documentUpdates.certificate = accomplishment.documents.certificate;
+    }
+
+    const body = {
+      accomplishmentId: accomplishment._id,
+      over_all_status: isAllApproved()
+        ? "Approved by the OSSD Coordinator"
+        : "Revision from the OSSD Coordinator",
+      documents: documentUpdates,
+    };
 
     try {
-      const { data } = await axios.post(
-        `${API_ROUTER}/update-external-accomplishment/${basicInfo.Accomplishment_id}`,
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
+      const res = await axios.post(
+        `${API_ROUTER}/update-institutional-accomplishment/adviser/${accomplishment._id}`,
+        body
       );
-      console.log("✅ Submission successful:", data);
-      alert("External Accomplishment updated successfully!");
+      setPopup({
+        visible: true,
+        title: "Change Submitted",
+        text: "Your changes have been submitted successfully.",
+        ButtonText: "Okay",
+      });
     } catch (err) {
-      console.error("❌ Submission failed:", err);
+      setPopup({
+        visible: true,
+        title: "Error",
+        text: err.response?.data?.message || "Something went wrong.",
+        ButtonText: "Okay",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const isAnythingEditing =
-    Object.values(editing).includes(true) ||
-    Object.values(basicEdit).includes(true);
+  return (
+    <form onSubmit={onSubmit} className="space-y-6 bg-white p-4  mx-auto">
+      {popup.visible && (
+        <PopUp
+          {...popup}
+          onClose={() => setPopup((p) => ({ ...p, visible: false }))}
+        />
+      )}
 
-  const renderSection = (key) => {
-    if (!fileFields[key]) return null;
+      <h2 className="text-2xl font-bold text-center">{`Accomplishment: ${
+        accomplishment.event_title || "N/A"
+      }`}</h2>
+      <p className="text-lg">
+        Activity Type: {accomplishment.activity_type || "N/A"} <br />
+        Description: {accomplishment.event_description || "N/A"} <br />
+        Event Date:{" "}
+        {accomplishment.event_date
+          ? new Date(accomplishment.event_date).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })
+          : "N/A"}{" "}
+        <br />
+        Current Status: {accomplishment.over_all_status || "Pending"}
+      </p>
 
-    const statusKey = `${key}_status`;
-    const noteKey = `${key}_note`;
-    const multiple = fileFields[key].multiple || false;
+      {documentsConfig.map(({ key, label, files }) => (
+        <section key={key} className="mb-4 flex flex-col">
+          {files.length > 0 && files[0] ? (
+            <div className="flex flex-col gap-2">
+              <h3 className="font-semibold">{label}</h3>
+              <div className="flex bg-gray-200 items-start shadow-lg p-2 rounded-lg flex-1 gap-4">
+                <div className="flex-1">
+                  <div className="flex">
+                    <label className="mr-4">
+                      <input
+                        type="radio"
+                        name={`${key}Status`}
+                        value="approved"
+                        checked={docStatus[key] === "approved"}
+                        onChange={() => handleChange(key, "status", "approved")}
+                        className="mr-2"
+                      />
+                      Approved
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name={`${key}Status`}
+                        value="revision"
+                        checked={docStatus[key] === "revision"}
+                        className="mr-2"
+                        onChange={() => handleChange(key, "status", "revision")}
+                      />
+                      Revision
+                    </label>
+                  </div>
+                  <div className="flex-1">
+                    {/* Always show textarea if there are notes or status is revision */}
+                    {(docStatus[key] === "revision" || revisionNotes[key]) && (
+                      <div className="mt-2">
+                        <textarea
+                          className="w-full rounded bg-gray-50 p-4"
+                          rows={3}
+                          placeholder="Reason for revision"
+                          value={revisionNotes[key]}
+                          onChange={(e) =>
+                            handleChange(key, "note", e.target.value)
+                          }
+                        />
+                        {docStatus[key] !== "revision" &&
+                          revisionNotes[key] && (
+                            <p className="text-amber-600 text-sm mt-1">
+                              Previous revision note displayed. Status is now
+                              approved.
+                            </p>
+                          )}
+                      </div>
+                    )}
+                  </div>
+                </div>
 
-    const status = selectedAccomplishment.documents?.[statusKey] || "Pending";
-    const note =
-      selectedAccomplishment.documents?.[noteKey] || "Up for checking";
-
-    return (
-      <div key={key} className="space-y-2">
-        <div className="flex justify-between items-center">
-          <div className="flex flex-col">
-            <h3 className="font-medium">
-              {fileFields[key].label}{" "}
-              <span className="text-sm text-gray-500">({status})</span>
-            </h3>
-            <span className="text-xs text-gray-600 italic">Note: {note}</span>
-          </div>
-          <button
-            className="text-sm text-blue-600 hover:underline flex items-center"
-            onClick={() => toggleEdit(key)}
-          >
-            <FontAwesomeIcon icon={faEdit} className="mr-1" />
-            {editing[key] ? "Cancel" : "Edit"}
-          </button>
-        </div>
-
-        {!editing[key] ? (
-          multiple ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {(Array.isArray(selectedAccomplishment.documents?.[key])
-                ? selectedAccomplishment.documents?.[key]
-                : selectedAccomplishment.documents?.[key]
-                ? [selectedAccomplishment.documents?.[key]]
-                : []
-              ).map((f, i) => (
-                <FileRenderer key={i} basePath={basePath} fileName={f} />
-              ))}
+                <div className="flex-1/2 flex shrink-0 overflow-auto">
+                  {files.map((file, i) => (
+                    <FileRenderer key={i} basePath={basePath} fileName={file} />
+                  ))}
+                </div>
+              </div>
             </div>
           ) : (
-            <FileRenderer
-              basePath={basePath}
-              fileName={selectedAccomplishment.documents?.[key]}
-            />
-          )
-        ) : multiple ? (
-          <ReusableMultiFileUpload
-            fields={{ [key]: fileFields[key] }}
-            onFileChange={handleFileChange}
-          />
-        ) : (
-          <ReusableFileUpload
-            fields={{ [key]: fileFields[key] }}
-            onFileChange={handleFileChange}
-          />
-        )}
-      </div>
-    );
-  };
-
-  return (
-    <div className="border h-full p-6 space-y-6 overflow-y-auto">
-      <h1 className="text-2xl font-bold mb-6 text-center">
-        Edit External Accomplishment
-      </h1>
-
-      {/* Basic Information */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Basic Information</h2>
-
-        {/* Event Title */}
-        <div>
-          <div className="flex justify-between items-center">
-            <label className="text-sm font-medium">Event Title</label>
-            <button
-              className="text-sm text-blue-600 hover:underline"
-              onClick={() => toggleBasicEdit("event_title")}
-            >
-              {basicEdit.event_title ? "Cancel" : "Edit"}
-            </button>
-          </div>
-          {basicEdit.event_title ? (
-            <input
-              type="text"
-              value={basicInfo.event_title}
-              onChange={(e) =>
-                setBasicInfo((prev) => ({
-                  ...prev,
-                  event_title: e.target.value,
-                }))
-              }
-              className="w-full border rounded px-2 py-1"
-            />
-          ) : (
-            <p className="text-gray-800">
-              {selectedAccomplishment.event_title}
-            </p>
+            <p className="italic text-sm">None</p>
           )}
-        </div>
+        </section>
+      ))}
 
-        {/* Event Date */}
-        <div>
-          <div className="flex justify-between items-center">
-            <label className="text-sm font-medium">Event Date</label>
-            <button
-              className="text-sm text-blue-600 hover:underline"
-              onClick={() => toggleBasicEdit("event_date")}
-            >
-              {basicEdit.event_date ? "Cancel" : "Edit"}
-            </button>
-          </div>
-          {basicEdit.event_date ? (
-            <input
-              type="date"
-              value={basicInfo.event_date}
-              onChange={(e) =>
-                setBasicInfo((prev) => ({
-                  ...prev,
-                  event_date: e.target.value,
-                }))
-              }
-              className="w-full border rounded px-2 py-1"
-            />
-          ) : (
-            <p className="text-gray-800">
-              {LongDateFormat(selectedAccomplishment.event_date)}
-            </p>
-          )}
-        </div>
-
-        {/* Event Description */}
-        <div>
-          <div className="flex justify-between items-center">
-            <label className="text-sm font-medium">Event Description</label>
-            <button
-              className="text-sm text-blue-600 hover:underline"
-              onClick={() => toggleBasicEdit("event_description")}
-            >
-              {basicEdit.event_description ? "Cancel" : "Edit"}
-            </button>
-          </div>
-          {basicEdit.event_description ? (
-            <textarea
-              rows={3}
-              value={basicInfo.event_description}
-              onChange={(e) =>
-                setBasicInfo((prev) => ({
-                  ...prev,
-                  event_description: e.target.value,
-                }))
-              }
-              className="w-full border rounded px-2 py-1"
-            />
-          ) : (
-            <p className="text-gray-800 whitespace-pre-line">
-              {selectedAccomplishment.event_description}
-            </p>
-          )}
-        </div>
+      <div className="flex justify-end gap-4 pt-6">
+        <button
+          type="button"
+          onClick={onBack}
+          disabled={loading}
+          className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition"
+        >
+          Back
+        </button>
+        <button
+          type="submit"
+          disabled={loading}
+          className={`px-4 py-2 rounded transition ${
+            isAllApproved()
+              ? "bg-green-600 hover:bg-green-700 text-white"
+              : "bg-yellow-500 hover:bg-yellow-600 text-white"
+          }`}
+        >
+          {loading
+            ? "Submitting..."
+            : isAllApproved()
+            ? "Approve"
+            : "Send Revision"}
+        </button>
       </div>
-
-      {/* Files Section */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Uploaded Files</h2>
-        <div className="space-y-6">
-          {renderSection("official_invitation")}
-          {renderSection("narrative_report")}
-          {renderSection("liquidation_report")}
-          {renderSection("photo_documentation")}
-          {renderSection("cm063_documents")}
-          {renderSection("echo_seminar_documents")}
-        </div>
-      </div>
-
-      {/* Buttons */}
-      <div className="w-full h-10 flex justify-end gap-2">
-        <div className="h-10 flex justify-end w-fit">
-          <button className="px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow transition-all">
-            CANCEL
-          </button>
-        </div>
-        {isAnythingEditing && (
-          <div className="h-10 flex justify-end w-fit">
-            <button
-              onClick={handleUpdate}
-              className="px-5 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow transition-all"
-            >
-              UPDATE
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
+    </form>
   );
 }
 
-function EditProposedPlanAccomplishment({ selectedAccomplishment }) {
-  const [basicInfo, setBasicInfo] = useState({
-    event_title: selectedAccomplishment.event_title,
-    event_description: selectedAccomplishment.event_description,
-    event_date: selectedAccomplishment.event_date.split("T")[0], // Format date for input
-    organization: selectedAccomplishment.organization._id,
-    organization_name: selectedAccomplishment.organization.org_name,
-  });
-  const basePath = `/${basicInfo.organization_name}/ProposedActivity/${basicInfo.event_title}`;
-  const [editing, setEditing] = useState({
-    approved_proposal: false,
-    resolution: false,
-    attendance_sheet: false,
-    narrative_report: false,
-    financial_report: false,
-    evaluation_summary: false,
-    photo_documentation: false,
-    sample_evaluations: false,
-  });
+function EditExternalAccomplishmentOSSD({ accomplishment, onBack }) {
+  const [loading, setLoading] = useState(false);
+  const [popup, setPopup] = useState({ visible: false, title: "", text: "" });
 
-  const [basicEdit, setBasicEdit] = useState({
-    event_title: false,
-    event_description: false,
-    event_date: false,
-  });
+  // basePath to access files, encode URI components to avoid malformed URLs
+  const basePath = `/${accomplishment.organization?.org_name}/ExternalAccomplishment/${accomplishment.event_title}`;
 
-  const [uploadedFiles, setUploadedFiles] = useState({});
+  // Create a helper function to safely check if a document exists
+  const documentExists = (docPath) => {
+    return docPath !== undefined && docPath !== null;
+  };
 
-  const fileFields = {
-    approved_proposal: { label: "Approved Proposal", accept: ".pdf" },
-    resolution: { label: "Resolution", accept: ".pdf" },
-    attendance_sheet: { label: "Attendance Sheet", accept: ".pdf" },
-    narrative_report: { label: "Narrative Report", accept: ".pdf" },
-    financial_report: { label: "Financial Report", accept: ".pdf" },
-    evaluation_summary: { label: "Evaluation Summary", accept: ".pdf" },
-    photo_documentation: {
+  const hasDocuments = (docArray) => {
+    return Array.isArray(docArray) && docArray.length > 0;
+  };
+
+  // Initialize statuses based on existing statuses in accomplishment or fallback to 'pending' or null
+  const initialStatus = {
+    official_invitation:
+      accomplishment.documents?.official_invitation_status ||
+      (documentExists(accomplishment.documents?.official_invitation)
+        ? "pending"
+        : null),
+
+    narrative_report:
+      accomplishment.documents?.narrative_report_status ||
+      (documentExists(accomplishment.documents?.narrative_report)
+        ? "pending"
+        : null),
+
+    liquidation_report:
+      accomplishment.documents?.liquidation_report_status ||
+      (documentExists(accomplishment.documents?.liquidation_report)
+        ? "pending"
+        : null),
+
+    photo_documentation:
+      accomplishment.documents?.photo_documentation_status ||
+      (hasDocuments(accomplishment.documents?.photo_documentation)
+        ? "pending"
+        : null),
+
+    cm063_documents:
+      accomplishment.documents?.cm063_documents_status ||
+      (hasDocuments(accomplishment.documents?.cm063_documents)
+        ? "pending"
+        : null),
+
+    echo_seminar_documents:
+      accomplishment.documents?.echo_seminar_documents_status ||
+      (hasDocuments(accomplishment.documents?.echo_seminar_documents)
+        ? "pending"
+        : null),
+  };
+
+  // Initialize revision notes based on existing notes, fallback to empty string
+  const initialNotes = {
+    official_invitation:
+      accomplishment.documents?.official_invitation_notes || "",
+    narrative_report: accomplishment.documents?.narrative_report_notes || "",
+    liquidation_report:
+      accomplishment.documents?.liquidation_report_notes || "",
+    photo_documentation:
+      accomplishment.documents?.photo_documentation_notes || "",
+    cm063_documents: accomplishment.documents?.cm063_documents_notes || "",
+    echo_seminar_documents:
+      accomplishment.documents?.echo_seminar_documents_notes || "",
+  };
+
+  const [docStatus, setDocStatus] = useState(initialStatus);
+  const [revisionNotes, setRevisionNotes] = useState(initialNotes);
+
+  // If accomplishment changes, update states accordingly
+  useEffect(() => {
+    setDocStatus({
+      official_invitation:
+        accomplishment.documents?.official_invitation_status ||
+        (documentExists(accomplishment.documents?.official_invitation)
+          ? "pending"
+          : null),
+
+      narrative_report:
+        accomplishment.documents?.narrative_report_status ||
+        (documentExists(accomplishment.documents?.narrative_report)
+          ? "pending"
+          : null),
+
+      liquidation_report:
+        accomplishment.documents?.liquidation_report_status ||
+        (documentExists(accomplishment.documents?.liquidation_report)
+          ? "pending"
+          : null),
+
+      photo_documentation:
+        accomplishment.documents?.photo_documentation_status ||
+        (hasDocuments(accomplishment.documents?.photo_documentation)
+          ? "pending"
+          : null),
+
+      cm063_documents:
+        accomplishment.documents?.cm063_documents_status ||
+        (hasDocuments(accomplishment.documents?.cm063_documents)
+          ? "pending"
+          : null),
+
+      echo_seminar_documents:
+        accomplishment.documents?.echo_seminar_documents_status ||
+        (hasDocuments(accomplishment.documents?.echo_seminar_documents)
+          ? "pending"
+          : null),
+    });
+
+    setRevisionNotes({
+      official_invitation:
+        accomplishment.documents?.official_invitation_notes || "",
+      narrative_report: accomplishment.documents?.narrative_report_notes || "",
+      liquidation_report:
+        accomplishment.documents?.liquidation_report_notes || "",
+      photo_documentation:
+        accomplishment.documents?.photo_documentation_notes || "",
+      cm063_documents: accomplishment.documents?.cm063_documents_notes || "",
+      echo_seminar_documents:
+        accomplishment.documents?.echo_seminar_documents_notes || "",
+    });
+  }, [accomplishment]);
+
+  const documentsConfig = [
+    {
+      key: "official_invitation",
+      label: "Official Invitation",
+      files: documentExists(accomplishment.documents?.official_invitation)
+        ? [accomplishment.documents.official_invitation]
+        : [],
+    },
+    {
+      key: "narrative_report",
+      label: "Narrative Report",
+      files: documentExists(accomplishment.documents?.narrative_report)
+        ? [accomplishment.documents.narrative_report]
+        : [],
+    },
+    {
+      key: "liquidation_report",
+      label: "Liquidation Report",
+      files: documentExists(accomplishment.documents?.liquidation_report)
+        ? [accomplishment.documents.liquidation_report]
+        : [],
+    },
+    {
+      key: "photo_documentation",
       label: "Photo Documentation",
-      accept: "image/*",
-      multiple: true,
+      files: hasDocuments(accomplishment.documents?.photo_documentation)
+        ? accomplishment.documents.photo_documentation
+        : [],
     },
-    sample_evaluations: {
-      label: "Sample Evaluations",
-      accept: ".pdf",
-      multiple: true,
+    {
+      key: "cm063_documents",
+      label: "CMO 63 Documents",
+      files: hasDocuments(accomplishment.documents?.cm063_documents)
+        ? accomplishment.documents.cm063_documents
+        : [],
     },
+    {
+      key: "echo_seminar_documents",
+      label: "Echo Seminar Documents",
+      files: hasDocuments(accomplishment.documents?.echo_seminar_documents)
+        ? accomplishment.documents.echo_seminar_documents
+        : [],
+    },
+  ];
+
+  const isAllApproved = () => {
+    const statuses = Object.entries(docStatus)
+      .filter(([_, status]) => status !== null)
+      .map(([_, status]) => status);
+    if (statuses.length === 0) return false;
+    return statuses.every((status) => status === "approved");
   };
 
-  const logChange = (message) => {
-    console.log(`[EditProposedPlan] ${message}`);
-  };
-
-  const toggleEdit = (key) => {
-    const now = !editing[key];
-    setEditing((e) => ({ ...e, [key]: now }));
-    logChange(`${now ? "Entered" : "Exited"} edit mode for "${key}".`);
-  };
-
-  const toggleBasicEdit = (field) => {
-    setBasicEdit((prev) => ({ ...prev, [field]: !prev[field] }));
-    if (basicEdit[field]) {
-      // Reset to original value if cancelling edit
-      setBasicInfo((prev) => ({
-        ...prev,
-        [field]:
-          selectedAccomplishment[field] ||
-          (field === "event_date"
-            ? selectedAccomplishment[field].split("T")[0]
-            : ""),
-      }));
+  const handleChange = (key, type, value) => {
+    if (type === "status") {
+      setDocStatus((prev) => ({ ...prev, [key]: value }));
+      // Clear notes when status changes to approved
+      if (value === "approved") {
+        setRevisionNotes((prev) => ({ ...prev, [key]: "" }));
+      }
+    } else if (type === "note") {
+      setRevisionNotes((prev) => ({ ...prev, [key]: value }));
     }
   };
 
-  const handleFileChange = (key, files) => {
-    const arr = files instanceof FileList ? Array.from(files) : files;
-    setUploadedFiles((prev) => ({ ...prev, [key]: arr }));
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
 
-    if (!arr || arr.length === 0) {
-      logChange(`Cleared selection for "${key}".`);
-    } else {
-      logChange(`Selected ${arr.length} file(s) for "${key}".`);
-    }
-  };
+    const statusEntries = Object.entries(docStatus)
+      .filter(([_, status]) => status !== null)
+      .flatMap(([key, status]) => [
+        [`${key}_status`, status],
+        [`${key}_notes`, revisionNotes[key]],
+      ]);
 
-  const handleUpdate = async () => {
-    const formData = new FormData();
+    const body = {
+      accomplishmentId: accomplishment._id,
+      over_all_status: isAllApproved()
+        ? "Approved by the OSSD Coordinator"
+        : "Revision from the OSSD Coordinator",
+      documents: {
+        ...Object.fromEntries(statusEntries),
+      },
+    };
 
-    // Append text fields
-    formData.append("event_title", basicInfo.event_title);
-    formData.append("event_description", basicInfo.event_description);
-    formData.append("event_date", basicInfo.event_date);
-    formData.append("organization", basicInfo.organization);
-    formData.append("activity_type", "ProposedPlan");
-
-    // Metadata
-    formData.append("orgFolder", basicInfo.organization_name);
-    formData.append("orgDocumentClassification", "ProposedPlanAccomplishment");
-    formData.append("orgDocumentTitle", basicInfo.event_title);
-
-    // Append files
-    Object.entries(uploadedFiles).forEach(([key, files]) => {
-      const arr = Array.isArray(files) ? files : [files];
-      arr.forEach((file) => {
-        if (!file) return;
-        const isImage = file.type.startsWith("image/");
-        formData.append(isImage ? "photo" : "document", file);
+    console.log(body);
+    try {
+      const res = await axios.post(
+        `${API_ROUTER}/update-external-accomplishment/adviser/${accomplishment._id}`,
+        body
+      );
+      setPopup({
+        visible: true,
+        title: "Change Submitted",
+        text: "Your changes have been submitted successfully.",
+        ButtonText: "Okay",
       });
-    });
-
-    // File names
-    Object.entries(uploadedFiles).forEach(([key, files]) => {
-      const arr = Array.isArray(files) ? files : [files];
-      arr.forEach((file) => {
-        if (!file) return;
-        formData.append(key, file.name);
+    } catch (err) {
+      setPopup({
+        visible: true,
+        title: "Error",
+        text: err.response?.data?.message || "Something went wrong.",
+        ButtonText: "Okay",
       });
-    });
-
-    // Debug
-    for (let [key, val] of formData.entries()) {
-      console.log(key, val);
+    } finally {
+      setLoading(false);
     }
-
-    // try {
-    //   const { data } = await axios.post(
-    //     `${API_ROUTER}/submit-proposed-plan-accomplishment`,
-    //     formData,
-    //     { headers: { "Content-Type": "multipart/form-data" } }
-    //   );
-    //   console.log("✅ Submission successful:", data);
-    //   alert("Proposed Plan Accomplishment updated successfully!");
-    // } catch (err) {
-    //   console.error("❌ Submission failed:", err);
-    // }
-  };
-
-  const isAnythingEditing =
-    Object.values(editing).includes(true) ||
-    Object.values(basicEdit).includes(true);
-
-  const renderSection = (key) => {
-    if (!fileFields[key]) return null;
-
-    const statusKey = `${key}_status`;
-    const noteKey = `${key}_note`;
-    const multiple = fileFields[key].multiple || false;
-
-    const status = selectedAccomplishment.documents?.[statusKey] || "Pending";
-    const note =
-      selectedAccomplishment.documents?.[noteKey] || "Up for checking";
-
-    return (
-      <div key={key} className="space-y-2">
-        <div className="flex justify-between items-center">
-          <div className="flex flex-col">
-            <h3 className="font-medium">
-              {fileFields[key].label}{" "}
-              <span className="text-sm text-gray-500">({status})</span>
-            </h3>
-            <span className="text-xs text-gray-600 italic">Note: {note}</span>
-          </div>
-          <button
-            className="text-sm text-blue-600 hover:underline flex items-center"
-            onClick={() => toggleEdit(key)}
-          >
-            <FontAwesomeIcon icon={faEdit} className="mr-1" />
-            {editing[key] ? "Cancel" : "Edit"}
-          </button>
-        </div>
-
-        {!editing[key] ? (
-          multiple ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {(Array.isArray(selectedAccomplishment.documents?.[key])
-                ? selectedAccomplishment.documents?.[key]
-                : selectedAccomplishment.documents?.[key]
-                ? [selectedAccomplishment.documents?.[key]]
-                : []
-              ).map((f, i) => (
-                <FileRenderer key={i} basePath={basePath} fileName={f} />
-              ))}
-            </div>
-          ) : (
-            <FileRenderer
-              basePath={basePath}
-              fileName={selectedAccomplishment.documents?.[key]}
-            />
-          )
-        ) : multiple ? (
-          <ReusableMultiFileUpload
-            fields={{ [key]: fileFields[key] }}
-            onFileChange={handleFileChange}
-          />
-        ) : (
-          <ReusableFileUpload
-            fields={{ [key]: fileFields[key] }}
-            onFileChange={handleFileChange}
-          />
-        )}
-      </div>
-    );
   };
 
   return (
-    <div className="border h-full space-y-6 overflow-y-auto">
-      <h1 className="text-2xl font-bold mb-6 text-center">
-        Edit Proposed Plan Accomplishment
-      </h1>
+    <form onSubmit={onSubmit} className="space-y-6 bg-white p-4  mx-auto">
+      {popup.visible && (
+        <PopUp
+          {...popup}
+          onClose={() => setPopup((p) => ({ ...p, visible: false }))}
+        />
+      )}
 
-      {/* Basic Information */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Basic Information</h2>
+      <h2 className="text-2xl font-bold text-center">{`External Accomplishment: ${
+        accomplishment.event_title || "N/A"
+      }`}</h2>
+      <p className="text-lg">
+        Activity Type: External <br />
+        Description: {accomplishment.event_description || "N/A"} <br />
+        Event Date:{" "}
+        {accomplishment.event_date
+          ? new Date(accomplishment.event_date).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })
+          : "N/A"}
+        <br />
+        Current Status: {accomplishment.over_all_status || "Pending"}
+      </p>
 
-        {/* Event Title */}
-        <div>
-          <div className="flex justify-between items-center">
-            <label className="text-sm font-medium">Event Title</label>
-            <button
-              className="text-sm text-blue-600 hover:underline"
-              onClick={() => toggleBasicEdit("event_title")}
-            >
-              {basicEdit.event_title ? "Cancel" : "Edit"}
-            </button>
-          </div>
-          {basicEdit.event_title ? (
-            <input
-              type="text"
-              value={basicInfo.event_title}
-              onChange={(e) =>
-                setBasicInfo((prev) => ({
-                  ...prev,
-                  event_title: e.target.value,
-                }))
-              }
-              className="w-full border rounded px-2 py-1"
-            />
+      {documentsConfig.map(({ key, label, files }) => (
+        <section key={key} className="mb-4 flex flex-col">
+          {files.length > 0 && files[0] ? (
+            <div className="flex flex-col gap-2">
+              <h3 className="font-semibold">{label}</h3>
+              <div className="flex bg-gray-200 items-start shadow-lg p-2 rounded-lg flex-1 gap-4">
+                <div className="flex-1">
+                  <div className="flex">
+                    <label className="mr-4">
+                      <input
+                        type="radio"
+                        name={`${key}Status`}
+                        value="approved"
+                        checked={docStatus[key] === "approved"}
+                        onChange={() => handleChange(key, "status", "approved")}
+                        className="mr-2"
+                      />
+                      Approved
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name={`${key}Status`}
+                        value="revision"
+                        checked={docStatus[key] === "revision"}
+                        className="mr-2"
+                        onChange={() => handleChange(key, "status", "revision")}
+                      />
+                      Revision
+                    </label>
+                  </div>
+                  <div className="flex-1">
+                    {/* Always show textarea if there are notes or status is revision */}
+                    {(docStatus[key] === "revision" || revisionNotes[key]) && (
+                      <div className="mt-2">
+                        <textarea
+                          className="w-full rounded bg-gray-50 p-4"
+                          rows={3}
+                          placeholder="Reason for revision"
+                          value={revisionNotes[key]}
+                          onChange={(e) =>
+                            handleChange(key, "note", e.target.value)
+                          }
+                        />
+                        {docStatus[key] !== "revision" &&
+                          revisionNotes[key] && (
+                            <p className="text-amber-600 text-sm mt-1">
+                              Previous revision note displayed. Status is now
+                              approved.
+                            </p>
+                          )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex-1/2 flex shrink-0 overflow-auto">
+                  {files.map((file, i) => (
+                    <FileRenderer key={i} basePath={basePath} fileName={file} />
+                  ))}
+                </div>
+              </div>
+            </div>
           ) : (
-            <p className="text-gray-800">
-              {selectedAccomplishment.event_title}
-            </p>
+            <p className="italic text-sm">None</p>
           )}
-        </div>
+        </section>
+      ))}
 
-        {/* Event Date */}
-        <div>
-          <div className="flex justify-between items-center">
-            <label className="text-sm font-medium">Event Date</label>
-            <button
-              className="text-sm text-blue-600 hover:underline"
-              onClick={() => toggleBasicEdit("event_date")}
-            >
-              {basicEdit.event_date ? "Cancel" : "Edit"}
-            </button>
-          </div>
-          {basicEdit.event_date ? (
-            <input
-              type="date"
-              value={basicInfo.event_date}
-              onChange={(e) =>
-                setBasicInfo((prev) => ({
-                  ...prev,
-                  event_date: e.target.value,
-                }))
-              }
-              className="w-full border rounded px-2 py-1"
-            />
-          ) : (
-            <p className="text-gray-800">
-              {LongDateFormat(selectedAccomplishment.event_date)}
-            </p>
-          )}
-        </div>
-
-        {/* Event Description */}
-        <div>
-          <div className="flex justify-between items-center">
-            <label className="text-sm font-medium">Event Description</label>
-            <button
-              className="text-sm text-blue-600 hover:underline"
-              onClick={() => toggleBasicEdit("event_description")}
-            >
-              {basicEdit.event_description ? "Cancel" : "Edit"}
-            </button>
-          </div>
-          {basicEdit.event_description ? (
-            <textarea
-              rows={3}
-              value={basicInfo.event_description}
-              onChange={(e) =>
-                setBasicInfo((prev) => ({
-                  ...prev,
-                  event_description: e.target.value,
-                }))
-              }
-              className="w-full border rounded px-2 py-1"
-            />
-          ) : (
-            <p className="text-gray-800 whitespace-pre-line">
-              {selectedAccomplishment.event_description}
-            </p>
-          )}
-        </div>
+      <div className="flex justify-end gap-4 pt-6">
+        <button
+          type="button"
+          onClick={onBack}
+          disabled={loading}
+          className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition"
+        >
+          Back
+        </button>
+        <button
+          type="submit"
+          disabled={loading}
+          className={`px-4 py-2 rounded transition ${
+            isAllApproved()
+              ? "bg-green-600 hover:bg-green-700 text-white"
+              : "bg-yellow-500 hover:bg-yellow-600 text-white"
+          }`}
+        >
+          {loading
+            ? "Submitting..."
+            : isAllApproved()
+            ? "Approve"
+            : "Send Revision"}
+        </button>
       </div>
-
-      {/* Files Section */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Uploaded Files</h2>
-        <div className="space-y-6">
-          {renderSection("approved_proposal")}
-          {renderSection("resolution")}
-          {renderSection("attendance_sheet")}
-          {renderSection("narrative_report")}
-          {renderSection("financial_report")}
-          {renderSection("evaluation_summary")}
-          {renderSection("photo_documentation")}
-          {renderSection("sample_evaluations")}
-        </div>
-      </div>
-
-      {/* Buttons */}
-      <div className="w-full h-10 flex justify-end gap-2">
-        <div className="h-10 flex justify-end w-fit">
-          <button className="px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow transition-all">
-            CANCEL
-          </button>
-        </div>
-        {isAnythingEditing && (
-          <div className="h-10 flex justify-end w-fit">
-            <button
-              onClick={handleUpdate}
-              className="px-5 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow transition-all"
-            >
-              UPDATE
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
+    </form>
   );
 }
 
-export default function RandomTest({ selectedAccomplishment }) {
-  console.log("selected Accomplishment");
-  console.log(selectedAccomplishment);
+function EditProposedPlanAccomplishmentOSSD({ accomplishment, onBack }) {
+  const [loading, setLoading] = useState(false);
+  const [popup, setPopup] = useState({ visible: false, title: "", text: "" });
+
+  // basePath to access files, encode URI components to avoid malformed URLs
+  const basePath = `/${accomplishment.organization?.org_name}/ProposedActivity/${accomplishment.event_title}`;
+
+  // Create a helper function to safely check if a document exists
+  const documentExists = (docPath) => {
+    return docPath !== undefined && docPath !== null;
+  };
+
+  const hasDocuments = (docArray) => {
+    return Array.isArray(docArray) && docArray.length > 0;
+  };
+
+  // Initialize statuses based on existing statuses in accomplishment or fallback to 'pending' or null
+  const initialStatus = {
+    approved_proposal:
+      accomplishment.documents?.approved_proposal_status ||
+      (documentExists(accomplishment.documents?.approved_proposal)
+        ? "pending"
+        : null),
+
+    resolution:
+      accomplishment.documents?.resolution_status ||
+      (documentExists(accomplishment.documents?.resolution) ? "pending" : null),
+
+    attendance_sheet:
+      accomplishment.documents?.attendance_sheet_status ||
+      (documentExists(accomplishment.documents?.attendance_sheet)
+        ? "pending"
+        : null),
+
+    narrative_report:
+      accomplishment.documents?.narrative_report_status ||
+      (documentExists(accomplishment.documents?.narrative_report)
+        ? "pending"
+        : null),
+
+    financial_report:
+      accomplishment.documents?.financial_report_status ||
+      (documentExists(accomplishment.documents?.financial_report)
+        ? "pending"
+        : null),
+
+    evaluation_summary:
+      accomplishment.documents?.evaluation_summary_status ||
+      (documentExists(accomplishment.documents?.evaluation_summary)
+        ? "pending"
+        : null),
+
+    photo_documentation:
+      accomplishment.documents?.photo_documentation_status ||
+      (hasDocuments(accomplishment.documents?.photo_documentation)
+        ? "pending"
+        : null),
+
+    sample_evaluations:
+      accomplishment.documents?.sample_evaluations_status ||
+      (hasDocuments(accomplishment.documents?.sample_evaluations)
+        ? "pending"
+        : null),
+  };
+
+  // Initialize revision notes based on existing notes, fallback to empty string
+  const initialNotes = {
+    approved_proposal: accomplishment.documents?.approved_proposal_notes || "",
+    resolution: accomplishment.documents?.resolution_notes || "",
+    attendance_sheet: accomplishment.documents?.attendance_sheet_notes || "",
+    narrative_report: accomplishment.documents?.narrative_report_notes || "",
+    financial_report: accomplishment.documents?.financial_report_notes || "",
+    evaluation_summary:
+      accomplishment.documents?.evaluation_summary_notes || "",
+    photo_documentation:
+      accomplishment.documents?.photo_documentation_notes || "",
+    sample_evaluations:
+      accomplishment.documents?.sample_evaluations_notes || "",
+  };
+
+  const [docStatus, setDocStatus] = useState(initialStatus);
+  const [revisionNotes, setRevisionNotes] = useState(initialNotes);
+
+  // If accomplishment changes, update states accordingly
+  useEffect(() => {
+    setDocStatus({
+      approved_proposal:
+        accomplishment.documents?.approved_proposal_status ||
+        (documentExists(accomplishment.documents?.approved_proposal)
+          ? "pending"
+          : null),
+
+      resolution:
+        accomplishment.documents?.resolution_status ||
+        (documentExists(accomplishment.documents?.resolution)
+          ? "pending"
+          : null),
+
+      attendance_sheet:
+        accomplishment.documents?.attendance_sheet_status ||
+        (documentExists(accomplishment.documents?.attendance_sheet)
+          ? "pending"
+          : null),
+
+      narrative_report:
+        accomplishment.documents?.narrative_report_status ||
+        (documentExists(accomplishment.documents?.narrative_report)
+          ? "pending"
+          : null),
+
+      financial_report:
+        accomplishment.documents?.financial_report_status ||
+        (documentExists(accomplishment.documents?.financial_report)
+          ? "pending"
+          : null),
+
+      evaluation_summary:
+        accomplishment.documents?.evaluation_summary_status ||
+        (documentExists(accomplishment.documents?.evaluation_summary)
+          ? "pending"
+          : null),
+
+      photo_documentation:
+        accomplishment.documents?.photo_documentation_status ||
+        (hasDocuments(accomplishment.documents?.photo_documentation)
+          ? "pending"
+          : null),
+
+      sample_evaluations:
+        accomplishment.documents?.sample_evaluations_status ||
+        (hasDocuments(accomplishment.documents?.sample_evaluations)
+          ? "pending"
+          : null),
+    });
+
+    setRevisionNotes({
+      approved_proposal:
+        accomplishment.documents?.approved_proposal_notes || "",
+      resolution: accomplishment.documents?.resolution_notes || "",
+      attendance_sheet: accomplishment.documents?.attendance_sheet_notes || "",
+      narrative_report: accomplishment.documents?.narrative_report_notes || "",
+      financial_report: accomplishment.documents?.financial_report_notes || "",
+      evaluation_summary:
+        accomplishment.documents?.evaluation_summary_notes || "",
+      photo_documentation:
+        accomplishment.documents?.photo_documentation_notes || "",
+      sample_evaluations:
+        accomplishment.documents?.sample_evaluations_notes || "",
+    });
+  }, [accomplishment]);
+
+  const documentsConfig = [
+    {
+      key: "approved_proposal",
+      label: "Approved Proposal",
+      files: documentExists(accomplishment.documents?.approved_proposal)
+        ? [accomplishment.documents.approved_proposal]
+        : [],
+    },
+    {
+      key: "resolution",
+      label: "Resolution",
+      files: documentExists(accomplishment.documents?.resolution)
+        ? [accomplishment.documents.resolution]
+        : [],
+    },
+    {
+      key: "attendance_sheet",
+      label: "Attendance Sheet",
+      files: documentExists(accomplishment.documents?.attendance_sheet)
+        ? [accomplishment.documents.attendance_sheet]
+        : [],
+    },
+    {
+      key: "narrative_report",
+      label: "Narrative Report",
+      files: documentExists(accomplishment.documents?.narrative_report)
+        ? [accomplishment.documents.narrative_report]
+        : [],
+    },
+    {
+      key: "financial_report",
+      label: "Financial Report",
+      files: documentExists(accomplishment.documents?.financial_report)
+        ? [accomplishment.documents.financial_report]
+        : [],
+    },
+    {
+      key: "evaluation_summary",
+      label: "Evaluation Summary",
+      files: documentExists(accomplishment.documents?.evaluation_summary)
+        ? [accomplishment.documents.evaluation_summary]
+        : [],
+    },
+    {
+      key: "photo_documentation",
+      label: "Photo Documentation",
+      files: hasDocuments(accomplishment.documents?.photo_documentation)
+        ? accomplishment.documents.photo_documentation
+        : [],
+    },
+    {
+      key: "sample_evaluations",
+      label: "Sample Evaluations",
+      files: hasDocuments(accomplishment.documents?.sample_evaluations)
+        ? accomplishment.documents.sample_evaluations
+        : [],
+    },
+  ];
+
+  const isAllApproved = () => {
+    const statuses = Object.entries(docStatus)
+      .filter(([_, status]) => status !== null)
+      .map(([_, status]) => status);
+    if (statuses.length === 0) return false;
+    return statuses.every((status) => status === "approved");
+  };
+
+  const handleChange = (key, type, value) => {
+    if (type === "status") {
+      setDocStatus((prev) => ({ ...prev, [key]: value }));
+      // Clear notes when status changes to approved
+      if (value === "approved") {
+        setRevisionNotes((prev) => ({ ...prev, [key]: "" }));
+      }
+    } else if (type === "note") {
+      setRevisionNotes((prev) => ({ ...prev, [key]: value }));
+    }
+  };
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const statusEntries = Object.entries(docStatus)
+      .filter(([_, status]) => status !== null)
+      .flatMap(([key, status]) => [
+        [`${key}_status`, status],
+        [`${key}_notes`, revisionNotes[key]],
+      ]);
+
+    const body = {
+      accomplishmentId: accomplishment._id,
+      over_all_status: isAllApproved()
+        ? "Approved by the OSSD Coordinator"
+        : "Revision from the OSSD Coordinator",
+      documents: {
+        ...Object.fromEntries(statusEntries),
+      },
+    };
+    console.log(body);
+
+    try {
+      const res = await axios.post(
+        `${API_ROUTER}/update-proposed-accomplishment/adviser/${accomplishment._id}`,
+        body
+      );
+      setPopup({
+        visible: true,
+        title: "Change Submitted",
+        text: "Your changes have been submitted successfully.",
+        ButtonText: "Okay",
+      });
+    } catch (err) {
+      setPopup({
+        visible: true,
+        title: "Error",
+        text: err.response?.data?.message || "Something went wrong.",
+        ButtonText: "Okay",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={onSubmit} className="space-y-6 bg-white p-4  mx-auto">
+      {popup.visible && (
+        <PopUp
+          {...popup}
+          onClose={() => setPopup((p) => ({ ...p, visible: false }))}
+        />
+      )}
+
+      <h2 className="text-2xl font-bold text-center">{`Proposed Plan: ${
+        accomplishment.event_title || "N/A"
+      }`}</h2>
+      <p className="text-lg">
+        Activity Type: Proposed Plan <br />
+        Description: {accomplishment.event_description || "N/A"} <br />
+        Event Date:{" "}
+        {accomplishment.event_date
+          ? new Date(accomplishment.event_date).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })
+          : "N/A"}
+        <br />
+        Current Status: {accomplishment.over_all_status || "Pending"}
+      </p>
+
+      {documentsConfig.map(({ key, label, files }) => (
+        <section key={key} className="mb-4 flex flex-col">
+          {files.length > 0 && files[0] ? (
+            <div className="flex flex-col gap-2">
+              <h3 className="font-semibold">{label}</h3>
+              <div className="flex bg-gray-200 items-start shadow-lg p-2 rounded-lg flex-1 gap-4">
+                <div className="flex-1">
+                  <div className="flex">
+                    <label className="mr-4">
+                      <input
+                        type="radio"
+                        name={`${key}Status`}
+                        value="approved"
+                        checked={docStatus[key] === "approved"}
+                        onChange={() => handleChange(key, "status", "approved")}
+                        className="mr-2"
+                      />
+                      Approved
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name={`${key}Status`}
+                        value="revision"
+                        checked={docStatus[key] === "revision"}
+                        className="mr-2"
+                        onChange={() => handleChange(key, "status", "revision")}
+                      />
+                      Revision
+                    </label>
+                  </div>
+                  <div className="flex-1">
+                    {/* Always show textarea if there are notes or status is revision */}
+                    {(docStatus[key] === "revision" || revisionNotes[key]) && (
+                      <div className="mt-2">
+                        <textarea
+                          className="w-full rounded bg-gray-50 p-4"
+                          rows={3}
+                          placeholder="Reason for revision"
+                          value={revisionNotes[key]}
+                          onChange={(e) =>
+                            handleChange(key, "note", e.target.value)
+                          }
+                        />
+                        {docStatus[key] !== "revision" &&
+                          revisionNotes[key] && (
+                            <p className="text-amber-600 text-sm mt-1">
+                              Previous revision note displayed. Status is now
+                              approved.
+                            </p>
+                          )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex-1/2 flex shrink-0 overflow-auto">
+                  {files.map((file, i) => (
+                    <FileRenderer key={i} basePath={basePath} fileName={file} />
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <p className="italic text-sm">None</p>
+          )}
+        </section>
+      ))}
+
+      <div className="flex justify-end gap-4 pt-6">
+        <button
+          type="button"
+          onClick={onBack}
+          disabled={loading}
+          className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition"
+        >
+          Back
+        </button>
+        <button
+          type="submit"
+          disabled={loading}
+          className={`px-4 py-2 rounded transition ${
+            isAllApproved()
+              ? "bg-green-600 hover:bg-green-700 text-white"
+              : "bg-yellow-500 hover:bg-yellow-600 text-white"
+          }`}
+        >
+          {loading
+            ? "Submitting..."
+            : isAllApproved()
+            ? "Approve"
+            : "Send Revision"}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+export default function AccomplishmentEditOSSD({
+  selectedAccomplishment,
+  onBack,
+}) {
+  console.log();
+  console.log("selected Accomplishment", selectedAccomplishment.activity_type);
 
   const activityType = selectedAccomplishment.activity_type;
 
-  console.log(activityType);
   return (
-    <div className=" flex p-6 flex-col">
-      {activityType === "Institutional Activity" && (
-        <EditInstitutionalAccomplishment
-          selectedAccomplishment={selectedAccomplishment}
+    <div className=" flex  flex-col h-full w-full overflow-auto">
+      {activityType === "Institutional" && (
+        <EditInstitutionalAccomplisheditmentOSSD
+          accomplishment={selectedAccomplishment}
+          onBack={onBack}
         />
       )}
-      {activityType === "External Activity" && (
-        <EditExternalAccomplishment
-          selectedAccomplishment={selectedAccomplishment}
+      {activityType === "External" && (
+        <EditExternalAccomplishmentOSSD
+          accomplishment={selectedAccomplishment}
+          onBack={onBack}
         />
       )}
-      {activityType === "Proposed Plan" && (
-        <EditProposedPlanAccomplishment
-          selectedAccomplishment={selectedAccomplishment}
+      {activityType === "Proposed Action Plan" && (
+        <EditProposedPlanAccomplishmentOSSD
+          accomplishment={selectedAccomplishment}
+          onBack={onBack}
         />
       )}
     </div>

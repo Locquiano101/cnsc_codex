@@ -61,10 +61,20 @@ const AccomplishedInstitutionalSchema = new Schema(
     event_score: { type: Number },
 
     documents: {
+      narrative_status: { type: String },
+      narrative_notes: { type: String },
+      attendance_status: { type: String },
+      attendance_notes: { type: String },
+
+      documentation_status: { type: String },
+      documentation_notes: { type: String },
+      certificate_status: { type: String },
+      certificate_notes: { type: String },
+
       narrative_report: { type: String },
       attendance_sheet: { type: String },
       certificate: [{ type: String }],
-      photo_documentation: [{ type: String }],
+      photo_documentations: [{ type: String }],
     },
   },
   { timestamps: true }
@@ -93,6 +103,20 @@ const AccomplishedExternalSchema = new Schema(
       echo_seminar_document: { type: String },
       cm063_documents: [{ type: String }],
       photo_documentation: [{ type: String }],
+
+      narrative_report_notes: { type: String },
+      official_invitation_notes: { type: String },
+      liquidation_report_notes: { type: String },
+      echo_seminar_document_notes: { type: String },
+      cm063_documents_notes: { type: String },
+      photo_documentation_notes: { type: String },
+
+      narrative_report_status: { type: String },
+      official_invitation_status: { type: String },
+      liquidation_report_status: { type: String },
+      echo_seminar_document_status: { type: String },
+      cm063_documents_status: { type: String },
+      photo_documentation_status: { type: String },
     },
   },
   { timestamps: true }
