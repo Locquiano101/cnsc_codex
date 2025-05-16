@@ -17,8 +17,7 @@ const AccomplishedProposedSchema = new Schema(
     event_status: { type: String },
     event_date: { type: Date },
 
-    event_score: { type: Number },
-
+    event_score: { type: Number, default: null },
     documents: {
       approved_proposal: { type: String },
       attendance_sheet: { type: String },
@@ -58,8 +57,7 @@ const AccomplishedInstitutionalSchema = new Schema(
     event_description: { type: String },
     event_date: { type: Date },
 
-    event_score: { type: Number },
-
+    event_score: { type: Number, default: null },
     documents: {
       narrative_status: { type: String },
       narrative_notes: { type: String },
@@ -89,12 +87,14 @@ const AccomplishedExternalSchema = new Schema(
     },
 
     activity_type: { type: String, require: true },
-    event_score: { type: Number },
 
     over_all_status: { type: String },
+
     event_title: { type: String },
     event_description: { type: String },
     event_date: { type: Date },
+
+    event_score: { type: Number, default: null },
 
     documents: {
       narrative_report: { type: String },
@@ -118,41 +118,6 @@ const AccomplishedExternalSchema = new Schema(
       cm063_documents_status: { type: String },
       photo_documentation_status: { type: String },
     },
-  },
-  { timestamps: true }
-);
-
-const meetingSchema = new Schema(
-  {
-    minutes: { type: String },
-    photo_documentation: [{ type: String }],
-    resolution: [{ type: String }],
-  },
-  { timestamps: true }
-);
-
-const accomplishmentReportSchema = new Schema(
-  {
-    organization: {
-      type: Schema.Types.ObjectId,
-      ref: "organizations",
-      required: true,
-    },
-
-    semester: { type: String },
-    academic_year: { type: String },
-    cover_page: { type: String },
-    table_of_contents: { type: String },
-    approved_action_plan: { type: String },
-
-    awards_and_recognition: [{ type: String }],
-
-    meetings: [meetingSchema],
-    accomplished_activities: [AccomplishedProposedSchema],
-    participation_in_institutional_activities: [
-      AccomplishedInstitutionalSchema,
-    ],
-    participation_in_external_activities: [AccomplishedExternalSchema],
   },
   { timestamps: true }
 );
@@ -196,13 +161,6 @@ const proposalSchema = new Schema(
   { timestamps: true }
 );
 
-// Model Export
-const Meeting = mongoose.model("Meeting", meetingSchema);
-const Accomplishments = mongoose.model(
-  "accomplishment_report",
-  accomplishmentReportSchema
-);
-
 const ExternalAccomplishments = mongoose.model(
   "external_accomplishment",
   AccomplishedExternalSchema
@@ -218,8 +176,6 @@ const ProposedAccomplishments = mongoose.model(
 const Proposal = mongoose.model("Proposal", proposalSchema);
 
 export {
-  Accomplishments,
-  Meeting,
   Proposal,
   ExternalAccomplishments,
   InstutionalAccomplisments,

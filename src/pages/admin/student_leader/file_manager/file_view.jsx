@@ -39,8 +39,6 @@ function PopUp({ title, text, onClose, buttons }) {
   );
 }
 
-function PinnedFiles(user) {}
-
 export default function StudentFiles({ user }) {
   const [allFiles, setAllFiles] = useState([]);
   const [filteredFiles, setFilteredFiles] = useState([]);
