@@ -110,6 +110,8 @@ export default function StudentLeaderPage() {
         return <StudentAdminHomePage />;
       case "proposals":
         return <StudentProposalTableView user={storedUser} />;
+      case "accreditations":
+        return <StudentProposalTa1 bleView user={storedUser} />;
       case "documents":
         return <StudentFiles user={storedUser} />;
       case "accreditations":

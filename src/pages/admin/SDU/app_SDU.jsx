@@ -15,10 +15,10 @@ import {
 import { HandleLogout } from "../../../api/login_api";
 import AccreditationTableSection from "./accreditation/view";
 import SDUAdminUserTableView from "./user_management_page/user_table_view";
-
+import SandboxAccomplishment from "./accomplishments/accomplishment_main";
 export default function StudentDevelopmentUnitPage() {
   const navigate = useNavigate();
-  const [activeContent, setActiveContent] = useState("users");
+  const [activeContent, setActiveContent] = useState("accomplishments");
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -35,6 +35,8 @@ export default function StudentDevelopmentUnitPage() {
         return <>This is the organizations section</>;
       case "accreditations":
         return <AccreditationTableSection />;
+      case "accomplishments":
+        return <SandboxAccomplishment />;
       case "documents":
         return <>This is documents content</>;
       case "users":
@@ -69,13 +71,16 @@ export default function StudentDevelopmentUnitPage() {
             { key: "organizations", icon: faUsers, label: "Organizations" },
             { key: "users", icon: faUserGear, label: "User Management" },
             {
+              key: "accomplishments",
+              icon: faUserGear,
+              label: "Organization Accomplishments",
+            },
+            {
               key: "accreditations",
               icon: faFolderOpen,
               label: "Accreditations",
             },
-            { key: "documents", icon: faFileAlt, label: "Documents" },
             { key: "logs", icon: faClockRotateLeft, label: "System Logs" },
-            { key: "settings", icon: faGears, label: "Settings" },
           ].map(({ key, icon, label }) => (
             <div
               key={key}
@@ -103,7 +108,7 @@ export default function StudentDevelopmentUnitPage() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto bg-gray-50 p-4">
+      <main className="flex-1 overflow-y-auto bg-white p-4">
         {renderContent()}
       </main>
     </div>
