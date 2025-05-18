@@ -15,11 +15,11 @@ export const FileRenderer = ({ basePath, fileName }) => {
   const [showModal, setShowModal] = useState(false);
   if (isImage) {
     return (
-      <div className="object-cover  rounded-lg flex-shrink-0 flex flex-wrap relative">
+      <div className="object-cover h-70 object-center  rounded-lg flex-shrink-0 flex flex-wrap relative overflow-hidden">
         <img
           src={url}
           alt={fileName}
-          className="h-100 w-auto mx-2 rounded-lg object-cover cursor-pointer"
+          className="w-full h-70x-2 rounded-lg object-cover cursor-pointer"
           onClick={() => setShowModal(true)}
         />
 
@@ -37,7 +37,7 @@ export const FileRenderer = ({ basePath, fileName }) => {
               <img
                 src={url}
                 alt={fileName}
-                className="h-full w-full  rounded-lg shadow-lg"
+                className="max-h-[90vh] max-w-[90vw] object-contain rounded-lg shadow-lg"
               />
             </div>
           </div>
@@ -121,11 +121,11 @@ export const FileRendererAll = ({ basePath, fileName }) => {
   const [showModal, setShowModal] = useState(false);
   if (isImage) {
     return (
-      <div className="object-cover rounded-lg flex-shrink-0 shadow-md relative">
+      <div className="object-cover rounded-lg ">
         <img
           src={url}
           alt={fileName}
-          className="h-100 w-auto rounded-lg object-cover cursor-pointer"
+          className="w-full h-full rounded-lg object-cover cursor-pointer"
           onClick={() => setShowModal(true)}
         />
 

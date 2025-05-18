@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { API_ROUTER } from "../../../../App";
-import { FileRendererAll } from "../../../../components/file_renderer";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -10,24 +9,37 @@ import {
   faFile,
   faMapPin,
   faThumbTack,
+  faFileAlt,
+  faFilePdf,
+  faFileImage,
+  faFileWord,
+  faFileExcel,
+  faFilePowerpoint,
+  faFileCode,
+  faFileArchive,
+  faFileVideo,
+  faFileAudio,
+  faTimes,
+  faSearch,
+  faSpinner,
 } from "@fortawesome/free-solid-svg-icons";
 
-// Popup component
+// Improved popup component with professional styling
 function PopUp({ title, text, onClose, buttons }) {
   return (
-    <div className="fixed inset-0 bg-black/10 backdrop-blur-md flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 shadow-xl max-w-md w-full">
-        <h3 className="text-xl font-bold mb-2">{title}</h3>
-        <p className="mb-6">{text}</p>
-        <div className="flex justify-end gap-4">
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn">
+      <div className="bg-white rounded-lg p-6 shadow-2xl max-w-md w-full animate-scaleIn">
+        <h3 className="text-xl font-bold mb-3 text-gray-800">{title}</h3>
+        <p className="mb-6 text-gray-600">{text}</p>
+        <div className="flex justify-end gap-3">
           {buttons.map((button, index) => (
             <button
               key={index}
               onClick={button.onClick}
-              className={`px-4 py-2 rounded ${
+              className={`px-4 py-2 rounded-md font-medium transition-colors duration-200 ${
                 index === 0
-                  ? "bg-blue-600 text-white hover:bg-blue-700"
-                  : "bg-gray-200 hover:bg-gray-300"
+                  ? "bg-blue-600 text-white hover:bg-blue-700 shadow-sm"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
               }`}
             >
               {button.label}
@@ -39,6 +51,232 @@ function PopUp({ title, text, onClose, buttons }) {
   );
 }
 
+export const FileRendererAll = ({ basePath, fileName, type, onPin }) => {
+  const [showPreview, setShowPreview] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const extension = fileName.split(".").pop().toLowerCase();
+  const isImage = ["jpg", "jpeg", "png", "gif", "webp"].includes(extension);
+  const displayName =
+    fileName.length > 25 ? fileName.substring(0, 22) + "..." : fileName;
+
+  // Get file icon based on extension
+  const getFileIcon = () => {
+    switch (extension) {
+      case "pdf":
+        return faFilePdf;
+      case "jpg":
+      case "jpeg":
+      case "png":
+      case "gif":
+      case "svg":
+      case "webp":
+        return faFileImage;
+      case "doc":
+      case "docx":
+        return faFileWord;
+      case "xls":
+      case "xlsx":
+      case "csv":
+        return faFileExcel;
+      case "ppt":
+      case "pptx":
+        return faFilePowerpoint;
+      case "zip":
+      case "rar":
+      case "7z":
+        return faFileArchive;
+      case "mp4":
+      case "mov":
+      case "avi":
+      case "webm":
+        return faFileVideo;
+      case "mp3":
+      case "wav":
+      case "ogg":
+        return faFileAudio;
+      case "js":
+      case "html":
+      case "css":
+      case "json":
+      case "php":
+      case "py":
+        return faFileCode;
+      case "txt":
+        return faFileAlt;
+      default:
+        return faFile;
+    }
+  };
+
+  const handlePreviewClick = () => {
+    if (isImage) {
+      setIsLoading(true);
+      setShowPreview(true);
+      setIsLoading(false);
+    } else {
+      window.open(basePath, "_blank");
+    }
+  };
+
+  const handleClosePreview = (e) => {
+    e?.stopPropagation();
+    setShowPreview(false);
+  };
+
+  // Image Preview Modal
+  const ImagePreviewModal = () => (
+    <div
+      className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+      onClick={handleClosePreview}
+    >
+      <div className="absolute top-4 right-4">
+        <button
+          onClick={handleClosePreview}
+          className="text-white hover:text-gray-300 text-3xl"
+        >
+          <FontAwesomeIcon icon={faTimes} />
+        </button>
+      </div>
+
+      <div
+        className="max-w-full max-h-full"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {isLoading ? (
+          <div className="flex items-center justify-center h-64">
+            <FontAwesomeIcon
+              icon={faSpinner}
+              className="animate-spin text-white text-4xl"
+            />
+          </div>
+        ) : (
+          <img
+            src={basePath}
+            alt={fileName}
+            className="max-w-full max-h-[90vh] object-contain"
+            onLoad={() => setIsLoading(false)}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "/placeholder-image.png";
+            }}
+          />
+        )}
+      </div>
+
+      <div className="absolute bottom-4 left-0 right-0 text-center text-white text-sm">
+        {fileName}
+      </div>
+    </div>
+  );
+
+  // Image Thumbnail
+  if (isImage) {
+    return (
+      <>
+        <div className="relative w-full h-full flex flex-col items-center justify-center group cursor-zoom-in">
+          {/* Pin Button */}
+          {onPin && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onPin();
+              }}
+              className="absolute top-2 right-2 z-10 p-2 bg-white/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-100"
+            >
+              <FontAwesomeIcon
+                icon={faThumbTack}
+                className="transform rotate-45 text-red-500 hover:text-red-700"
+              />
+            </button>
+          )}
+
+          {/* Image Thumbnail */}
+          <div
+            className="relative w-full h-full overflow-hidden rounded-lg"
+            onClick={handlePreviewClick}
+          >
+            <img
+              src={basePath}
+              alt={fileName}
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "/placeholder-image.png";
+              }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/50 pointer-events-none" />
+          </div>
+
+          {/* File Name */}
+          <div className="absolute bottom-0 left-0 right-0 p-2">
+            <div className="w-full text-white text-sm font-medium truncate text-center">
+              {displayName}
+            </div>
+          </div>
+        </div>
+
+        {/* Preview Modal */}
+        {showPreview && <ImagePreviewModal />}
+      </>
+    );
+  }
+
+  // Document File
+  return (
+    <div
+      className="w-full h-full flex flex-col items-center justify-center cursor-pointer group"
+      onClick={handlePreviewClick}
+    >
+      <div className="w-full h-full flex flex-col items-center justify-center p-2 rounded-lg shadow-md bg-white transition-all duration-300 group-hover:shadow-lg relative">
+        {/* Pin Button */}
+        {onPin && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onPin();
+            }}
+            className="absolute top-2 right-2 z-10 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            <FontAwesomeIcon
+              icon={faThumbTack}
+              className="transform rotate-45 text-red-500 hover:text-red-700"
+            />
+          </button>
+        )}
+
+        {/* File Icon */}
+        <div className="mb-2 text-4xl text-gray-700 group-hover:text-blue-600 transition-colors">
+          <FontAwesomeIcon
+            icon={getFileIcon()}
+            className="transform group-hover:scale-110 transition-transform"
+          />
+        </div>
+
+        {/* File Name */}
+        <div className="w-full px-2">
+          <a
+            href={basePath}
+            target="_blank"
+            rel="noreferrer"
+            className="block text-blue-600 text-sm text-center truncate group-hover:underline"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {isLoading ? (
+              <div className="flex items-center justify-center">
+                <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2" />
+                <span>Loading...</span>
+              </div>
+            ) : (
+              <>(preview) - {displayName}</>
+            )}
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Enhanced StudentFiles component with professional styling
 export default function StudentFiles({ user }) {
   const [allFiles, setAllFiles] = useState([]);
   const [filteredFiles, setFilteredFiles] = useState([]);
@@ -53,6 +291,7 @@ export default function StudentFiles({ user }) {
     type: "All",
   });
   const [pinSuccess, setPinSuccess] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Popup state
   const [showPopup, setShowPopup] = useState(false);
@@ -65,9 +304,10 @@ export default function StudentFiles({ user }) {
         const response = await axios.get(
           `${API_ROUTER}/get-pinned-files/${user.organization._id}`
         );
-        console.log(response.data);
         setPinnedFiles(response.data);
-      } catch (error) {}
+      } catch (error) {
+        console.error("Error fetching pinned files:", error);
+      }
     };
     getPinnedFiles();
   }, [user]);
@@ -102,6 +342,7 @@ export default function StudentFiles({ user }) {
 
     async function fetchFiles() {
       try {
+        setIsLoading(true);
         const response = await axios.post(
           `${API_ROUTER}/get-organization-files`,
           { organization: user.organization.org_name }
@@ -138,6 +379,7 @@ export default function StudentFiles({ user }) {
             type: fileType,
           };
         });
+
         const uniqueCategories = [
           "All",
           ...new Set(processedFiles.map((file) => file.category)),
@@ -162,7 +404,7 @@ export default function StudentFiles({ user }) {
     fetchFiles();
   }, [user]);
 
-  // Apply filters when active filters change
+  // Apply filters and search when active filters or search term changes
   useEffect(() => {
     let result = [...allFiles];
 
@@ -185,8 +427,19 @@ export default function StudentFiles({ user }) {
       result = result.filter((file) => file.type === activeFilters.type);
     }
 
+    // Apply search term if present
+    if (searchTerm.trim() !== "") {
+      const term = searchTerm.toLowerCase();
+      result = result.filter(
+        (file) =>
+          file.filename.toLowerCase().includes(term) ||
+          file.category.toLowerCase().includes(term) ||
+          file.subcategory.toLowerCase().includes(term)
+      );
+    }
+
     setFilteredFiles(result);
-  }, [activeFilters, allFiles]);
+  }, [activeFilters, allFiles, searchTerm]);
 
   // Handle filter changes
   const handleFilterChange = (filterType, value) => {
@@ -215,6 +468,7 @@ export default function StudentFiles({ user }) {
   // Function to handle pin confirmation
   const confirmPinFile = async (organizationId, fileName) => {
     try {
+      setIsLoading(true);
       const response = await axios.post(`${API_ROUTER}/pin-files`, {
         organizationId,
         fileName,
@@ -235,6 +489,8 @@ export default function StudentFiles({ user }) {
       );
       setError("Failed to pin file");
       setShowPopup(false);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -259,6 +515,7 @@ export default function StudentFiles({ user }) {
       type: fileType,
     };
   };
+
   // Separate files by type
   const documentFiles = filteredFiles.filter(
     (file) => file.type === "Documents"
@@ -266,7 +523,7 @@ export default function StudentFiles({ user }) {
   const photoFiles = filteredFiles.filter((file) => file.type === "Photos");
 
   return (
-    <div className="h-full overflow-hidden flex flex-col">
+    <div className="h-full overflow-hidden flex flex-col bg-gray-50">
       {/* Popup component - only shows when showPopup is true */}
       {showPopup && (
         <PopUp
@@ -322,90 +579,134 @@ export default function StudentFiles({ user }) {
         />
       )}
 
-      <div className="p-4 bg-white border-b">
-        <h2 className="text-2xl font-bold mb-4">Files</h2>
+      <div className="p-6 bg-white border-b shadow-sm">
+        <h2 className="text-2xl font-bold mb-6 text-gray-800">Files</h2>
 
-        {/* Filter controls */}
-        <div className="flex flex-wrap w-1/2 gap-4 mb-4">
-          <div className="flex flex-1 items-center">
-            <FontAwesomeIcon
-              icon={faFolderOpen}
-              className="mr-2 text-2xl text-blue-600"
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Search box */}
+          <div className="relative lg:w-1/3">
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <FontAwesomeIcon icon={faSearch} className="text-gray-400" />
+            </div>
+            <input
+              type="text"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5"
+              placeholder="Search files..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <select
-              className="border rounded w-full p-2"
-              value={activeFilters.category}
-              onChange={(e) => handleFilterChange("category", e.target.value)}
-            >
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category === "All" ? "All Categories" : category}
-                </option>
-              ))}
-            </select>
           </div>
 
-          <div className="flex flex-1 items-center">
-            <FontAwesomeIcon
-              icon={faFolderOpen}
-              className="mr-2 text-2xl text-blue-600"
-            />
-            <select
-              className="border w-full rounded p-2"
-              value={activeFilters.subcategory}
-              onChange={(e) =>
-                handleFilterChange("subcategory", e.target.value)
-              }
-            >
-              {subcategories.map((subcategory) => (
-                <option key={subcategory} value={subcategory}>
-                  {subcategory === "All" ? "All Title" : subcategory}
-                </option>
-              ))}
-            </select>
-          </div>
+          {/* Filter controls */}
+          <div className="flex flex-wrap gap-4 flex-1">
+            <div className="flex flex-1 items-center">
+              <div className="relative w-full">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <FontAwesomeIcon
+                    icon={faFolderOpen}
+                    className="text-blue-600"
+                  />
+                </div>
+                <select
+                  className="border rounded-lg w-full p-2.5 pl-10 bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                  value={activeFilters.category}
+                  onChange={(e) =>
+                    handleFilterChange("category", e.target.value)
+                  }
+                >
+                  {categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category === "All" ? "All Categories" : category}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
 
-          <div className="flex flex-1 items-center">
-            <FontAwesomeIcon
-              icon={faFile}
-              className="mr-2 text-blue-600 text-2xl"
-            />
-            <select
-              className="border w-full rounded p-2"
-              value={activeFilters.type}
-              onChange={(e) => handleFilterChange("type", e.target.value)}
-            >
-              <option value="All">All Types</option>
-              <option value="Documents">Documents</option>
-              <option value="Photos">Photos</option>
-            </select>
+            <div className="flex flex-1 items-center">
+              <div className="relative w-full">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <FontAwesomeIcon
+                    icon={faFolderOpen}
+                    className="text-blue-600"
+                  />
+                </div>
+                <select
+                  className="border rounded-lg w-full p-2.5 pl-10 bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                  value={activeFilters.subcategory}
+                  onChange={(e) =>
+                    handleFilterChange("subcategory", e.target.value)
+                  }
+                >
+                  {subcategories.map((subcategory) => (
+                    <option key={subcategory} value={subcategory}>
+                      {subcategory === "All" ? "All Title" : subcategory}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="flex flex-1 items-center">
+              <div className="relative w-full">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <FontAwesomeIcon icon={faFile} className="text-blue-600" />
+                </div>
+                <select
+                  className="border rounded-lg w-full p-2.5 pl-10 bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                  value={activeFilters.type}
+                  onChange={(e) => handleFilterChange("type", e.target.value)}
+                >
+                  <option value="All">All Types</option>
+                  <option value="Documents">Documents</option>
+                  <option value="Photos">Photos</option>
+                </select>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="flex-1 p-4 overflow-auto">
-        {isLoading && <p>Loading...</p>}
-        {error && <p className="text-red-500">{error}</p>}
-
-        {filteredFiles.length === 0 && !isLoading && (
-          <p className="text-gray-500 text-center py-8">
-            No files match the selected filters
-          </p>
+      <div className="flex-1 p-6 overflow-auto">
+        {isLoading && (
+          <div className="flex justify-center items-center h-64">
+            <FontAwesomeIcon
+              icon={faSpinner}
+              className="text-blue-600 text-4xl animate-spin"
+            />
+          </div>
         )}
+
+        {error && (
+          <div className="bg-red-50 text-red-600 p-4 rounded-lg shadow-sm mb-6">
+            <p>{error}</p>
+          </div>
+        )}
+
+        {filteredFiles.length === 0 && !isLoading && !error && (
+          <div className="bg-blue-50 text-blue-700 p-8 rounded-lg shadow-sm text-center">
+            <FontAwesomeIcon icon={faFilter} className="text-4xl mb-4" />
+            <p className="text-lg">No files match the selected filters</p>
+            <p className="text-sm mt-2">
+              Try adjusting your search criteria or filters
+            </p>
+          </div>
+        )}
+
         {/*pinned files*/}
         {pinnedFiles.length > 0 && (
-          <div className="mb-6">
-            <h3 className="text-xl font-semibold mb-4 flex items-center">
+          <div className="mb-8">
+            <h3 className="text-xl font-semibold mb-4 flex items-center border-b pb-2">
               <FontAwesomeIcon icon={faMapPin} className="mr-2 text-red-600" />
-              Pinned Files
+              <span className="text-gray-800">Pinned Files</span>
             </h3>
-            <div className="grid grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
               {pinnedFiles.map((path, index) => {
                 const file = transformFilePath(path);
                 return (
                   <div
                     key={`pinned-${index}`}
-                    className="h-48 bg-yellow-50 rounded-2xl shadow-md flex justify-center items-center relative border border-yellow-400"
+                    className="h-48 bg-yellow-50 rounded-xl shadow-md border border-yellow-200 overflow-hidden"
                   >
                     <FileRendererAll
                       basePath={file.basepath}
@@ -422,26 +723,22 @@ export default function StudentFiles({ user }) {
         {/* Documents Section */}
         {(activeFilters.type === "All" || activeFilters.type === "Documents") &&
           documentFiles.length > 0 && (
-            <div className="relative">
-              <h3 className="text-xl font-semibold mb-4 flex items-center">
+            <div className="mb-8">
+              <h3 className="text-xl font-semibold mb-4 flex items-center border-b pb-2">
                 <FontAwesomeIcon icon={faFile} className="mr-2 text-blue-600" />
-                Documents
+                <span className="text-gray-800">Documents</span>
               </h3>
-              <div className="grid grid-cols-6 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
                 {documentFiles.map((file, index) => (
                   <div
                     key={`doc-${index}`}
-                    className="h-48 bg-white items-center rounded-2xl shadow-md flex justify-center relative"
+                    className="h-48 bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow"
                   >
-                    <FontAwesomeIcon
-                      icon={faThumbTack}
-                      className="transform rotate-45 absolute top-4 right-4 text-red-500 cursor-pointer hover:text-red-700"
-                      onClick={() => handlePinFile(file)}
-                    />
                     <FileRendererAll
                       basePath={file.basepath}
                       fileName={file.filename}
                       type={file.category}
+                      onPin={() => handlePinFile(file)}
                     />
                   </div>
                 ))}
@@ -452,29 +749,25 @@ export default function StudentFiles({ user }) {
         {/* Photos Section */}
         {(activeFilters.type === "All" || activeFilters.type === "Photos") &&
           photoFiles.length > 0 && (
-            <div className="flex flex-col mt-8">
-              <h3 className="text-xl font-semibold mb-4 flex items-center">
+            <div className="mb-8">
+              <h3 className="text-xl font-semibold mb-4 flex items-center border-b pb-2">
                 <FontAwesomeIcon
                   icon={faImage}
                   className="mr-2 text-blue-600"
                 />
-                Photos
+                <span className="text-gray-800">Photos</span>
               </h3>
-              <div className="flex flex-wrap gap-4 justify-between">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {photoFiles.map((file, index) => (
                   <div
                     key={`photo-${index}`}
-                    className="overflow-hidden relative"
+                    className="aspect-square bg-gray-100 overflow-hidden rounded-xl shadow-md hover:shadow-lg transition-shadow"
                   >
-                    <FontAwesomeIcon
-                      icon={faThumbTack}
-                      className="transform rotate-45 absolute top-4 right-4 text-red-500 cursor-pointer hover:text-red-700 z-10"
-                      onClick={() => handlePinFile(file)}
-                    />
                     <FileRendererAll
                       basePath={file.basepath}
                       fileName={file.filename}
                       type={file.category}
+                      onPin={() => handlePinFile(file)}
                     />
                   </div>
                 ))}

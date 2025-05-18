@@ -123,7 +123,7 @@ export default function LoginPage() {
             className="text-cnsc-secondary-color text-6xl md:text-9xl font-bold"
             style={{
               textShadow:
-                "2px 2px 0 maroon, -2px -2px 0 maroon, 2px -2px 0 maroon, -2px 2px 0 maroon, 0 0 2px maroon",
+                "1px 1px 0 white, -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 0 0 1px white",
             }}
           >
             CODEX
