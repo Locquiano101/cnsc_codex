@@ -125,7 +125,7 @@ export const PostCard = ({
   return (
     <>
       <div
-        className={`rounded-xl shadow-md shadow-gray-500 px-8 py-6 relative h-fit `}
+        className={`rounded-xl shadow-md shadow-gray-500 px-8 py-6 relative  `}
       >
         <div className="absolute shadow-md shadow-gray-500 p-2 rounded top-4 right-4 flex flex-col gap-2">
           <div className="flex gap-4 ">
@@ -279,7 +279,7 @@ export default function AdviserPosting({ user }) {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 overflow-auto gap-4">
+    <div className="flex flex-col  overflow-auto gap-4 p-7">
       {posts.map((post) => (
         <PostCard
           key={post._id}

@@ -68,12 +68,8 @@ function ProposalView({ onAdd, onView, onEdit, user }) {
   if (error) return <p className="p-4 text-red-500">{error}</p>;
 
   return (
-<<<<<<< HEAD
-    <div className="  h-screen flex flex-col overflow-hidden p-5 shadow-2xl">
-=======
-    <div className=" h-full flex flex-col overflow-hidden">
->>>>>>> 91b905c154187f258c93212463b210af89e41051
-      <div className="bg-brian-blue text-white p-3 flex justify-between items-center">
+    <div className=" h-screen flex flex-col overflow-hidden p-7">
+      <div className="bg-[#000000] text-white p-3 flex justify-between items-center">
         <h1 className="font-medium">Proposals</h1>
         <button
           onClick={onAdd}
@@ -140,7 +136,7 @@ function ProposalView({ onAdd, onView, onEdit, user }) {
                       </span>
                     </td>
                     <td className="py-4 px-4 text-center text-sm font-medium">
-                      <div className="flex justify-center gap-2">
+                      <div className="flex flex-start gap-2">
                         <button
                           onClick={() => onView(p)}
                           className="p-1.5 bg-[#17a2b8] hover:bg-[#138496] text-white rounded-full transition-colors duration-150 shadow-sm"

@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPenToSquare, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { faPenToSquare } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import { API_ROUTER } from "../../../../App";
 import AddPostFormModal from "./student_post_add";
 import EditPostFormModal from "./student_post_edit";
 import { FileRenderer } from "../../../../components/file_renderer";
 
+// Custom Hook
 export const usePostForm = (orgName, initialData = null) => {
   const [formDataState, setFormDataState] = useState({
     title: initialData?.title || "",
@@ -54,7 +55,6 @@ export const usePostForm = (orgName, initialData = null) => {
       return;
     }
 
-    // Store files based on document type
     setUploadedFiles((prev) => ({
       ...prev,
       [fieldKey]: isDocument ? files[0] : Array.from(files),
@@ -63,16 +63,8 @@ export const usePostForm = (orgName, initialData = null) => {
 
   const getFileFields = () => ({
     upload: isDocument
-      ? {
-          label: "Document Upload",
-          accept: ".pdf",
-          multiple: false,
-        }
-      : {
-          label: "Photo Upload",
-          accept: "image/*",
-          multiple: true,
-        },
+      ? { label: "Document Upload", accept: ".pdf", multiple: false }
+      : { label: "Photo Upload", accept: "image/*", multiple: true },
   });
 
   const getLogoPath = (orgName, orgLogo) =>
@@ -98,6 +90,7 @@ export const usePostForm = (orgName, initialData = null) => {
   };
 };
 
+// Renders a PDF document in an iframe
 export const DocumentRenderer = ({ basePath, fileName }) => {
   const url = `${basePath}/documents/${encodeURIComponent(fileName)}`;
   const isPdf = fileName.endsWith(".pdf");
@@ -105,7 +98,7 @@ export const DocumentRenderer = ({ basePath, fileName }) => {
   return (
     <div className="w-full border h-full flex flex-col">
       {isPdf && (
-        <div className="w-full h-72">
+        <div className="w-full min-h-[40em] max-h-[45em]">
           <iframe
             src={`${url}#toolbar=0&navpanes=0&scrollbar=0`}
             className="w-full h-full"
@@ -117,6 +110,7 @@ export const DocumentRenderer = ({ basePath, fileName }) => {
   );
 };
 
+// Individual Post Display Card
 export const PostCard = ({
   post,
   className = "",
@@ -125,42 +119,41 @@ export const PostCard = ({
   onEditClick = null,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const hasPhotos = post.content?.photos && post.content.photos.length > 0;
-  const hasDocuments =
-    post.content?.documents && post.content.documents.length > 0;
-
-  console.log(
-    `${encodeURIComponent(
-      post.organization.org_name
-    )}/Accreditation/Accreditation/photos/${encodeURIComponent(
-      post.organization.logo
-    )}`
-  );
+  const hasPhotos = post.content?.photos?.length > 0;
+  const hasDocuments = post.content?.documents?.length > 0;
 
   return (
     <>
-      <div className={`rounded-xl shadow-md px-8 py-6 relative ${className}`}>
+      <div className={`rounded-xl shadow-2xl px-8 py-6 relative ${className}`}>
         <div className="absolute shadow-md shadow-gray-500 p-2 rounded top-4 right-4 flex flex-col gap-2">
-          <div className="flex gap-4 ">
+          <div className="flex gap-2">
             {onEditClick && (
-              <button
-                onClick={() => setIsEditing(true)}
-                className="text-xs px-6 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600"
-              >
-                Edit
-              </button>
+              <>
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="text-xs px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => onEditClick("delete", post._id)}
+                  className="text-xs px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-600"
+                >
+                  Delete
+                </button>
+              </>
             )}
-            <h1>status: {post.status}</h1>
           </div>
 
+          {post.status && <h1 className="text-xs">status: {post.status}</h1>}
           {post.revision_notes && (
             <div className="border">
-              <h1>notes: {post.revision_notes}</h1>
+              <h1 className="text-xs">notes: {post.revision_notes}</h1>
             </div>
           )}
         </div>
-        {/* Edit Button */}
-        {/* Profile and Org Name */}
+
+        {/* Org logo and name */}
         <div className="flex items-center space-x-3">
           <img
             src={`/${post.organization.org_name}/Accreditation/Accreditation/photos/${post.organization.logo}`}
@@ -176,11 +169,13 @@ export const PostCard = ({
             </p>
           </div>
         </div>
-        {/* Post Title and Caption */}
+
+        {/* Title and caption */}
         <div className="mt-3">
           <h2 className="font-bold text-lg">{post.title}</h2>
           <p className="text-sm text-gray-800 mt-1">{post.caption}</p>
         </div>
+
         {/* Tags */}
         {post.tags?.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-3">
@@ -194,6 +189,7 @@ export const PostCard = ({
             ))}
           </div>
         )}
+
         {/* Photos */}
         {hasPhotos && (
           <div className="grid grid-cols-2 gap-2 mt-2">
@@ -216,6 +212,7 @@ export const PostCard = ({
               ))}
           </div>
         )}
+
         {/* Documents */}
         {hasDocuments && (
           <div className="flex flex-wrap gap-2 mt-2">
@@ -251,6 +248,7 @@ export const PostCard = ({
   );
 };
 
+// Main Component
 export default function StudentPosting({ user }) {
   const [posts, setPosts] = useState([]);
   const [isCreatingPost, setIsCreatingPost] = useState(false);
@@ -260,7 +258,7 @@ export default function StudentPosting({ user }) {
   useEffect(() => {
     if (!user) return;
 
-    async function fetchPosts() {
+    const fetchPosts = async () => {
       setIsLoading(true);
       try {
         const response = await axios.get(
@@ -273,14 +271,12 @@ export default function StudentPosting({ user }) {
       } finally {
         setIsLoading(false);
       }
-    }
+    };
 
     fetchPosts();
   }, [user]);
 
-  // Function to handle post creation success
   const handlePostCreated = async () => {
-    // Refetch posts after creation
     try {
       const response = await axios.get(
         `${API_ROUTER}/get-post/${user.organization._id}`
@@ -292,38 +288,57 @@ export default function StudentPosting({ user }) {
     }
   };
 
-  if (!user) {
+  const handleEditOrDelete = async (action, postId) => {
+    if (action === "delete") {
+      const confirmed = window.confirm(
+        "Are you sure you want to delete this post?"
+      );
+      if (!confirmed) return;
+
+      try {
+        await axios.delete(`${API_ROUTER}/delete-post/${postId}`);
+        const response = await axios.get(
+          `${API_ROUTER}/get-post/${user.organization._id}`
+        );
+        setPosts(response.data);
+      } catch (err) {
+        console.error("Failed to delete post:", err);
+        alert("Failed to delete post.");
+      }
+    }
+  };
+
+  if (!user)
     return <div className="text-center p-4">User not authenticated</div>;
-  }
-
-  if (isLoading) {
-    return <div className="text-center p-4">Loading posts...</div>;
-  }
-
-  if (error) {
-    return <div className="text-center p-4 text-red-500">{error}</div>;
-  }
+  if (isLoading) return <div className="text-center p-4">Loading posts...</div>;
+  if (error) return <div className="text-center p-4 text-red-500">{error}</div>;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 overflow-auto gap-4">
-      {/* ADD POST Button */}
+    <div className="relative h-screen p-10 overflow-auto">
+      {/* Add New Post Button */}
       <div
         onClick={() => setIsCreatingPost(true)}
-        className="flex flex-col items-center justify-center border p-4 w-full h-[10REM] cursor-pointer hover:bg-gray-100 transition-colors duration-200 rounded-xl shadow-sm"
+        className="fixed bottom-6 right-6 flex items-center rounded-xl shadow-lg overflow-hidden cursor-pointer z-50"
       >
-        <FontAwesomeIcon
-          icon={faPenToSquare}
-          className="text-[3rem] text-blue-500 mb-2"
-        />
-        <h1 className="font-bold text-[2.5rem]">ADD POST</h1>
+        <div className="bg-red-700 w-16 h-16 flex items-center justify-center">
+          <FontAwesomeIcon
+            icon={faPenToSquare}
+            className="text-white text-2xl"
+          />
+        </div>
+        <div className="bg-white px-6 py-4">
+          <span className="text-gray-800 font-semibold text-lg">
+            Add New Post
+          </span>
+        </div>
       </div>
 
-      {/* Post Cards - now using the merged component */}
+      {/* Post List */}
       {posts.map((post) => (
         <PostCard
           key={post._id}
           post={post}
-          onEditClick={() => true} // Enable edit button
+          onEditClick={handleEditOrDelete}
           basePath={`/${user.organization.org_name}/StudentPost/${post.title}`}
         />
       ))}

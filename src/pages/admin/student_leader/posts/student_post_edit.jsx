@@ -141,7 +141,7 @@ export default function EditPostFormModal({
   const fileFields = getFileFields();
   console.log(logoPath);
   return (
-    <div className="inset-0 fixed bg-black/50 backdrop-blur-xs flex items-center justify-center z-50">
+    <div className="inset-0 fixed bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 overflow-auto">
       {showPopup && (
         <PopUp
           title="Success!"

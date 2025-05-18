@@ -36,12 +36,12 @@ function ViewProposalAdviserTableSection({ onView, onEdit, user }) {
   if (error) return <p className="p-4 text-red-500">{error}</p>;
 
   return (
-    <div className="shadow-lg shadow-gray-300 flex flex-col h-full">
+    <div className="  shadow-lg flex flex-col h-full p-7">
       {/* Header */}
       <div className="bg-[#1e4976] text-white p-3  font-medium">Proposals</div>
 
       {/* Table */}
-      <div className="overflow-y-auto h-full">
+      <div className="overflow-y-auto h-full shadow-2xl">
         <table className="min-w-full text-sm text-gray-800">
           <thead className="bg-gray-100 text-xs uppercase tracking-wide text-gray-600 sticky top-0 z-10">
             <tr>
