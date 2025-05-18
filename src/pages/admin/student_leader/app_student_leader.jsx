@@ -111,7 +111,7 @@ export default function StudentLeaderPage() {
       case "proposals":
         return <StudentProposalTableView user={storedUser} />;
       case "accreditations":
-        return <StudentProposalTa1 bleView user={storedUser} />;
+        return <StudentAccomplishmentsTableView user={storedUser} />;
       case "documents":
         return <StudentFiles user={storedUser} />;
       case "accreditations":
@@ -130,9 +130,12 @@ export default function StudentLeaderPage() {
   return (
     <div className="flex h-screen  overflow-hidden">
       {/* Sidebar */}
-      <div className="w-2/12 bg-brian-blue flex flex-col">
+      <div className="w-2/12 bg-cnsc-primary-color flex flex-col">
         {/* Logo & Welcome side-by-side */}
-        <div className="flex h-24 bg-brian-blue text-cnsc-white-color gap-2 px-2  items-center">
+        <Link
+          to={`/organization/profile/${storedUser.organization.org_name}`}
+          className="flex h-24 bg-cnsc-primary-color text-cnsc-white-color gap-2 px-5 items-center"
+        >
           <img
             src={`/${encodeURIComponent(
               storedUser.organization.org_name
@@ -148,7 +151,7 @@ export default function StudentLeaderPage() {
               {storedUser.organization.org_name}
             </h2>
           </div>
-        </div>
+        </Link>
 
         {/* Navigation */}
         <div className="flex flex-col w-1.45 text-white">
@@ -175,7 +178,7 @@ export default function StudentLeaderPage() {
               className={`flex items-center gap-3 px-6 py-3 cursor-pointer transition ${
                 activeContent === key
                   ? "bg-[#DFE4EB] text-[#1B3A57] font-semibold"
-                  : "hover:bg-[#2E4B6B] text-white"
+                  : "hover:bg-[#D44C47] text-white"
               }`}
             >
               <FontAwesomeIcon icon={icon} className="flex-1" />
@@ -194,19 +197,7 @@ export default function StudentLeaderPage() {
       </div>
 
       <div className="w-full flex flex-col flex-3/4">
-        <div className="h-24 bg-brian-blue/50 flex items-center justify-end">
-          <div className="shadow-lg shadow-black mr-4 m-4 rounded-xl bg-gray-200 p-4">
-            <Link
-              to={`/organization/profile/${storedUser.organization.org_name}`}
-              className="text-md"
-            >
-              <span className="mr-4">
-                <FontAwesomeIcon icon={faUser} />
-              </span>
-              Go to Public Profile
-            </Link>
-          </div>
-        </div>
+        <div className="h-24 bg-[#444444] flex items-center justify-end"></div>
         <div className=" bg-brian-blue/10 flex flex-col overflow-hidden ">
           {renderContent()}
         </div>

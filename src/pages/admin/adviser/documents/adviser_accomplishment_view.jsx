@@ -157,7 +157,7 @@ function AdviserAccomplishmentReportTable({
   ];
 
   return (
-    <div className="max-h-[500px] border-b-cnsc-blue-color shadow-md h-110">
+    <div className=" border-b-cnsc-blue-color h-screen shadow-md p-7 ">
       <div className="bg-[#1e4976] text-white p-3 flex justify-between items-center">
         <h1 className="font-medium">Accomplishments</h1>
         <div className="flex gap-2">

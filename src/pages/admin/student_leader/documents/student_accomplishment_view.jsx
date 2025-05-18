@@ -48,7 +48,7 @@ function StudentAccomplishmentReportTable({
 
   return (
     <div className=" border-b-cnsc-blue-color p-5 h-screen">
-      <div className="bg-[#1e4976] text-white p-3 flex justify-between items-center ">
+      <div className="bg-[#000000] text-white p-3 flex justify-between items-center ">
         <h1 className="font-medium">Accomplishments</h1>
         <div className="flex gap-2">
           {/* Dropdown filter */}

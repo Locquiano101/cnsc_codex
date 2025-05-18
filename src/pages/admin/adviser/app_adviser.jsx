@@ -131,7 +131,7 @@ export default function AdviserAdminPage() {
           </div>
         </div>
         <div className="flex-1 overflow-auto">
-          <div className="p-4 h-full">{renderContent()}</div>
+          <div className=" h-full">{renderContent()}</div>
         </div>
       </div>
     </div>
