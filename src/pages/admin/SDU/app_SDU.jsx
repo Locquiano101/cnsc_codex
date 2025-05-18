@@ -2,23 +2,27 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faFileAlt,
-  faFolderOpen,
-  faUserGear,
   faHome,
-  faRightFromBracket,
+  faUserGear,
   faUsers,
-  faGears,
-  faBookOpen,
   faClockRotateLeft,
+  faGlobe,
+  faRightFromBracket,
+  faChevronDown,
+  faChevronUp,
 } from "@fortawesome/free-solid-svg-icons";
 import { HandleLogout } from "../../../api/login_api";
 import AccreditationTableSection from "./accreditation/view";
 import SDUAdminUserTableView from "./user_management_page/user_table_view";
 import SandboxAccomplishment from "./accomplishments/accomplishment_main";
+import OrganizationViewSDU from "./organization/organization_main";
+import { FolderOpen, Star, Users, FileText, Award } from "lucide-react";
+
 export default function StudentDevelopmentUnitPage() {
   const navigate = useNavigate();
-  const [activeContent, setActiveContent] = useState("accomplishments");
+  const [activeContent, setActiveContent] = useState("organizations");
+  const [showOrgSubmenu, setShowOrgSubmenu] = useState(true);
+  const [showSystemWideSubmenu, setShowSystemWideSubmenu] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -27,18 +31,34 @@ export default function StudentDevelopmentUnitPage() {
     }
   }, [navigate]);
 
+  const handleNavClick = (content) => {
+    setActiveContent(content);
+    if (
+      content !== "organizations" &&
+      content !== "accreditations" &&
+      content !== "accomplishments" &&
+      content !== "systemProposal" &&
+      content !== "systemAccomplishment"
+    ) {
+      setShowOrgSubmenu(false);
+      setShowSystemWideSubmenu(false);
+    }
+  };
+
   const renderContent = () => {
     switch (activeContent) {
       case "home":
         return <>This is the overview</>;
       case "organizations":
-        return <>This is the organizations section</>;
+        return <OrganizationViewSDU />;
       case "accreditations":
         return <AccreditationTableSection />;
       case "accomplishments":
         return <SandboxAccomplishment />;
-      case "documents":
-        return <>This is documents content</>;
+      case "systemProposal":
+        return <>System-Wide Proposal Content</>;
+      case "systemAccomplishment":
+        return <>System-Wide Accomplishment Content</>;
       case "users":
         return <SDUAdminUserTableView />;
       case "logs":
@@ -66,35 +86,138 @@ export default function StudentDevelopmentUnitPage() {
 
         {/* Navigation */}
         <nav className="flex flex-col space-y-1 text-sm font-medium">
-          {[
-            { key: "home", icon: faHome, label: "Reports / Dashboard" },
-            { key: "organizations", icon: faUsers, label: "Organizations" },
-            { key: "users", icon: faUserGear, label: "User Management" },
-            {
-              key: "accomplishments",
-              icon: faUserGear,
-              label: "Organization Accomplishments",
-            },
-            {
-              key: "accreditations",
-              icon: faFolderOpen,
-              label: "Accreditations",
-            },
-            { key: "logs", icon: faClockRotateLeft, label: "System Logs" },
-          ].map(({ key, icon, label }) => (
-            <div
-              key={key}
-              onClick={() => setActiveContent(key)}
-              className={`flex items-center gap-3 px-6 py-3 cursor-pointer transition ${
-                activeContent === key
-                  ? "bg-[#DFE4EB] text-[#1B3A57] font-semibold"
-                  : "hover:bg-[#2E4B6B] text-white"
-              }`}
-            >
-              <FontAwesomeIcon icon={icon} />
-              {label}
+          {/* Reports / Dashboard */}
+          <div
+            onClick={() => handleNavClick("home")}
+            className={`flex items-center gap-3 px-6 py-3 cursor-pointer transition ${
+              activeContent === "home"
+                ? "bg-[#DFE4EB] text-[#1B3A57] font-semibold"
+                : "hover:bg-[#2E4B6B] text-white"
+            }`}
+          >
+            <FontAwesomeIcon icon={faHome} />
+            Reports / Dashboard
+          </div>
+
+          {/* Organizations Group Toggle */}
+          <div
+            onClick={() => setShowOrgSubmenu((prev) => !prev)}
+            className="flex items-center justify-between px-6 py-3 cursor-pointer hover:bg-[#2E4B6B] text-white transition"
+          >
+            <div className="flex items-center gap-3">
+              <FontAwesomeIcon icon={faUsers} />
+              Organizations
             </div>
-          ))}
+            <FontAwesomeIcon
+              icon={showOrgSubmenu ? faChevronUp : faChevronDown}
+            />
+          </div>
+
+          {/* Organization Submenu */}
+          {showOrgSubmenu && (
+            <div className="flex flex-col">
+              <div
+                onClick={() => handleNavClick("organizations")}
+                className={`px-4 py-2 flex pl-12 cursor-pointer transition ${
+                  activeContent === "organizations"
+                    ? "bg-[#DFE4EB] text-[#1B3A57] font-semibold"
+                    : "hover:bg-[#2E4B6B] text-white"
+                }`}
+              >
+                <Users size={16} className="mr-4" />
+                Management
+              </div>
+              <div
+                onClick={() => handleNavClick("accreditations")}
+                className={`px-4 py-2 flex pl-12 cursor-pointer transition ${
+                  activeContent === "accreditations"
+                    ? "bg-[#DFE4EB] text-[#1B3A57] font-semibold"
+                    : "hover:bg-[#2E4B6B] text-white"
+                }`}
+              >
+                <FolderOpen size={16} className="mr-4" />
+                Accreditations
+              </div>
+              <div
+                onClick={() => handleNavClick("accomplishments")}
+                className={`px-4 py-2 flex pl-12 cursor-pointer transition ${
+                  activeContent === "accomplishments"
+                    ? "bg-[#DFE4EB] text-[#1B3A57] font-semibold"
+                    : "hover:bg-[#2E4B6B] text-white"
+                }`}
+              >
+                <Star size={16} className="mr-4" />
+                Accomplishments
+              </div>
+            </div>
+          )}
+
+          {/* System Wide Group Toggle */}
+          <div
+            onClick={() => setShowSystemWideSubmenu((prev) => !prev)}
+            className="flex items-center justify-between px-6 py-3 cursor-pointer hover:bg-[#2E4B6B] text-white transition"
+          >
+            <div className="flex items-center gap-3">
+              <FontAwesomeIcon icon={faGlobe} />
+              System Wide Organization
+            </div>
+            <FontAwesomeIcon
+              icon={showSystemWideSubmenu ? faChevronUp : faChevronDown}
+            />
+          </div>
+
+          {/* System Wide Submenu */}
+          {showSystemWideSubmenu && (
+            <div className="flex flex-col">
+              <div
+                onClick={() => handleNavClick("systemProposal")}
+                className={`px-4 py-2 flex pl-12 cursor-pointer transition ${
+                  activeContent === "systemProposal"
+                    ? "bg-[#DFE4EB] text-[#1B3A57] font-semibold"
+                    : "hover:bg-[#2E4B6B] text-white"
+                }`}
+              >
+                <FileText size={16} className="mr-4" />
+                Event Proposals
+              </div>
+              <div
+                onClick={() => handleNavClick("systemAccomplishment")}
+                className={`px-4 py-2 flex pl-12 cursor-pointer transition ${
+                  activeContent === "systemAccomplishment"
+                    ? "bg-[#DFE4EB] text-[#1B3A57] font-semibold"
+                    : "hover:bg-[#2E4B6B] text-white"
+                }`}
+              >
+                <Award size={16} className="mr-4" />
+                Accomplishment Reports
+              </div>
+            </div>
+          )}
+
+          {/* Other nav items */}
+          <div
+            onClick={() => handleNavClick("users")}
+            className={`flex items-center gap-3 px-6 py-3 cursor-pointer transition ${
+              activeContent === "users"
+                ? "bg-[#DFE4EB] text-[#1B3A57] font-semibold"
+                : "hover:bg-[#2E4B6B] text-white"
+            }`}
+          >
+            <FontAwesomeIcon icon={faUserGear} />
+            User Management
+          </div>
+
+          <div
+            onClick={() => handleNavClick("logs")}
+            className={`flex items-center gap-3 px-6 py-3 cursor-pointer transition ${
+              activeContent === "logs"
+                ? "bg-[#DFE4EB] text-[#1B3A57] font-semibold"
+                : "hover:bg-[#2E4B6B] text-white"
+            }`}
+          >
+            <FontAwesomeIcon icon={faClockRotateLeft} />
+            System Logs
+          </div>
         </nav>
 
         {/* Logout */}
@@ -108,7 +231,7 @@ export default function StudentDevelopmentUnitPage() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto bg-white p-4">
+      <main className="flex-1 overflow-y-auto bg-gray-300 p-4">
         {renderContent()}
       </main>
     </div>

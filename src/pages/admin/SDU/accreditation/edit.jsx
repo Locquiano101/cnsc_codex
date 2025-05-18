@@ -117,9 +117,9 @@ export default function ProcessAccreditationSection({
   ];
 
   return (
-    <div>
+    <div className="px-6 py-4">
       {/* Updated At (read-only) */}
-      <div className="flex gap-2 mb-4 items-center">
+      <div className="flex gap-2 mb-4 items-center ">
         <strong className="min-w-fit mr-4 ">Updated At:</strong>
         <input
           type="text"
@@ -170,7 +170,7 @@ export default function ProcessAccreditationSection({
                 <div className="space-x-4 flex justify-between">
                   <h1 className="min-w-fit font-medium">{doc.label}:</h1>
                   <div className="flex gap-4">
-                    <label for={`status-${index}`}>
+                    <label htmlFor={`status-${index}`}>
                       <input
                         type="radio"
                         name={`status-${index}`}
@@ -181,7 +181,7 @@ export default function ProcessAccreditationSection({
                       />
                       Approved
                     </label>
-                    <label for={`status-${index}`}>
+                    <label htmlFor={`status-${index}`}>
                       <input
                         type="radio"
                         name={`status-${index}`}

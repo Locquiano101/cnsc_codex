@@ -1,0 +1,121 @@
+Tier 1: Complex System Overhauls (Hardest)
+Dashboard & Tracking System
+
+    Make dashboard the default landing page after login.
+
+    Implement accomplishment tracking (percentage/status bars).
+
+    Add submission/document tracking with audit logs.
+
+    Pie-chart visualization for approvals (color-coded: grey = pending, colored = approved).
+
+    Accreditation & Evaluation Engine
+
+    APESOC Ratings System (automated scoring based on criteria).
+
+    Dynamic scoring breakdown (PPA, Awards, Meetings, etc.).
+
+    Evaluator roles/permissions (Sou Head, Student Trustee, OSSD Director).
+
+    Registration & Org Management
+
+    Organization categorization (Academic, Lifestyle, Fraternity, etc.).
+
+    Adviser academic rank integration.
+
+    Specialization tagging for filtering.
+
+    Revision Workflow
+
+    Visibility of comments during revisions.
+
+    "PENDING" lockout (restrict access to other pages until revisions are approved).
+
+Tier 2: Core Feature Upgrades (Moderate)
+UI/UX Improvements
+
+    Redesign CODEX logo (white outline, larger text, better alignment).
+
+    Confirmation modals for all critical actions (e.g., submissions, edits).
+
+    Filtering & Monitoring
+
+    Filter by category (org type, status, specialization).
+
+    Organization monitoring dashboard (visualizations, summaries).
+
+    Anti-Duplication & Restrictions
+
+    Constraints for repeating processes/events.
+
+    Prevent duplicate submissions (e.g., same event logged twice).
+
+    Logging & Security
+
+    Action/update logs (timestamped, user-specific).
+
+Tier 3: Quick Wins (Easiest)
+Static Content & Labels
+
+    Summary pages (Accredited Orgs, APESOC Results).
+
+    Clarify points breakdown in accreditation requirements.
+
+    Basic Validation
+
+    Logo approval disclaimer ("Not approved by SDU").
+
+Tooltips/help text for unclear fields.
+
+
+
+
+~~~~~~~~ ORIGINAL CONTENT ~~~~~~~~ 
+Suggestions 
+white outline for the word CODEX 
+make the text bigger or more legible 
+realign the text on the table 
+confirmation box for every end of process or changes
+filter by category
+constrain for process repetition/duplication of processes
+dashboard should be the landing page every login
+Filter by Category
+Restrictions for Repeating Events
+Confirmation Box every end process
+Logs for Actions/Updates
+Tracking of Accomplishment (Dashboard) In percentage/or Status
+Submission/Document Tracking
+Breakdown (Pie Graph) Grey if not approved, Colour if approved
+Monitoring of Organization (filtered, visualization)
+Summary of Accredited Organization 
+Summary of APESOC Results 
+APESOC Ratings
+
+ Registration (Add)
+Specializations of the Organization
+ Academic
+Lifestyle 
+Fraternity or sorority
+Environmental 
+Social-Civic
+Spiritual or religious
+Student government
+Adviser Academic Rank
+
+Accreditation 
+Logo shouldn't be approved by SDU
+Revision Feature for Student Org
+Visibility of Comments for Revisions 
+PENDING: Cannot access other pages. Only option is for Revisions
+
+ Requirements
+Percentage per Activities/Events Bearing
+ PPA = 35 pts 
+Meeting and Assemblies = 5 pts 
+Quality of Required Documents = 10 pts 
+Institutional Involvement = 15 pts 
+International Award and Recognition = 8 pts 
+National and Regional Awards and Recognition = 12 pts 
+Institutional/Local Awards and Recognition = 5 pts 
+Outreach Program/involvement in approved externally initiated activities = 10pts 
+Evaluators: Sou Head, Student trustee, and OSSD Director

@@ -271,22 +271,38 @@ export const OrganizationComponent = ({ formData, onChange, handleSubmit }) => {
                       />
                     </div>
                   )}
-
                   {classification === "System-wide" && (
                     <div className="flex-1">
                       <div className="flex flex-col gap-1 col-span-4">
                         <label htmlFor="specialization">
                           Specialization <span className="text-red-500">*</span>
                         </label>
-                        <input
-                          type="text"
+                        <select
                           id="specialization"
                           name="specialization"
                           className="border py-2 px-4 rounded-2xl"
                           value={formData.specialization || ""}
                           onChange={handleChange}
                           required
-                        />
+                        >
+                          <option value="">Select Specialization</option>
+                          <option value="Academic">Academic</option>
+                          <option value="Lifestyle">Lifestyle</option>
+                          <option value="Fraternity/Sorority">
+                            Fraternity/Sorority
+                          </option>
+                          <option value="Environmental">Environmental</option>
+                          <option value="Social-Civic">Social-Civic</option>
+                          <option value="Spiritual or religious">
+                            Spiritual or religious
+                          </option>
+                          <option value="Student government">
+                            Student government
+                          </option>
+                          <option value="Adviser Academic Rank">
+                            Adviser Academic Rank
+                          </option>
+                        </select>
                       </div>
                     </div>
                   )}

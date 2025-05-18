@@ -24,6 +24,8 @@ import StudentAdminHomePage from "./student_admin_home_page";
 import StudentAccomplishmentsTableView from "./documents/student_accomplishment_view";
 import StudentPosting from "./posts/student_posts_view";
 import StudentFiles from "./file_manager/file_view";
+import StudentDevelopmentUnitPage from "../SDU/app_SDU";
+import StudentAccreditationView from "./documents/student_accreditation_edit";
 
 function PendingOrRevisionUI({ status, storedUser }) {
   return (
@@ -98,10 +100,14 @@ export default function StudentLeaderPage() {
   }
 
   const status = storedUser.organization.accreditation_status.over_all_status;
+
   const validStatuses = ["Pending", "Revision Required"];
 
   const renderContent = () => {
     if (validStatuses.includes(status)) {
+      if (activeContent === "accreditations") {
+        return <StudentAccreditationView userData={storedUser} />;
+      }
       return <PendingOrRevisionUI status={status} storedUser={storedUser} />;
     }
 
@@ -110,16 +116,12 @@ export default function StudentLeaderPage() {
         return <StudentAdminHomePage />;
       case "proposals":
         return <StudentProposalTableView user={storedUser} />;
-      case "accreditations":
-        return <StudentProposalTa1 bleView user={storedUser} />;
       case "documents":
         return <StudentFiles user={storedUser} />;
       case "accreditations":
         return <StudentAccomplishmentsTableView user={storedUser} />;
       case "post":
         return <StudentPosting user={storedUser} />;
-      case "settings":
-        return <div className="p-4">This is settings content</div>;
       default:
         return <div className="p-4">Invalid selection</div>;
     }
@@ -154,34 +156,33 @@ export default function StudentLeaderPage() {
         <div className="flex flex-col w-1.45 text-white">
           {[
             { key: "home", icon: faHome, label: "Reports / Dashboard" },
-            {
-              key: "accreditations",
-              icon: faFile,
-              label: "Accomplishments",
-            },
+            { key: "accreditations", icon: faFile, label: "Accomplishments" },
             { key: "proposals", icon: faFileAlt, label: "Proposals" },
             { key: "documents", icon: faFolderOpen, label: "Documents" },
-            {
-              key: "post",
-              icon: faPenToSquare,
-              label: "Post",
-            },
-            { key: "chat", icon: faComment, label: "Chats" },
+            { key: "post", icon: faPenToSquare, label: "Post" },
             { key: "settings", icon: faGears, label: "Settings" },
-          ].map(({ key, icon, label }) => (
-            <div
-              key={key}
-              onClick={() => handleClick(key)}
-              className={`flex items-center gap-3 px-6 py-3 cursor-pointer transition ${
-                activeContent === key
-                  ? "bg-[#DFE4EB] text-[#1B3A57] font-semibold"
-                  : "hover:bg-[#2E4B6B] text-white"
-              }`}
-            >
-              <FontAwesomeIcon icon={icon} className="flex-1" />
-              <p className="flex-3/4">{label}</p>
-            </div>
-          ))}
+          ]
+            .filter(({ key }) => {
+              // Only allow "home" and "accreditations" if status is pending or revision
+              if (validStatuses.includes(status)) {
+                return key === "home" || key === "accreditations";
+              }
+              return true;
+            })
+            .map(({ key, icon, label }) => (
+              <div
+                key={key}
+                onClick={() => handleClick(key)}
+                className={`flex items-center gap-3 px-6 py-3 cursor-pointer transition ${
+                  activeContent === key
+                    ? "bg-[#DFE4EB] text-[#1B3A57] font-semibold"
+                    : "hover:bg-[#2E4B6B] text-white"
+                }`}
+              >
+                <FontAwesomeIcon icon={icon} className="flex-1" />
+                <p className="flex-3/4">{label}</p>
+              </div>
+            ))}
         </div>
 
         <button

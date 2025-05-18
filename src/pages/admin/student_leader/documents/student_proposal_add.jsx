@@ -7,10 +7,7 @@ import {
 import { API_ROUTER } from "../../../../App";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faDownLeftAndUpRightToCenter,
-  faLeftLong,
-} from "@fortawesome/free-solid-svg-icons";
+import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
 
 // All file fields.
 const fileFields = {

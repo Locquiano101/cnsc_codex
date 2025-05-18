@@ -1,6 +1,9 @@
 import EventCalendar from "../newsfeed_page/newsfeed_event_calendar";
 import PostTemplate from "../newsfeed_page/newsfeed_post_template";
-import { FileRenderer } from "../../../components/file_renderer";
+import {
+  FileRenderer,
+  FileRendererPinned,
+} from "../../../components/file_renderer";
 import { useParams } from "react-router-dom";
 
 import {
@@ -240,7 +243,7 @@ export default function OrganizationProfilePage() {
                               key={`pinned-${index}`}
                               className="bg-yellow-50 rounded-lg shadow-sm flex items-center p-2 border border-yellow-400"
                             >
-                              <FileRenderer
+                              <FileRendererPinned
                                 basePath={file.basepath}
                                 fileName={file.filename}
                                 type={file.category}

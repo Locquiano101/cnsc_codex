@@ -8,9 +8,62 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 
 export const FileRenderer = ({ basePath, fileName }) => {
-  const isImage = /\.(jpe?g|png|gif|bmp|webp|svg)$/i.test(fileName);
+  const isImage = /\.(jpe?g|png|gif|bmp|webp|svg)$/.test(fileName);
   const raw = `${basePath}/${isImage ? "photos" : "documents"}/${fileName}`;
   const url = encodeURI(raw);
+
+  const [showModal, setShowModal] = useState(false);
+  if (isImage) {
+    return (
+      <div className="object-cover  rounded-lg flex-shrink-0 flex flex-wrap relative">
+        <img
+          src={url}
+          alt={fileName}
+          className="h-100 w-auto mx-2 rounded-lg object-cover cursor-pointer"
+          onClick={() => setShowModal(true)}
+        />
+
+        {showModal && (
+          <div
+            className="fixed inset-0 bg-black/25 w-full bg-opacity-70 flex items-center justify-center z-50"
+            onClick={() => setShowModal(false)}
+          >
+            <div className="relative" onClick={(e) => e.stopPropagation()}>
+              <FontAwesomeIcon
+                icon={faClose}
+                className="text-[32px]  text-red-600 absolute top-2 right-4 cursor-pointer"
+                onClick={() => setShowModal(false)}
+              />
+              <img
+                src={url}
+                alt={fileName}
+                className="h-full w-full  rounded-lg shadow-lg"
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className=" p-2 w-full space-y-4 flex flex-col justify-center items-center rounded-lg shadow-md bg-white">
+      <FontAwesomeIcon icon={faFileAlt} className="text-[3rem] font-black" />
+      <a
+        href={url}
+        target="_blank"
+        rel="noreferrer"
+        className="text-blue-600 text-md underline h-full"
+      >
+        (preview) - {fileName}
+      </a>
+    </div>
+  );
+};
+
+export const FileRendererPinned = ({ basePath, fileName }) => {
+  const isImage = /\.(jpe?g|png|gif|bmp|webp|svg)$/.test(fileName);
+  const url = encodeURI(basePath);
 
   const [showModal, setShowModal] = useState(false);
   if (isImage) {
@@ -173,5 +226,21 @@ export function DocumentSection({ title, files, basePath }) {
         )}
       </div>
     </section>
+  );
+}
+
+export function ProfilePictureRenderer({ OrgName, OrgLogo }) {
+  console.log("alshdask", OrgName);
+  const path = `/${OrgName}/Accreditation/Accreditation/photos/${OrgLogo}  `;
+
+  return (
+    <img
+      src={OrgLogo ? path : "/general/cnsc_codex_ver_2.svg"}
+      className="h-full w-full rounded-full aspect-square object-cover"
+      alt="Organization Logo"
+      onError={(e) => {
+        e.target.src = "/general/default-org-logo.svg";
+      }}
+    />
   );
 }

@@ -1,18 +1,9 @@
 import { useState } from "react";
-import {
-  ChevronUp,
-  ChevronDown,
-  Info,
-  Award,
-  TrendingUp,
-  BarChart3,
-} from "lucide-react";
+import { Award, ChevronUp, ChevronDown } from "lucide-react";
 
 export default function OrganizationLeaderboard() {
-  const [activeTab, setActiveTab] = useState("top");
   const [expandedOrg, setExpandedOrg] = useState(null);
 
-  // Dummy data for the leaderboard
   const topOrgs = [
     {
       id: 1,
@@ -23,7 +14,6 @@ export default function OrganizationLeaderboard() {
         "Developed 3 revolutionary clean energy technologies",
         "Established sustainability programs in 27 countries",
       ],
-      growthRate: 18.3,
       category: "Environmental Impact",
     },
     {
@@ -35,7 +25,6 @@ export default function OrganizationLeaderboard() {
         "Launched 14 mobile health clinics",
         "Developed affordable treatment for tropical diseases",
       ],
-      growthRate: 15.7,
       category: "Social Development",
     },
     {
@@ -43,111 +32,129 @@ export default function OrganizationLeaderboard() {
       name: "EduForward",
       score: 89.8,
       achievements: [
-        "Established 132 schools in underserved communities",
-        "Trained 5,700 educators",
-        "Created digital learning platform with 1.2M users",
+        "Provided education to 1.2M underserved students",
+        "Built 87 schools in developing regions",
+        "Created award-winning online learning platform",
       ],
-      growthRate: 21.2,
-      category: "Social Development",
+      category: "Education",
     },
     {
       id: 4,
       name: "TechUnity Foundation",
       score: 87.5,
       achievements: [
-        "Connected 850K households to high-speed internet",
-        "Distributed 230K computers to low-income students",
-        "Created 17 tech hubs in rural communities",
+        "Distributed technology to 500k disadvantaged communities",
+        "Trained 25k individuals in digital literacy",
+        "Launched 5 innovation hubs in rural areas",
       ],
-      growthRate: 12.9,
-      category: "Technological Innovation",
+      category: "Technology Access",
     },
     {
       id: 5,
       name: "BlueWave Conservation",
       score: 84.2,
       achievements: [
-        "Restored 120K acres of marine habitat",
-        "Removed 890 tons of ocean plastic",
-        "Protected 15 endangered marine species",
+        "Cleaned 230 miles of coastline",
+        "Protected 45 endangered marine species",
+        "Established 12 marine sanctuaries",
       ],
-      growthRate: 9.8,
-      category: "Environmental Impact",
+      category: "Marine Conservation",
     },
   ];
 
-  // Format score with one decimal place
-  const formatScore = (score) => score.toFixed(1);
-
-  // Format growth rate or improvement with plus sign and one decimal place
-  const formatGrowth = (growth) => `+${growth.toFixed(1)}%`;
-
   const toggleExpand = (id) => {
-    if (expandedOrg === id) {
-      setExpandedOrg(null);
-    } else {
-      setExpandedOrg(id);
-    }
+    setExpandedOrg(expandedOrg === id ? null : id);
   };
 
+  const formatScore = (score) => score.toFixed(1);
+
   return (
-    <div className=" bg-white rounded-lg overflow-hidden">
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 py-4 px-6">
-        <h1 className="text-2xl font-bold text-white">
-          Top Organization Accomplishments Leaderboard
-        </h1>
-        <p className="text-blue-100">
-          Last updated:{" "}
-          {Intl.DateTimeFormat("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "2-digit",
-          }).format(Date.now())}
+    <div className="bg-white rounded-lg shadow-lg flex flex-col h-full border border-gray-200">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 py-5 px-6 rounded-t-lg">
+        <div className="flex items-center gap-2">
+          <Award className="text-yellow-300" size={28} />
+          <h1 className="text-2xl font-bold text-white">
+            Organization Impact Leaderboard
+          </h1>
+        </div>
+        <p className="text-blue-100 mt-1">
+          Recognizing excellence in social and environmental impact
         </p>
       </div>
 
-      <div>
-        <div className="bg-gray-50 p-4 rounded-lg mb-6">
-          <div className="grid grid-cols-12 text-sm font-medium text-gray-500 mb-2">
-            <div className="col-span-1">Rank</div>
-            <div className="col-span-4">Organization</div>
-            <div className="col-span-2">Score</div>
-          </div>
+      {/* Column Headers */}
+      <div className="grid grid-cols-10 px-6 py-3 bg-gray-50 border-b text-sm font-semibold text-gray-600">
+        <div className="col-span-1">Rank</div>
+        <div className="col-span-5">Organization</div>
+        <div className="col-span-3">Score</div>
+        <div className="col-span-1"></div>
+      </div>
 
+      {/* Scrollable Content */}
+      <div className="overflow-auto flex-1">
+        <div className="divide-y divide-gray-100">
           {topOrgs.map((org, index) => (
-            <div key={org.id} className="mb-2">
+            <div key={org.id} className="hover:bg-blue-50/50 transition-colors">
               <div
-                className="grid grid-cols-12 items-center bg-white p-3 rounded-lg shadow-sm cursor-pointer hover:bg-blue-50"
                 onClick={() => toggleExpand(org.id)}
+                className="grid grid-cols-10 items-center px-6 py-4 cursor-pointer"
+                aria-expanded={expandedOrg === org.id}
               >
-                <div className="col-span-1 flex items-center justify-center bg-blue-100 text-blue-600 font-bold rounded-full w-8 h-8">
-                  {index + 1}
+                <div className="col-span-1">
+                  <span
+                    className={`inline-flex items-center justify-center w-8 h-8 rounded-full font-bold ${
+                      index === 0
+                        ? "bg-yellow-100 text-yellow-800"
+                        : index === 1
+                        ? "bg-gray-200 text-gray-700"
+                        : index === 2
+                        ? "bg-amber-100 text-amber-800"
+                        : "bg-blue-100 text-blue-700"
+                    }`}
+                  >
+                    {index + 1}
+                  </span>
                 </div>
-                <div className="col-span-4 font-medium">{org.name}</div>
-                <div className="col-span-2">
-                  <span className="inline-block bg-blue-100 text-blue-800 py-1 px-2 rounded-lg font-medium">
+                <div className="col-span-5 font-medium text-gray-800">
+                  {org.name}
+                </div>
+                <div className="col-span-3">
+                  <span className="inline-block bg-blue-100 text-blue-800 py-1 px-3 rounded-full font-medium">
                     {formatScore(org.score)}
                   </span>
                 </div>
-                <div className="col-span-3 text-gray-600">{org.category}</div>
-
-                <div className="col-span-1 flex justify-end text-gray-400">
+                <div className="col-span-1 flex justify-end">
                   {expandedOrg === org.id ? (
-                    <ChevronUp size={18} />
+                    <ChevronUp size={20} className="text-blue-500" />
                   ) : (
-                    <ChevronDown size={18} />
+                    <ChevronDown size={20} className="text-gray-400" />
                   )}
                 </div>
               </div>
 
               {expandedOrg === org.id && (
-                <div className="bg-gray-50 p-4 rounded-b-lg mb-2 border-t-2 border-blue-100">
-                  <h3 className="font-medium text-gray-700 mb-2">
-                    Key Achievements:
+                <div className="bg-blue-50/70 px-6 py-4 border-t border-blue-100">
+                  <div className="mb-3">
+                    <span className="text-sm font-semibold text-gray-500">
+                      Category
+                    </span>
+                    <div className="bg-white border border-gray-200 text-gray-800 px-3 py-1 rounded-md mt-1 inline-block">
+                      {org.category}
+                    </div>
+                  </div>
+
+                  <h3 className="font-semibold text-gray-700 mb-2">
+                    Key Achievements
                   </h3>
-                  <ul className="list-disc pl-5 space-y-1 text-gray-600">
+                  <ul className="space-y-2">
                     {org.achievements.map((achievement, i) => (
-                      <li key={i}>{achievement}</li>
+                      <li key={i} className="flex items-start gap-2">
+                        <div className="bg-blue-100 text-blue-600 rounded-full p-1 mt-0.5">
+                          <Award size={12} />
+                        </div>
+                        <span className="text-gray-700">{achievement}</span>
+                      </li>
                     ))}
                   </ul>
                 </div>
@@ -157,7 +164,14 @@ export default function OrganizationLeaderboard() {
         </div>
       </div>
 
-      {/* Rising Stars Tab */}
+      <div className="border-t px-6 py-3 text-sm text-gray-500 bg-gray-50 rounded-b-lg">
+        Last updated:{" "}
+        {new Date().toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })}
+      </div>
     </div>
   );
 }
