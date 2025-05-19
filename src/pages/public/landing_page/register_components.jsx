@@ -410,7 +410,7 @@ export const AdviserComponent = ({
         onSubmit={onLocalSubmit}
       >
         <div className="w-[90%]">
-          <div className="pt-10 pl-10 pr-10 bg-white shadow-2xl mt-4">
+          <div className="pt-10 pl-10 pr-10 bg-white shadow-2xl mt-4 pb-5">
             {/* Adviser Section */}
             <section className="mt-4">
               <h1 className="mb-2 font-semibold text-lg">
@@ -510,7 +510,7 @@ export const AdviserComponent = ({
                 </div>
 
                 {/* Adviser Department */}
-                <div className="col-span-6 flex flex-col gap-1">
+                <div className="col-span-6 flex flex-col gap-1 ">
                   <College formData={formData} onChange={handleCollegeChange} />
                 </div>
               </div>
