@@ -279,7 +279,7 @@ export default function AdviserPosting({ user }) {
   }
 
   return (
-    <div className="flex flex-col  overflow-auto gap-4 p-7">
+    <div className="flex flex-col  h-screen gap-4 p-7 overflow-auto">
       {posts.map((post) => (
         <PostCard
           key={post._id}

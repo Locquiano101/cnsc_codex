@@ -151,7 +151,7 @@ export default function AccreditationTableSection() {
     prepareChartData();
 
   return (
-    <div className="h-full w-full border-12 overflow-y-auto">
+    <div className="h-full w-full overflow-y-auto">
       <div className="rounded-2xl flex flex-col gap-4">
         <div className="bg-white p-4 rounded-2xl flex flex-col items-center ">
           <h1 className="text-2xl font-bold text-center">

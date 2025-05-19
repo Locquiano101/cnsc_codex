@@ -116,11 +116,8 @@ export default function StudentLeaderPage() {
         return <StudentAdminHomePage />;
       case "proposals":
         return <StudentProposalTableView user={storedUser} />;
-<<<<<<< HEAD
-=======
       case "accreditations":
         return <StudentAccomplishmentsTableView user={storedUser} />;
->>>>>>> 983de4bd4defd90c64e0402dbe8b79f7aa758d45
       case "documents":
         return <StudentFiles user={storedUser} />;
       case "accreditations":
@@ -137,11 +134,11 @@ export default function StudentLeaderPage() {
   return (
     <div className="flex h-screen  overflow-hidden">
       {/* Sidebar */}
-      <div className="w-2/12 bg-cnsc-primary-color flex flex-col">
+      <div className="w-64 bg-[#1E1E1E] flex flex-col">
         {/* Logo & Welcome side-by-side */}
         <Link
           to={`/organization/profile/${storedUser.organization.org_name}`}
-          className="flex h-24 bg-cnsc-primary-color text-cnsc-white-color gap-2 px-5 items-center"
+          className="flex h-24 bg-[#1E1E1E] text-cnsc-white-color gap-2 px-5 items-center"
         >
           <img
             src={`/${encodeURIComponent(
@@ -153,7 +150,6 @@ export default function StudentLeaderPage() {
             alt="Logo"
           />
           <div className="flex flex-col ">
-            <h1 className="text-sm italic">Welcome,</h1>
             <h2 className=" text-lg font-bold">
               {storedUser.organization.org_name}
             </h2>
@@ -169,50 +165,25 @@ export default function StudentLeaderPage() {
             { key: "documents", icon: faFolderOpen, label: "Documents" },
             { key: "post", icon: faPenToSquare, label: "Post" },
             { key: "settings", icon: faGears, label: "Settings" },
-<<<<<<< HEAD
-          ]
-            .filter(({ key }) => {
-              // Only allow "home" and "accreditations" if status is pending or revision
-              if (validStatuses.includes(status)) {
-                return key === "home" || key === "accreditations";
-              }
-              return true;
-            })
-            .map(({ key, icon, label }) => (
-              <div
-                key={key}
-                onClick={() => handleClick(key)}
-                className={`flex items-center gap-3 px-6 py-3 cursor-pointer transition ${
-                  activeContent === key
-                    ? "bg-[#DFE4EB] text-[#1B3A57] font-semibold"
-                    : "hover:bg-[#2E4B6B] text-white"
-                }`}
-              >
-                <FontAwesomeIcon icon={icon} className="flex-1" />
-                <p className="flex-3/4">{label}</p>
-              </div>
-            ))}
-=======
           ].map(({ key, icon, label }) => (
             <div
               key={key}
               onClick={() => handleClick(key)}
               className={`flex items-center gap-3 px-6 py-3 cursor-pointer transition ${
                 activeContent === key
-                  ? "bg-[#DFE4EB] text-[#1B3A57] font-semibold"
-                  : "hover:bg-[#D44C47] text-white"
+                  ? "bg-cnsc-primary-color  font-semibold"
+                  : "hover:bg-gray-500 text-white"
               }`}
             >
               <FontAwesomeIcon icon={icon} className="flex-1" />
               <p className="flex-3/4">{label}</p>
             </div>
           ))}
->>>>>>> 983de4bd4defd90c64e0402dbe8b79f7aa758d45
         </div>
 
         <button
           onClick={() => HandleLogout(navigate)}
-          className="mt-auto mb-4 flex justify-center items-center py-3 cursor-pointer text-white hover:bg-red-50 transition"
+          className="mt-auto mb-4 flex justify-center items-center py-3 cursor-pointer text-white hover:bg-gray-500 transition"
         >
           <FontAwesomeIcon icon={faRightFromBracket} className="mr-2" />
           <span className="font-semibold">Logout</span>
@@ -220,7 +191,7 @@ export default function StudentLeaderPage() {
       </div>
 
       <div className="w-full flex flex-col flex-3/4">
-        <div className="h-24 bg-[#444444] flex items-center justify-end"></div>
+        <div className="h-24 bg-cnsc-black-color flex items-center justify-end"></div>
         <div className=" bg-brian-blue/10 flex flex-col overflow-hidden ">
           {renderContent()}
         </div>
