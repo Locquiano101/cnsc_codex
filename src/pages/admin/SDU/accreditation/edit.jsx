@@ -86,19 +86,16 @@ export default function ProcessAccreditationSection({
   };
 
   const handleSave = async () => {
-    console.log("Updated Accreditation JSON:", editedAccreditation);
     try {
-      const response = await axios.put(
-        `${API_ROUTER}/process-accreditation-sdu/${editedAccreditation.accreditation_status._id}`,
-        editedAccreditation
+      const payload = editedAccreditation;
+      await axios.put(
+        `${API_ROUTER}/process-accreditation-sdu/${payload.accreditation_status._id}`,
+        payload
       );
-      console.log("Accreditation update response:", response.data);
       alert("Accreditation updated successfully.");
-    } catch (err) {
-      console.error(
-        "Error updating accreditation:",
-        err.response?.data || err.message
-      );
+      window.location.reload(); // Reloads the entire page
+    } catch (error) {
+      console.error("Error updating accreditation:", error);
       alert("Failed to update accreditation.");
     }
   };
@@ -117,97 +114,108 @@ export default function ProcessAccreditationSection({
   ];
 
   return (
-    <div className="px-6 py-4">
-      {/* Updated At (read-only) */}
-      <div className="flex gap-2 mb-4 items-center ">
-        <strong className="min-w-fit mr-4 ">Updated At:</strong>
+    <div className="px-8 py-6 space-y-6 bg-white rounded shadow-md">
+      {/* Timestamp */}
+      <div>
+        <label className="block text-sm font-semibold text-gray-700 mb-1">
+          Last Updated:
+        </label>
         <input
           type="text"
           value={new Date(editedAccreditation.updatedAt).toLocaleString()}
           readOnly
           disabled
-          className="w-full p-1 border bg-gray-200 cursor-not-allowed"
+          className="w-full p-2 border border-gray-300 bg-gray-100 rounded text-sm text-gray-600"
         />
       </div>
-      <div className="grid grid-cols-7 w-full gap-1 mb-4">
-        {fields.map(([label, key, span = 1]) => (
+
+      {/* Organization Info */}
+      <div className="grid grid-cols-12 gap-4">
+        {fields.map(([label, key, span = "4"]) => (
           <div
             key={key}
-            className={`col-span-${span} border items-center flex bg-gray-50 p-2 rounded`}
+            className={`col-span-${span} bg-gray-50 border border-gray-200 p-3 rounded`}
           >
-            <h1>
-              <span className="font-bold">{label}:</span>{" "}
+            <label className="block text-xs font-medium text-gray-500">
+              {label}
+            </label>
+            <div className="text-sm font-semibold text-gray-800">
               {editedAccreditation[key] || "—"}
-            </h1>
+            </div>
           </div>
         ))}
-        {editedAccreditation.accreditation_status && (
-          <div className="border p-2 col-span-7 flex justify-around rounded bg-gray-50">
-            <h1 className="font-bold">
-              Accreditation Status:
-              <span className="font-normal ml-2">
-                {editedAccreditation.accreditation_status.accreditation_type ||
-                  ""}
-              </span>
-            </h1>
-            <h1 className="block mb-2">
-              <strong>Overall Status:</strong>
-              <span className="font-normal ml-2">
-                {editedAccreditation.accreditation_status.over_all_status || ""}
-              </span>{" "}
-            </h1>
-          </div>
-        )}
       </div>
 
-      {/* Documents Section (editable) */}
-      {documents.length > 0 && (
-        <div className="flex flex-col gap-2 ">
-          <h1 className="text-center text-xl ">Documents Section</h1>
-          {documents.map((doc, index) => (
-            <div key={index} className="flex gap-4 border-b ">
-              <div className="flex flex-col flex-1">
-                <div className="space-x-4 flex justify-between">
-                  <h1 className="min-w-fit font-medium">{doc.label}:</h1>
-                  <div className="flex gap-4">
-                    <label htmlFor={`status-${index}`}>
-                      <input
-                        type="radio"
-                        name={`status-${index}`}
-                        value="approved"
-                        checked={doc.Status === "approved"}
-                        onChange={() => handleStatusChange(index, "approved")}
-                        className="mr-2"
-                      />
-                      Approved
-                    </label>
-                    <label htmlFor={`status-${index}`}>
-                      <input
-                        type="radio"
-                        name={`status-${index}`}
-                        value="revision"
-                        checked={doc.Status === "revision"}
-                        onChange={() => handleStatusChange(index, "revision")}
-                        className="mr-2"
-                      />
-                      Revision
-                    </label>
-                  </div>
-                </div>
-                {doc.Status === "revision" && (
-                  <textarea
-                    className="border p-2 w-full h-20"
-                    placeholder="Enter revision notes..."
-                    value={doc.revision_notes || ""}
-                    onChange={(e) =>
-                      handleRevisionNoteChange(index, e.target.value)
-                    }
-                  />
-                )}
-              </div>
+      {/* Accreditation Status */}
+      {editedAccreditation.accreditation_status && (
+        <div className="grid grid-cols-2 gap-6 p-4 bg-gray-50 border rounded">
+          <div>
+            <label className="text-sm font-medium text-gray-500">
+              Accreditation Type
+            </label>
+            <div className="text-base font-semibold text-gray-800 mt-1">
+              {editedAccreditation.accreditation_status.accreditation_type ||
+                ""}
+            </div>
+          </div>
+          <div>
+            <label className="text-sm font-medium text-gray-500">
+              Overall Status
+            </label>
+            <div className="text-base font-semibold text-gray-800 mt-1">
+              {editedAccreditation.accreditation_status.over_all_status || ""}
+            </div>
+          </div>
+        </div>
+      )}
 
-              {/* File Rendering */}
-              <div className="flex-1/2">
+      {/* Documents Section */}
+      {documents.length > 0 && (
+        <div className="space-y-6">
+          <h2 className="text-xl font-bold text-center text-gray-800">
+            Documents Section
+          </h2>
+          {documents.map((doc, index) => (
+            <div
+              key={index}
+              className="p-4 bg-white border border-gray-200 rounded shadow-sm space-y-3"
+            >
+              <div className="flex justify-between items-center">
+                <h3 className="font-semibold text-gray-700">{doc.label}</h3>
+                <div className="flex items-center gap-6">
+                  <label className="flex items-center gap-1 text-sm text-green-700 font-medium">
+                    <input
+                      type="radio"
+                      name={`status-${index}`}
+                      value="approved"
+                      checked={doc.Status === "approved"}
+                      onChange={() => handleStatusChange(index, "approved")}
+                    />
+                    Approved
+                  </label>
+                  <label className="flex items-center gap-1 text-sm text-yellow-700 font-medium">
+                    <input
+                      type="radio"
+                      name={`status-${index}`}
+                      value="revision"
+                      checked={doc.Status === "revision"}
+                      onChange={() => handleStatusChange(index, "revision")}
+                    />
+                    Revision
+                  </label>
+                </div>
+              </div>
+              {doc.Status === "revision" && (
+                <textarea
+                  className="w-full p-2 border border-gray-300 rounded text-sm"
+                  placeholder="Enter revision notes..."
+                  value={doc.revision_notes || ""}
+                  onChange={(e) =>
+                    handleRevisionNoteChange(index, e.target.value)
+                  }
+                />
+              )}
+              <div className="mt-4">
                 <FileRenderer basePath={basePath} fileName={doc.file} />
               </div>
             </div>
@@ -215,19 +223,19 @@ export default function ProcessAccreditationSection({
         </div>
       )}
 
-      {/* Action Buttons */}
-      <div className="flex mt-4">
+      {/* Buttons */}
+      <div className="flex justify-end gap-4 pt-4 border-t">
         <button
-          className="mr-2 px-4 py-2 bg-green-500 text-white rounded"
-          onClick={handleSave}
-        >
-          Save Changes
-        </button>
-        <button
-          className="px-4 py-2 bg-blue-500 text-white rounded"
           onClick={goBack}
+          className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded shadow"
         >
           Back
+        </button>
+        <button
+          onClick={handleSave}
+          className="px-5 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded shadow"
+        >
+          Save Changes
         </button>
       </div>
     </div>

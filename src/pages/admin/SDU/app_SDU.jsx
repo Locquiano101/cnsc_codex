@@ -77,7 +77,7 @@ export default function StudentDevelopmentUnitPage() {
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Sidebar */}
-      <aside className="w-64 bg-[#1B3A57] flex flex-col pt-6 text-white">
+      <aside className="w-64 bg-[#222222] flex flex-col pt-6 text-white ">
         {/* Logo + Admin Label */}
         <div className="flex items-center px-6 mb-6">
           <img
@@ -95,8 +95,8 @@ export default function StudentDevelopmentUnitPage() {
             onClick={() => handleNavClick("home")}
             className={`flex items-center gap-3 px-6 py-3 cursor-pointer transition ${
               activeContent === "home"
-                ? "bg-[#DFE4EB] text-[#1B3A57] font-semibold"
-                : "hover:bg-[#2E4B6B] text-white"
+                ? "bg-cnsc-primary-color text-cnsc-white-color font-semibold"
+                : "hover:bg-gray-500 text-white"
             }`}
           >
             <FontAwesomeIcon icon={faHome} />
@@ -106,7 +106,7 @@ export default function StudentDevelopmentUnitPage() {
           {/* Organizations Group Toggle */}
           <div
             onClick={() => setShowOrgSubmenu((prev) => !prev)}
-            className="flex items-center justify-between px-6 py-3 cursor-pointer hover:bg-[#2E4B6B] text-white transition"
+            className="flex items-center justify-between px-6 py-3 cursor-pointer hover:bg-gray-500 text-white transition"
           >
             <div className="flex items-center gap-3">
               <FontAwesomeIcon icon={faUsers} />
@@ -124,8 +124,8 @@ export default function StudentDevelopmentUnitPage() {
                 onClick={() => handleNavClick("organizations")}
                 className={`px-4 py-2 flex pl-12 cursor-pointer transition ${
                   activeContent === "organizations"
-                    ? "bg-[#DFE4EB] text-[#1B3A57] font-semibold"
-                    : "hover:bg-[#2E4B6B] text-white"
+                    ? "bg-cnsc-primary-color text-cnsc-white-color font-semibold"
+                    : "hover:bg-gray-500 text-white"
                 }`}
               >
                 <Users size={16} className="mr-4" />
@@ -135,8 +135,8 @@ export default function StudentDevelopmentUnitPage() {
                 onClick={() => handleNavClick("accreditations")}
                 className={`px-4 py-2 flex pl-12 cursor-pointer transition ${
                   activeContent === "accreditations"
-                    ? "bg-[#DFE4EB] text-[#1B3A57] font-semibold"
-                    : "hover:bg-[#2E4B6B] text-white"
+                    ? "bg-cnsc-primary-color text-cnsc-white font-semibold"
+                    : "hover:bg-gray-500 text-white"
                 }`}
               >
                 <FolderOpen size={16} className="mr-4" />
@@ -146,8 +146,8 @@ export default function StudentDevelopmentUnitPage() {
                 onClick={() => handleNavClick("accomplishments")}
                 className={`px-4 py-2 flex pl-12 cursor-pointer transition ${
                   activeContent === "accomplishments"
-                    ? "bg-[#DFE4EB] text-[#1B3A57] font-semibold"
-                    : "hover:bg-[#2E4B6B] text-white"
+                    ? "bg-cnsc-primary-color text-white font-semibold"
+                    : "hover:bg-gray-500 text-white"
                 }`}
               >
                 <Star size={16} className="mr-4" />
@@ -159,7 +159,7 @@ export default function StudentDevelopmentUnitPage() {
           {/* System Wide Group Toggle */}
           <div
             onClick={() => setShowSystemWideSubmenu((prev) => !prev)}
-            className="flex items-center justify-between px-6 py-3 cursor-pointer hover:bg-[#2E4B6B] text-white transition"
+            className="flex items-center justify-between px-6 py-3 cursor-pointer hover:bg-gray-500 text-white transition"
           >
             <div className="flex items-center gap-3">
               <FontAwesomeIcon icon={faGlobe} />
@@ -177,8 +177,8 @@ export default function StudentDevelopmentUnitPage() {
                 onClick={() => handleNavClick("systemProposal")}
                 className={`px-4 py-2 flex pl-12 cursor-pointer transition ${
                   activeContent === "systemProposal"
-                    ? "bg-[#DFE4EB] text-[#1B3A57] font-semibold"
-                    : "hover:bg-[#2E4B6B] text-white"
+                    ? "bg-cnsc-primary-color text-white font-semibold"
+                    : "hover:bg-gray-500 text-white"
                 }`}
               >
                 <FileText size={16} className="mr-4" />
@@ -188,8 +188,8 @@ export default function StudentDevelopmentUnitPage() {
                 onClick={() => handleNavClick("systemAccomplishment")}
                 className={`px-4 py-2 flex pl-12 cursor-pointer transition ${
                   activeContent === "systemAccomplishment"
-                    ? "bg-[#DFE4EB] text-[#1B3A57] font-semibold"
-                    : "hover:bg-[#2E4B6B] text-white"
+                    ? "bg-cnsc-primary-color text-white font-semibold"
+                    : "hover:bg-gray-500 text-white"
                 }`}
               >
                 <Award size={16} className="mr-4" />
@@ -203,8 +203,8 @@ export default function StudentDevelopmentUnitPage() {
             onClick={() => handleNavClick("users")}
             className={`flex items-center gap-3 px-6 py-3 cursor-pointer transition ${
               activeContent === "users"
-                ? "bg-[#DFE4EB] text-[#1B3A57] font-semibold"
-                : "hover:bg-[#2E4B6B] text-white"
+                ? "bg-cnsc-primary-color text-white font-semibold"
+                : "hover:bg-gray-500 text-white"
             }`}
           >
             <FontAwesomeIcon icon={faUserGear} />
@@ -215,8 +215,8 @@ export default function StudentDevelopmentUnitPage() {
             onClick={() => handleNavClick("logs")}
             className={`flex items-center gap-3 px-6 py-3 cursor-pointer transition ${
               activeContent === "logs"
-                ? "bg-[#DFE4EB] text-[#1B3A57] font-semibold"
-                : "hover:bg-[#2E4B6B] text-white"
+                ? "bg-cnsc-primary-color text-white font-semibold"
+                : "hover:bg-gray-500 text-white"
             }`}
           >
             <FontAwesomeIcon icon={faClockRotateLeft} />
@@ -227,7 +227,7 @@ export default function StudentDevelopmentUnitPage() {
         {/* Logout */}
         <div
           onClick={() => HandleLogout(navigate)}
-          className="mt-auto w-full flex justify-center items-center py-3 cursor-pointer text-white hover:bg-red-50 transition"
+          className="mt-auto w-full flex justify-center items-center py-3 cursor-pointer text-white hover:bg-gray-500"
         >
           <FontAwesomeIcon icon={faRightFromBracket} className="mr-2" />
           <span className="font-semibold">Logout</span>
