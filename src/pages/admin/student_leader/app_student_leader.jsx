@@ -176,8 +176,8 @@ export default function StudentLeaderPage() {
                 onClick={() => handleClick(key)}
                 className={`flex items-center gap-3 px-6 py-3 cursor-pointer transition ${
                   activeContent === key
-                    ? "bg-[#DFE4EB] text-[#1B3A57] font-semibold"
-                    : "hover:bg-[#2E4B6B] text-white"
+                    ? "bg-cnsc-primary-color  font-semibold"
+                    : "hover:bg-gray-500 text-white"
                 }`}
               >
                 <FontAwesomeIcon icon={icon} className="flex-1" />
