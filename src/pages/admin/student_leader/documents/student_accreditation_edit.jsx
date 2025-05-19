@@ -4,12 +4,9 @@ import {
   Users,
   Award,
   FileText,
-  Calendar,
   Clock,
   CheckCircle,
   XCircle,
-  CodeSquare,
-  Download,
   Upload,
   Eye,
   AlertCircle,
@@ -112,6 +109,26 @@ export default function StudentAccreditationDetailsView({ userData }) {
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleDateString();
+  };
+
+  // Get organization specialization or course based on org_type
+  const getOrgSpecialization = () => {
+    if (
+      org_type?.Classification === "Local" &&
+      org_type?.Departments?.length > 0
+    ) {
+      return org_type.Departments.map(
+        (dept) => `${dept.Department} - ${dept.Course}`
+      ).join(", ");
+    } else if (
+      org_type?.Classification === "System-Wide" &&
+      org_type?.Fields?.length > 0
+    ) {
+      return org_type.Fields.map((field) =>
+        field.specializations.join(", ")
+      ).join(", ");
+    }
+    return "N/A";
   };
 
   // Loading state
@@ -244,15 +261,42 @@ export default function StudentAccreditationDetailsView({ userData }) {
                     </span>
                     <span className="text-gray-800">{delivery_unit}</span>
                   </div>
-                  <div className="flex items-start">
-                    <span className="text-gray-500 w-32 text-sm">
-                      Specialization:
-                    </span>
-                    <span className="text-gray-800">
-                      {org_type?.Fields?.[0]?.specializations?.join(", ") ||
-                        "Academic"}
-                    </span>
-                  </div>
+
+                  {/* Different display based on org type */}
+                  {org_type?.Classification === "Local" ? (
+                    <div className="flex items-start">
+                      <span className="text-gray-500 w-32 text-sm">
+                        Department:
+                      </span>
+                      <span className="text-gray-800">
+                        {org_type.Departments?.length > 0 ? (
+                          <div>
+                            {org_type.Departments.map((dept, index) => (
+                              <div key={index} className="mb-1">
+                                <div>{dept.Department}</div>
+                                <div className="text-sm text-gray-600">
+                                  {dept.Course}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          "Not specified"
+                        )}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-start">
+                      <span className="text-gray-500 w-32 text-sm">
+                        Specialization:
+                      </span>
+                      <span className="text-gray-800">
+                        {org_type?.Fields?.[0]?.specializations?.join(", ") ||
+                          "Not specified"}
+                      </span>
+                    </div>
+                  )}
+
                   <div className="flex items-start">
                     <span className="text-gray-500 w-32 text-sm">Email:</span>
                     <span className="text-gray-800">{org_email}</span>
