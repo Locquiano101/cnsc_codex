@@ -116,11 +116,8 @@ export default function StudentLeaderPage() {
         return <StudentAdminHomePage />;
       case "proposals":
         return <StudentProposalTableView user={storedUser} />;
-<<<<<<< HEAD
-=======
       case "accreditations":
         return <StudentAccomplishmentsTableView user={storedUser} />;
->>>>>>> f2a84fc1a5a5c431120669e8f4367310c25fb0fc
       case "documents":
         return <StudentFiles user={storedUser} />;
       case "accreditations":
@@ -168,30 +165,6 @@ export default function StudentLeaderPage() {
             { key: "documents", icon: faFolderOpen, label: "Documents" },
             { key: "post", icon: faPenToSquare, label: "Post" },
             { key: "settings", icon: faGears, label: "Settings" },
-<<<<<<< HEAD
-          ]
-            .filter(({ key }) => {
-              // Only allow "home" and "accreditations" if status is pending or revision
-              if (validStatuses.includes(status)) {
-                return key === "home" || key === "accreditations";
-              }
-              return true;
-            })
-            .map(({ key, icon, label }) => (
-              <div
-                key={key}
-                onClick={() => handleClick(key)}
-                className={`flex items-center gap-3 px-6 py-3 cursor-pointer transition ${
-                  activeContent === key
-                    ? "bg-[#DFE4EB] text-[#1B3A57] font-semibold"
-                    : "hover:bg-[#2E4B6B] text-white"
-                }`}
-              >
-                <FontAwesomeIcon icon={icon} className="flex-1" />
-                <p className="flex-3/4">{label}</p>
-              </div>
-            ))}
-=======
           ].map(({ key, icon, label }) => (
             <div
               key={key}
@@ -206,7 +179,6 @@ export default function StudentLeaderPage() {
               <p className="flex-3/4">{label}</p>
             </div>
           ))}
->>>>>>> f2a84fc1a5a5c431120669e8f4367310c25fb0fc
         </div>
 
         <button

@@ -12,12 +12,8 @@ import OrganizationPage from "./pages/public/organization_page/organizations";
 import DeanAdminPage from "./pages/admin/dean/app_dean";
 import OSSDCoordinatorPage from "./pages/admin/ossd_coordinator/app_ossd_coordinator";
 
-<<<<<<< HEAD
-export const API_ROUTER = "http://192.168.1.16:8080/api";
-
-=======
 export const API_ROUTER = "http://localhost:8080/api";
->>>>>>> f2a84fc1a5a5c431120669e8f4367310c25fb0fc
+
 // Updated ProtectedRoute with allowedRoles prop
 const ProtectedRoute = ({ allowedRoles }) => {
   // Retrieve token and user position from localStorage
