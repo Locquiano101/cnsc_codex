@@ -21,7 +21,7 @@ import { API_ROUTER } from "../../../../App";
 import { FileRenderer } from "../../../../components/file_renderer";
 import { useState, useEffect } from "react";
 
-export default function AccreditationDetailsView({ userData }) {
+export default function StudentAccreditationDetailsView({ userData }) {
   const [activeTab, setActiveTab] = useState("overview");
   const [accreditationData, setAccreditationData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -60,7 +60,6 @@ export default function AccreditationDetailsView({ userData }) {
       adviser_email,
       adviser_department,
       accreditation_status,
-      createdAt: orgCreatedAt,
     },
     position,
     delivery_unit,
