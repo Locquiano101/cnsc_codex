@@ -1,97 +1,152 @@
-import {
-  Building,
-  User,
-  Users,
-  Award,
-  FileText,
-  Clock,
-  CheckCircle,
-  XCircle,
-  Upload,
-  Eye,
-  AlertCircle,
-} from "lucide-react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFileAlt, faClose } from "@fortawesome/free-solid-svg-icons";
+import { FileText, Upload, X, Pen } from "lucide-react";
 import axios from "axios";
 import { API_ROUTER } from "../../../../App";
-import { FileRenderer } from "../../../../components/file_renderer";
 import { useState, useEffect } from "react";
 
-export default function StudentAccreditationDetailsView({ userData }) {
-  const [activeTab, setActiveTab] = useState("overview");
-  const [accreditationData, setAccreditationData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  // Set your base path for file uploads
+export default function StudentEditAccreditation({
+  document,
+  onClose,
+  accreditationId,
+  orgName,
+}) {
+  // Revision popup component
+  const [showFileRenderer, setShowFileRenderer] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
 
-  const basePath = `${userData.organization.org_name}/Accreditation/Accreditation/`;
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const apiroute = `${API_ROUTER}/get-accreditation/${userData.organization._id}`;
-        const response = await axios.get(apiroute);
-        setAccreditationData(response.data.accreditation);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching accreditation:", error);
-        setError("Failed to load accreditation data");
-        setLoading(false);
+  if (!document) return null;
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      setUploadError(null); // Clear any previous error
+      console.log("Selected file:", file); // Log selected file data
+    }
+  };
+
+  const handleEditClick = () => {
+    setShowFileRenderer(true);
+  };
+
+  // Function to upload revised document
+  // Frontend function to upload revised document
+  const uploadRevisedDocument = async (
+    accreditationId,
+    documentId,
+    file,
+    orgName
+  ) => {
+    const formData = new FormData();
+
+    // Add organization metadata
+    formData.append("orgName", orgName);
+    formData.append("orgFolder", orgName);
+    formData.append("orgDocumentClassification", "Accreditation");
+    formData.append("orgDocumentTitle", "Accreditation");
+    formData.append("documentId", documentId); // Add documentId to identify which document to update
+
+    // Append file based on its type
+    if (file && file.type) {
+      if (file.type.startsWith("image/")) {
+        formData.append("photo", file);
+      } else if (
+        file.type === "application/pdf" ||
+        file.type === "application/msword" ||
+        file.type ===
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      ) {
+        formData.append("document", file);
+      } else {
+        formData.append("file", file);
       }
-    };
+      formData.append("fileName", file.name); // Using a consistent key instead of document.label
+    }
 
-    fetchData();
-  }, [userData.organization._id]);
+    // Debug: Log all form data entries
+    for (let [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
 
-  const {
-    organization: {
-      org_name,
-      org_acronym,
-      org_class,
-      org_type,
-      org_president,
-      org_email,
-      logo,
-      adviser_name,
-      adviser_email,
-      adviser_department,
-      accreditation_status,
-    },
-    position,
-    delivery_unit,
-    _id: userId,
-    createdAt,
-  } = userData;
+    // API request
+    const response = await axios.post(
+      `${API_ROUTER}/student-update-accreditation/${accreditationId}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    return response.data;
+  };
+
+  const handleUploadDocument = async () => {
+    if (!selectedFile) {
+      setUploadError("Please select a file to upload");
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      setUploadError(null);
+
+      // Log what we're uploading
+      console.log("Uploading document data:");
+      console.log("- File:", selectedFile);
+      console.log("- File name:", selectedFile.name);
+      console.log("- File size:", selectedFile.size);
+      console.log("- File type:", selectedFile.type);
+      console.log("- Accreditation ID:", accreditationId);
+      console.log("- Document ID:", document._id);
+      console.log("- Organization name:", orgName);
+
+      const result = await uploadRevisedDocument(
+        accreditationId,
+        document._id,
+        selectedFile,
+        orgName
+      );
+
+      console.log("Upload result:", result);
+
+      setUploadSuccess(true);
+    } catch (error) {
+      console.error("Error uploading document:", error);
+      setUploadError(
+        error.response?.data?.message || "Failed to upload document"
+      );
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   // Status badge component with appropriate colors
   const StatusBadge = ({ status }) => {
     let bgColor = "bg-yellow-100";
     let textColor = "text-yellow-800";
-    let icon = <Clock className="w-4 h-4 mr-1" />;
 
     switch (status?.toLowerCase()) {
       case "approved":
         bgColor = "bg-green-100";
         textColor = "text-green-800";
-        icon = <CheckCircle className="w-4 h-4 mr-1" />;
         break;
       case "rejected":
         bgColor = "bg-red-100";
         textColor = "text-red-800";
-        icon = <XCircle className="w-4 h-4 mr-1" />;
         break;
       case "revision":
       case "revision required":
         bgColor = "bg-orange-100";
         textColor = "text-orange-800";
-        icon = <AlertCircle className="w-4 h-4 mr-1" />;
         break;
       case "pending":
       default:
         bgColor = "bg-yellow-100";
         textColor = "text-yellow-800";
-        icon = <Clock className="w-4 h-4 mr-1" />;
         break;
     }
 
@@ -99,415 +154,155 @@ export default function StudentAccreditationDetailsView({ userData }) {
       <span
         className={`flex items-center px-3 py-1 rounded-full ${bgColor} ${textColor} text-sm font-medium`}
       >
-        {icon}
         {status || "Pending"}
       </span>
     );
   };
 
-  // Format date function
-  const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString();
-  };
-
-  // Get organization specialization or course based on org_type
-  const getOrgSpecialization = () => {
-    if (
-      org_type?.Classification === "Local" &&
-      org_type?.Departments?.length > 0
-    ) {
-      return org_type.Departments.map(
-        (dept) => `${dept.Department} - ${dept.Course}`
-      ).join(", ");
-    } else if (
-      org_type?.Classification === "System-Wide" &&
-      org_type?.Fields?.length > 0
-    ) {
-      return org_type.Fields.map((field) =>
-        field.specializations.join(", ")
-      ).join(", ");
-    }
-    return "N/A";
-  };
-
-  // Loading state
-  if (loading) {
-    return (
-      <div className="bg-white shadow-lg rounded-lg p-8 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading accreditation details...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <div className="bg-white shadow-lg rounded-lg p-8">
-        <div className="text-center text-red-500">
-          <AlertCircle className="h-12 w-12 mx-auto" />
-          <p className="mt-4">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="bg-white shadow-lg overflow-hidden">
-      {/* Header with org logo and main details */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-6 text-white">
-        <div className="flex items-center space-x-4">
-          <div className="bg-white rounded-full h-16 w-16 flex items-center justify-center">
-            {logo ? (
-              <img
-                src={`/${org_name}/Accreditation/Accreditation/photos/${logo}`}
-                className="h-full rounded-full aspect-square"
-                alt="Logo"
-              />
-            ) : (
-              <Building className="h-10 w-10 text-blue-600" />
-            )}
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold">
-              {org_name} ({org_acronym})
-            </h1>
-            <div className="flex items-center mt-1 text-blue-100">
-              <Building className="w-4 h-4 mr-1" />
-              <span className="text-sm">{org_class} Organization</span>
-            </div>
-            <div className="flex items-center mt-1 text-blue-100">
-              <User className="w-4 h-4 mr-1" />
-              <span className="text-sm">User ID: {userId}</span>
-            </div>
-          </div>
+    <div className="fixed inset-0 bg-black/10 backdrop-blur-xs flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4">
+        <div className="flex justify-between items-center border-b p-4">
+          <h3 className="text-lg font-semibold text-gray-800">
+            Revision Required
+          </h3>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
-        <div className="mt-6 flex items-center justify-between">
-          <div className="text-sm flex items-center">
-            <span className="mr-4">Overall Accreditation Status:</span>
-            <StatusBadge status={accreditation_status?.over_all_status} />
+        <div className="p-6">
+          <div className="mb-4">
+            <h4 className="font-medium text-gray-700 mb-2">Document</h4>
+            <p className="text-gray-800">{document.label}</p>
           </div>
-          <div className="text-sm">
-            <span>Last Updated: {formatDate(createdAt)}</span>
+
+          <div className="mb-4">
+            <h4 className="font-medium text-gray-700 mb-2">Status</h4>
+            <StatusBadge status={document.Status} />
           </div>
-        </div>
-      </div>
 
-      {/* Navigation Tabs */}
-      <div className="border-b border-gray-200">
-        <nav className="flex">
-          <button
-            onClick={() => setActiveTab("overview")}
-            className={`px-4 py-3 text-sm font-medium ${
-              activeTab === "overview"
-                ? "border-b-2 border-blue-500 text-blue-600"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            Overview
-          </button>
-          <button
-            onClick={() => setActiveTab("requirements")}
-            className={`px-4 py-3 text-sm font-medium ${
-              activeTab === "requirements"
-                ? "border-b-2 border-blue-500 text-blue-600"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            Requirements
-          </button>
-        </nav>
-      </div>
-
-      {/* Tab Content */}
-      <div className="p-6 overflow-auto">
-        {activeTab === "overview" && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Organization Details */}
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h3 className="font-semibold text-gray-700 mb-3 flex items-center">
-                  <Building className="w-5 h-5 mr-2 text-blue-500" />
-                  Organization Details
-                </h3>
-                <div className="space-y-2">
-                  <div className="flex items-start">
-                    <span className="text-gray-500 w-32 text-sm">Name:</span>
-                    <span className="text-gray-800">{org_name}</span>
-                  </div>
-                  <div className="flex items-start">
-                    <span className="text-gray-500 w-32 text-sm">Acronym:</span>
-                    <span className="text-gray-800">{org_acronym}</span>
-                  </div>
-                  <div className="flex items-start">
-                    <span className="text-gray-500 w-32 text-sm">Type:</span>
-                    <span className="text-gray-800">
-                      {org_type?.Classification}
-                    </span>
-                  </div>
-                  <div className="flex items-start">
-                    <span className="text-gray-500 w-32 text-sm">
-                      Delivery Unit:
-                    </span>
-                    <span className="text-gray-800">{delivery_unit}</span>
-                  </div>
-
-                  {/* Different display based on org type */}
-                  {org_type?.Classification === "Local" ? (
-                    <div className="flex items-start">
-                      <span className="text-gray-500 w-32 text-sm">
-                        Department:
-                      </span>
-                      <span className="text-gray-800">
-                        {org_type.Departments?.length > 0 ? (
-                          <div>
-                            {org_type.Departments.map((dept, index) => (
-                              <div key={index} className="mb-1">
-                                <div>{dept.Department}</div>
-                                <div className="text-sm text-gray-600">
-                                  {dept.Course}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          "Not specified"
-                        )}
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="flex items-start">
-                      <span className="text-gray-500 w-32 text-sm">
-                        Specialization:
-                      </span>
-                      <span className="text-gray-800">
-                        {org_type?.Fields?.[0]?.specializations?.join(", ") ||
-                          "Not specified"}
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="flex items-start">
-                    <span className="text-gray-500 w-32 text-sm">Email:</span>
-                    <span className="text-gray-800">{org_email}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Key Personnel */}
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h3 className="font-semibold text-gray-700 mb-3 flex items-center">
-                  <Users className="w-5 h-5 mr-2 text-blue-500" />
-                  Key Personnel
-                </h3>
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex items-center text-gray-600 mb-1">
-                      <User className="w-4 h-4 mr-1" />
-                      <span className="text-sm font-medium">User Position</span>
-                    </div>
-                    <div className="ml-5 text-gray-800">{position}</div>
-                  </div>
-                  <div>
-                    <div className="flex items-center text-gray-600 mb-1">
-                      <User className="w-4 h-4 mr-1" />
-                      <span className="text-sm font-medium">President</span>
-                    </div>
-                    <div className="ml-5 text-gray-800">{org_president}</div>
-                  </div>
-                  <div>
-                    <div className="flex items-center text-gray-600 mb-1">
-                      <User className="w-4 h-4 mr-1" />
-                      <span className="text-sm font-medium">Adviser</span>
-                    </div>
-                    <div className="ml-5 text-gray-800">{adviser_name}</div>
-                    <div className="ml-5 text-gray-600 text-sm">
-                      {adviser_email}
-                    </div>
-                    <div className="ml-5 text-gray-600 text-sm">
-                      {adviser_department}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Accreditation Summary */}
-            <div className="bg-blue-50 rounded-lg p-4">
-              <h3 className="font-semibold text-gray-700 mb-3 flex items-center">
-                <Award className="w-5 h-5 mr-2 text-blue-500" />
-                Accreditation Summary
-              </h3>
-
-              <div className="flex flex-col space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <StatusBadge
-                      status={accreditation_status?.over_all_status}
-                    />
-                    <span className="text-gray-600">
-                      {accreditation_status?.over_all_status === "Approved"
-                        ? "Organization is fully accredited"
-                        : accreditation_status?.over_all_status ===
-                          "Revision Required"
-                        ? "Organization requires document revisions"
-                        : "Organization is pending accreditation"}
-                    </span>
-                  </div>
-
-                  {accreditation_status?.over_all_status === "Approved" && (
-                    <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm flex items-center">
-                      <FileText className="w-4 h-4 mr-1" />
-                      View Certificate
-                    </button>
-                  )}
-                </div>
-
-                {accreditationData?.accreditation_status
-                  ?.accreditation_type && (
-                  <div className="text-gray-600 bg-blue-100 p-3 rounded-md">
-                    <span className="font-medium">Accreditation Type:</span>{" "}
-                    <span className="capitalize">
-                      {
-                        accreditationData.accreditation_status
-                          .accreditation_type
-                      }
-                    </span>
-                    {accreditation_status?.over_all_status ===
-                      "Revision Required" && (
-                      <div className="mt-2 flex items-start text-sm">
-                        <AlertCircle className="w-4 h-4 mr-2 text-orange-500 mt-1 flex-shrink-0" />
-                        <div>
-                          <strong className="text-orange-700">
-                            Action Required:
-                          </strong>{" "}
-                          Please review and resubmit the highlighted documents
-                          that need revision.
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
+          <div className="mb-6">
+            <h4 className="font-medium text-gray-700 mb-2">Revision Notes</h4>
+            <div className="bg-orange-50 border border-orange-200 rounded-md p-3">
+              <p className="text-gray-800">
+                {document.revision_notes || "No specific notes provided."}
+              </p>
             </div>
           </div>
-        )}
 
-        {activeTab === "requirements" && (
-          <div>
-            <h3 className="font-semibold h-full text-gray-700 mb-4 flex items-center">
-              <FileText className="w-5 h-5 mr-2 text-blue-500" />
-              Accreditation Requirements
-            </h3>
-
-            {accreditationData &&
-            accreditationData.accreditation_status &&
-            accreditationData.accreditation_status.documents_and_status ? (
-              <div className="bg-gray-50 rounded-lg overflow-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-100">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Requirement
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        File
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {accreditationData.accreditation_status.documents_and_status.map(
-                      (doc, index) => (
-                        <tr key={doc._id || index}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
-                            {doc.label}
-                          </td>
-                          <td className="px-6 py-4">
-                            {doc.file ? (
-                              <FileRenderer
-                                basePath={`/${userData.organization.org_name}/Accreditation/Accreditation/`}
-                                fileName={doc.file}
-                              />
-                            ) : (
-                              <span className="text-gray-500 italic text-sm">
-                                No file uploaded
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <StatusBadge status={doc.Status} />
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm">
-                            <div className="flex space-x-2">
-                              {doc.file && (
-                                <a
-                                  href={`${basePath}/${
-                                    /\.(jpe?g|png|gif|bmp|webp|svg)$/.test(
-                                      doc.file
-                                    )
-                                      ? "photos"
-                                      : "documents"
-                                  }/${doc.file}`}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="text-blue-600 hover:text-blue-800 flex items-center"
-                                >
-                                  <Eye className="w-4 h-4 mr-1" />
-                                  View
-                                </a>
-                              )}
-                              <button className="text-green-600 hover:text-green-800 flex items-center">
-                                <Upload className="w-4 h-4 mr-1" />
-                                {doc.file ? "Replace" : "Upload"}
-                              </button>
-                              {doc.Status === "revision" &&
-                                doc.revision_notes && (
-                                  <div
-                                    className="text-orange-500 hover:text-orange-700 flex items-center cursor-help"
-                                    title={doc.revision_notes}
-                                  >
-                                    <AlertCircle className="w-4 h-4 mr-1" />
-                                    {doc.revision_notes.length > 0
-                                      ? "Notes"
-                                      : ""}
-                                  </div>
-                                )}
-                            </div>
-                          </td>
-                        </tr>
-                      )
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-yellow-700">
+          <div className="mb-4">
+            <h4 className="font-medium text-gray-700 mb-2">Current File</h4>
+            {document.file ? (
+              <div className="flex justify-between">
                 <div className="flex items-center">
-                  <AlertCircle className="w-5 h-5 mr-2" />
-                  <span>
-                    No requirement documents found for this organization.
-                  </span>
+                  <FileText className="w-5 h-5 text-blue-500 mr-2" />
+                  <span className="text-blue-600">{document.file}</span>
+                </div>
+                <div className="flex items-center">
+                  <button
+                    onClick={handleEditClick}
+                    className="flex items-center text-blue-500 hover:text-blue-700"
+                  >
+                    <Pen className="w-5 h-5 mr-1" />
+                    <span>edit</span>
+                  </button>
                 </div>
               </div>
+            ) : (
+              <p className="text-gray-500 italic">No file uploaded</p>
             )}
           </div>
-        )}
+
+          {showFileRenderer && (
+            <div className="mb-6 border border-gray-200 rounded-lg p-4">
+              <h4 className="font-medium text-gray-700 mb-2">
+                Upload New File
+              </h4>
+              <input
+                type="file"
+                onChange={handleFileChange}
+                disabled={isUploading}
+                className="block w-full text-sm text-gray-500
+                file:mr-4 file:py-2 file:px-4
+                file:rounded-md file:border-0
+                file:text-sm file:font-semibold
+                file:bg-blue-50 file:text-blue-700
+                hover:file:bg-blue-100"
+              />
+
+              {/* Show selected file name */}
+              {selectedFile && (
+                <div className="mt-2 text-sm text-gray-700">
+                  Selected file: {selectedFile.name}
+                </div>
+              )}
+
+              {/* Error message */}
+              {uploadError && (
+                <div className="mt-2 text-sm text-red-600">{uploadError}</div>
+              )}
+
+              {/* Success message */}
+              {uploadSuccess && (
+                <div className="mt-2 text-sm text-green-600">
+                  Document uploaded successfully! Refreshing...
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="flex justify-end space-x-3 mt-6">
+            <button
+              onClick={onClose}
+              disabled={isUploading}
+              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center disabled:opacity-50 ${
+                isUploading ? "opacity-75" : ""
+              }`}
+              onClick={handleUploadDocument}
+              disabled={!selectedFile || isUploading || uploadSuccess}
+            >
+              {isUploading ? (
+                <>
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  <span>Uploading...</span>
+                </>
+              ) : (
+                <>
+                  <Upload className="w-4 h-4 mr-2" />
+                  Upload Revised Document
+                </>
+              )}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

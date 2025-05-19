@@ -17,7 +17,7 @@ import StudentAdminHomePage from "./student_admin_home_page";
 import StudentAccomplishmentsTableView from "./documents/student_accomplishment_view";
 import StudentPosting from "./posts/student_posts_view";
 import StudentFiles from "./file_manager/file_view";
-import StudentAccreditationView from "./documents/student_accreditation_edit";
+import StudentAccreditationView from "./documents/student_accreditation_view.jsx";
 import SystemLogsUI from "./system_logs";
 
 function PendingOrRevisionUI({ status, storedUser }) {
@@ -68,7 +68,7 @@ function PendingOrRevisionUI({ status, storedUser }) {
 export default function StudentLeaderPage() {
   const navigate = useNavigate();
   const [storedUser, setStoredUser] = useState(null);
-  const [activeContent, setActiveContent] = useState("proposals");
+  const [activeContent, setActiveContent] = useState("accreditations");
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -112,7 +112,7 @@ export default function StudentLeaderPage() {
       case "documents":
         return <StudentFiles user={storedUser} />;
       case "accreditations":
-        return <StudentAccreditationView userData={storedUser} />;
+        return <StudentAccomplishmentsTableView userData={storedUser} />;
       case "accomplishments":
         return <StudentAccomplishmentsTableView user={storedUser} />;
       case "post":

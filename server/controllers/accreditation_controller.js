@@ -4,6 +4,47 @@ import { NodeEmail } from "../middleware/emailer.js";
 
 const verificationStore = {};
 
+export const UpdateAccreditationCertainDocument = async (req, res) => {
+  const { accreditationId } = req.params;
+  const { documentId, fileName } = req.body; // Destructure fileName from body
+
+  console.log("Params:", req.params);
+  console.log("Body:", req.body);
+
+  try {
+    // Find and update only the file name of the specific document
+    const updatedAccreditation = await Accreditation.findOneAndUpdate(
+      {
+        _id: accreditationId,
+        "documents_and_status._id": documentId,
+      },
+      {
+        $set: {
+          "documents_and_status.$.file": fileName, // Update only the file name
+        },
+      },
+      { new: true }
+    );
+
+    if (!updatedAccreditation) {
+      console.error("Error updating accreditation document");
+      return res
+        .status(404)
+        .json({ message: "Accreditation or document not found" });
+    }
+
+    return res.status(200).json({
+      message: "Document file name updated successfully",
+      data: updatedAccreditation,
+    });
+  } catch (error) {
+    console.error("Error updating accreditation document:", error);
+    return res.status(500).json({
+      message: "An error occurred while updating the document",
+      error: error.message,
+    });
+  }
+};
 export const SendConfirmationCodeAccreditation = async (req, res) => {
   console.log("Request body:", req.body); // Add this
 
@@ -55,6 +96,7 @@ export const ConfirmAccreditation = async (req, res) => {
     res.status(400).json({ error: "Invalid verification code" });
   }
 };
+
 export const UpdateAccreditationSDU = async (req, res) => {
   try {
     // Use the accreditation record ID passed as a URL parameter.

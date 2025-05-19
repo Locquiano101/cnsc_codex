@@ -8,7 +8,7 @@ export default function EditProposalAdviserSection({ user, proposal, onBack }) {
   const [loading, setLoading] = useState(false);
   const [popup, setPopup] = useState({ visible: false, title: "", text: "" });
 
-  const basePath = `/${proposal.organization.org_name}/Proposals/${proposal.title}`;
+  const basePath = `/${proposal.organization.org_name}/asdasd/${proposal.title}`;
 
   const initialStatus = {
     proposal: "pending",

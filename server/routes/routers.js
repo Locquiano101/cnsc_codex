@@ -47,6 +47,7 @@ import {
   GetAllAccreditations,
   GetAccreditationById,
   UpdateAccreditationSDU,
+  UpdateAccreditationCertainDocument,
 } from "../controllers/accreditation_controller.js";
 
 import {
@@ -106,6 +107,12 @@ router.get("/get-pinned-files/:organizationId", GetFileNames);
 router.post("/create-new-user", CreateNewUser);
 
 /*ACCREDITATION ROUTE*/
+router.post(
+  "/student-update-accreditation/:accreditationId",
+  UploadMultipleFiles,
+  UpdateAccreditationCertainDocument
+);
+
 router.get("/get-accreditation", GetAllAccreditations);
 router.get("/get-accreditation/:id", GetAccreditationById);
 router.post("/confirm-verification-accreditation", ConfirmAccreditation);
