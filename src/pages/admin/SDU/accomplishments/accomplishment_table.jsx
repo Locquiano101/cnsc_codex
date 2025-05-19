@@ -1,113 +1,96 @@
-import { useState } from "react";
-import { Pencil, Star } from "lucide-react";
+import { API_ROUTER } from "../../../../App";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { Star } from "lucide-react";
+import SduAccomplishmentRating from "./accomplishment_rating";
 
 export default function AccomplishmentsTable() {
-  const [accomplishments, setAccomplishments] = useState([
-    {
-      logo: "/general/cnsc_codex.png",
-      name: "Learn Tailwind CSS",
-      organization: "Frontend Masters",
-      score: 102,
-      status: "Completed",
-      target: "Implement in projects",
-    },
-    {
-      logo: "/general/cnsc_codex.png",
-      name: "Networking",
-      organization: "Tech Meetups",
-      status: "In Progress",
-      score: 30,
-      target: "Attend 5 tech meetups",
-    },
-    {
-      logo: "/general/cnsc_codex.png",
-      name: "Networking",
-      organization: "Tech Meetups",
-      status: "In Progress",
-      score: 30,
-      target: "Attend 5 tech meetups",
-    },
-    {
-      logo: "/general/cnsc_codex.png",
-      name: "Networking",
-      organization: "Tech Meetups",
-      status: "In Progress",
-      score: 30,
-      target: "Attend 5 tech meetups",
-    },
-    {
-      logo: "/general/cnsc_codex.png",
-      name: "Networking",
-      organization: "Tech Meetups",
-      status: "In Progress",
-      score: 30,
-      target: "Attend 5 tech meetups",
-    },
-    {
-      logo: "/general/cnsc_codex.png",
-      name: "Networking",
-      organization: "Tech Meetups",
-      status: "In Progress",
-      score: 30,
-      target: "Attend 5 tech meetups",
-    },
-    {
-      logo: "/general/cnsc_codex.png",
-      name: "Networking",
-      organization: "Tech Meetups",
-      status: "In Progress",
-      score: 30,
-      target: "Attend 5 tech meetups",
-    },
-    {
-      logo: "/general/cnsc_codex.png",
-      name: "Networking",
-      organization: "Tech Meetups",
-      status: "In Progress",
-      score: 30,
-      target: "Attend 5 tech meetups",
-    },
-  ]);
+  const [accomplishments, setAccomplishments] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  // State for the rating modal
   const [showRatingModal, setShowRatingModal] = useState(false);
-  const [currentItemIndex, setCurrentItemIndex] = useState(null);
-  const [rating, setRating] = useState(0);
-  const [hoverRating, setHoverRating] = useState(0);
+  const [currentAccomplishment, setCurrentAccomplishment] = useState(null);
+
+  useEffect(() => {
+    async function getAccomplishmentByOrgID() {
+      setIsLoading(true);
+      try {
+        const response = await axios.get(`${API_ROUTER}/accomplishments/`);
+        const responseData = response.data;
+
+        // Just store all activities directly without transformation
+        const allActivities = [
+          ...(responseData.InstitutionalActivity || []),
+          ...(responseData.ExternalActivity || []),
+          ...(responseData.ProposedActivity || []),
+        ];
+
+        console.log("Activities:", allActivities);
+        setAccomplishments(allActivities);
+      } catch (err) {
+        console.error("Error fetching accomplishments:", err);
+        setError("Failed to fetch accomplishments data");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    getAccomplishmentByOrgID();
+  }, []);
+
+  // Format status for display
+  function formatStatus(status) {
+    if (!status) return "Pending";
+
+    if (status.includes("Approved")) {
+      return "Completed";
+    } else if (status.includes("Pending")) {
+      return "Pending";
+    } else {
+      return "In Progress";
+    }
+  }
 
   const handleScore = (index) => {
-    setCurrentItemIndex(index);
-    setRating(0);
-    setHoverRating(0);
+    setCurrentAccomplishment(accomplishments[index]);
     setShowRatingModal(true);
   };
 
-  const handleRateSubmit = () => {
-    if (currentItemIndex !== null && rating > 0) {
-      const updated = [...accomplishments];
-      updated[currentItemIndex].score = rating * 20; // convert 1-5 star to percentage
-      setAccomplishments(updated);
-    }
-    setShowRatingModal(false);
-  };
-
   const getScoreColor = (score) => {
+    if (!score) return "text-gray-500";
     if (score < 30) return "text-red-500";
     if (score < 70) return "text-yellow-500";
     return "text-green-500";
   };
 
   const getStatusColor = (status) => {
-    switch (status.toLowerCase()) {
-      case "completed":
-        return "bg-green-100 text-green-700";
-      case "in progress":
-        return "bg-blue-100 text-blue-700";
-      case "pending":
-        return "bg-yellow-100 text-yellow-700";
-      default:
-        return "bg-gray-100 text-gray-700";
+    if (!status) return "bg-gray-100 text-gray-700";
+
+    const statusLower = status.toLowerCase();
+    if (statusLower.includes("approved")) {
+      return "bg-green-100 text-green-700";
+    } else if (statusLower.includes("pending")) {
+      return "bg-yellow-100 text-yellow-700";
+    } else if (statusLower.includes("progress")) {
+      return "bg-blue-100 text-blue-700";
+    } else {
+      return "bg-gray-100 text-gray-700";
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        Loading accomplishments...
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="text-red-500 p-4">{error}</div>;
+  }
 
   return (
     <div className="h-full overflow-y-auto rounded-[24px] relative">
@@ -121,7 +104,7 @@ export default function AccomplishmentsTable() {
               Accomplishment Title
             </th>
             <th className="py-3 px-6 text-left font-semibold text-gray-700">
-              Progress
+              Score
             </th>
             <th className="py-3 px-6 text-left font-semibold text-gray-700">
               Status
@@ -134,30 +117,57 @@ export default function AccomplishmentsTable() {
         <tbody>
           {accomplishments.map((item, index) => (
             <tr
-              key={index}
+              key={item._id || index}
               className="border-b border-gray-200 hover:bg-gray-50"
             >
               <td className="py-4 px-6 text-gray-700 font-medium">
-                <img
-                  src={item.logo}
-                  alt="Logo"
-                  className="h-16 inline rounded-full shadow mr-4"
-                />
-                {item.organization}
+                <div className="flex items-center">
+                  <div className="h-12 w-12 rounded-full flex items-center justify-center mr-3">
+                    <img
+                      src={
+                        item.organization?.logo
+                          ? `/${item.organization?.org_name}/Accreditation/Accreditation/photos/${item.organization.logo}`
+                          : "/placeholder-logo.png"
+                      }
+                      className="h-full rounded-full aspect-square object-cover"
+                      alt={`${
+                        item.organization?.org_name || "Organization"
+                      } logo`}
+                      onError={(e) => {
+                        e.target.src = "/placeholder-logo.png";
+                        e.target.onerror = null;
+                      }}
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <span>
+                      {item.organization?.org_name || "Unknown Organization"}
+                    </span>
+                    {item.organization?.org_acronym && (
+                      <span className="text-xs text-gray-500">
+                        {item.organization.org_acronym}
+                      </span>
+                    )}
+                  </div>
+                </div>
               </td>
-              <td className="py-4 px-6 text-gray-700">{item.name}</td>
+              <td className="py-4 px-6 text-gray-700">
+                {item.event_title || item.name || "Untitled Activity"}
+              </td>
               <td className="py-4 px-6">
-                <span className={`font-medium ${getScoreColor(item.score)}`}>
-                  {item.score}%
+                <span
+                  className={`font-medium ${getScoreColor(item.event_score)}`}
+                >
+                  {item.event_score ? `${item.event_score}%` : "N/A"}
                 </span>
               </td>
               <td className="py-4 px-6">
                 <span
                   className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(
-                    item.status
+                    item.over_all_status
                   )}`}
                 >
-                  {item.status}
+                  {formatStatus(item.over_all_status)}
                 </span>
               </td>
               <td className="py-4 px-6 text-center">
@@ -177,56 +187,11 @@ export default function AccomplishmentsTable() {
       </table>
 
       {/* Rating Modal */}
-      {showRatingModal && currentItemIndex !== null && (
-        <div className="fixed inset-0 bg-black/10 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md">
-            <h3 className="text-xl font-bold mb-4">Rate this accomplishment</h3>
-            <p className="mb-6">
-              How would you rate{" "}
-              <strong>{accomplishments[currentItemIndex].name}</strong> from{" "}
-              <strong>{accomplishments[currentItemIndex].organization}</strong>?
-            </p>
-            <div className="flex justify-center mb-6">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  className="mx-1 focus:outline-none"
-                  onClick={() => setRating(star)}
-                  onMouseEnter={() => setHoverRating(star)}
-                  onMouseLeave={() => setHoverRating(0)}
-                >
-                  <Star
-                    size={32}
-                    className={`${
-                      star <= (hoverRating || rating)
-                        ? "text-amber-500 fill-amber-500"
-                        : "text-amber-500"
-                    }`}
-                  />
-                </button>
-              ))}
-            </div>
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setShowRatingModal(false)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleRateSubmit}
-                disabled={rating === 0}
-                className={`px-4 py-2 rounded-lg ${
-                  rating === 0
-                    ? "bg-gray-300 cursor-not-allowed"
-                    : "bg-amber-500 hover:bg-amber-600 text-white"
-                }`}
-              >
-                Submit Rating
-              </button>
-            </div>
-          </div>
-        </div>
+      {showRatingModal && currentAccomplishment && (
+        <SduAccomplishmentRating
+          accomplishment={currentAccomplishment}
+          onClose={() => setShowRatingModal(false)}
+        />
       )}
     </div>
   );

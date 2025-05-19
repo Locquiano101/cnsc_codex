@@ -116,11 +116,6 @@ export default function StudentLeaderPage() {
         return <StudentAdminHomePage />;
       case "proposals":
         return <StudentProposalTableView user={storedUser} />;
-<<<<<<< HEAD
-=======
-      case "accreditations":
-        return <StudentAccomplishmentsTableView user={storedUser} />;
->>>>>>> 983de4bd4defd90c64e0402dbe8b79f7aa758d45
       case "documents":
         return <StudentFiles user={storedUser} />;
       case "accreditations":
@@ -169,7 +164,6 @@ export default function StudentLeaderPage() {
             { key: "documents", icon: faFolderOpen, label: "Documents" },
             { key: "post", icon: faPenToSquare, label: "Post" },
             { key: "settings", icon: faGears, label: "Settings" },
-<<<<<<< HEAD
           ]
             .filter(({ key }) => {
               // Only allow "home" and "accreditations" if status is pending or revision
@@ -192,22 +186,6 @@ export default function StudentLeaderPage() {
                 <p className="flex-3/4">{label}</p>
               </div>
             ))}
-=======
-          ].map(({ key, icon, label }) => (
-            <div
-              key={key}
-              onClick={() => handleClick(key)}
-              className={`flex items-center gap-3 px-6 py-3 cursor-pointer transition ${
-                activeContent === key
-                  ? "bg-[#DFE4EB] text-[#1B3A57] font-semibold"
-                  : "hover:bg-[#D44C47] text-white"
-              }`}
-            >
-              <FontAwesomeIcon icon={icon} className="flex-1" />
-              <p className="flex-3/4">{label}</p>
-            </div>
-          ))}
->>>>>>> 983de4bd4defd90c64e0402dbe8b79f7aa758d45
         </div>
 
         <button

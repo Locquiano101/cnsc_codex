@@ -26,6 +26,8 @@ import {
   GetProposalsByOrganizationsDean,
   GetAccomplishmentsByOrganizationsDean,
   GetOrganizationByOrgName,
+  GetSystemWideAccomplishments,
+  GetProposalsSystemWide,
 } from "../controllers/general.js";
 
 import { UpdateProposalsNotesAdviser } from "../controllers/adviser_admin/document_controller.js";
@@ -115,6 +117,7 @@ router.put("/process-accreditation-sdu/:id", UpdateAccreditationSDU);
 
 //Proposal Route
 router.get("/proposals/", GetProposals);
+router.get("/proposals/system-wide", GetProposalsSystemWide);
 router.post("/proposals/dean", GetProposalsByOrganizationsDean);
 router.get("/proposals/:organizationId", GetProposalsbyOrganization);
 router.get(
@@ -140,6 +143,7 @@ router.post(
 
 //Accomplishment Route
 router.get("/accomplishments", GetAccomplishments);
+router.get("/system-wide-accomplishments", GetSystemWideAccomplishments);
 
 router.get(
   "/accomplishments/:organizationId",

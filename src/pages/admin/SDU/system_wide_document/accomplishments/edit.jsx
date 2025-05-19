@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { API_ROUTER } from "../../../../App";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye } from "@fortawesome/free-solid-svg-icons";
-import { FileRenderer } from "../../../../components/file_renderer";
-import { PopUp } from "../../../../components/pop-ups";
+import { API_ROUTER } from "../../../../../App";
+import { FileRenderer } from "../../../../../components/file_renderer";
+import { PopUp } from "../../../../../components/pop-ups";
 
 function EditInstitutionalAccomplishmentAdviser({ accomplishment, onBack }) {
   const [loading, setLoading] = useState(false);
@@ -186,8 +184,8 @@ function EditInstitutionalAccomplishmentAdviser({ accomplishment, onBack }) {
     const body = {
       accomplishmentId: accomplishment._id,
       over_all_status: isAllApproved()
-        ? "Approved by the Adviser"
-        : "Revision from the Adviser",
+        ? "Approved by the SDU"
+        : "Revision from the SDU",
       documents: documentUpdates,
     };
 
@@ -543,8 +541,8 @@ function EditExternalAccomplishmentAdviser({ accomplishment, onBack }) {
     const body = {
       accomplishmentId: accomplishment._id,
       over_all_status: isAllApproved()
-        ? "Approved by the Adviser"
-        : "Revision from the Adviser",
+        ? "Approved by the SDU"
+        : "Revision from the SDU",
       documents: {
         ...Object.fromEntries(statusEntries),
       },
@@ -943,8 +941,8 @@ function EditProposedPlanAccomplishmentAdviser({ accomplishment, onBack }) {
     const body = {
       accomplishmentId: accomplishment._id,
       over_all_status: isAllApproved()
-        ? "Approved by the Adviser"
-        : "Revision from the Adviser",
+        ? "Approved by the SDU"
+        : "Revision from the SDU",
       documents: {
         ...Object.fromEntries(statusEntries),
       },
@@ -1099,7 +1097,7 @@ function EditProposedPlanAccomplishmentAdviser({ accomplishment, onBack }) {
   );
 }
 
-export default function AccomplishmentEditAdviser({
+export default function SduAccomplishmentApprovalEdit({
   selectedAccomplishment,
   onBack,
 }) {

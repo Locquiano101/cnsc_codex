@@ -17,10 +17,14 @@ import SDUAdminUserTableView from "./user_management_page/user_table_view";
 import SandboxAccomplishment from "./accomplishments/accomplishment_main";
 import OrganizationViewSDU from "./organization/organization_main";
 import { FolderOpen, Star, Users, FileText, Award } from "lucide-react";
+import SDUAccomplishmentMain from "./accomplishments/accomplishment_main";
+import AddStudentAccomplishmentReport from "../student_leader/documents/student_accomplishment_add";
+import SDUSystemAccomplishmentTableApproval from "./system_wide_document/accomplishments/view";
+import SduAdminProposalApproval from "./system_wide_document/proposals/view";
 
 export default function StudentDevelopmentUnitPage() {
   const navigate = useNavigate();
-  const [activeContent, setActiveContent] = useState("organizations");
+  const [activeContent, setActiveContent] = useState("accomplishments");
   const [showOrgSubmenu, setShowOrgSubmenu] = useState(true);
   const [showSystemWideSubmenu, setShowSystemWideSubmenu] = useState(false);
 
@@ -56,9 +60,9 @@ export default function StudentDevelopmentUnitPage() {
       case "accomplishments":
         return <SandboxAccomplishment />;
       case "systemProposal":
-        return <>System-Wide Proposal Content</>;
+        return <SduAdminProposalApproval />;
       case "systemAccomplishment":
-        return <>System-Wide Accomplishment Content</>;
+        return <SDUSystemAccomplishmentTableApproval />;
       case "users":
         return <SDUAdminUserTableView />;
       case "logs":
@@ -231,9 +235,7 @@ export default function StudentDevelopmentUnitPage() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto bg-gray-300 p-4">
-        {renderContent()}
-      </main>
+      <main className="flex-1 bg-gray-300 p-4">{renderContent()}</main>
     </div>
   );
 }

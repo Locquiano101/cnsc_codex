@@ -160,6 +160,51 @@ export const GetProposals = async (req, res) => {
   }
 };
 
+export const GetProposalsSystemWide = async (req, res) => {
+  try {
+    // First find all system-wide organizations
+    const systemWideOrgs = await Organizations.find({
+      org_class: "System-wide",
+    });
+    const orgIds = systemWideOrgs.map((org) => org._id);
+
+    // Then find proposals from those organizations
+    const systemWideProposals = await Proposal.find({
+      organization: { $in: orgIds },
+    })
+      .populate("organization")
+      .sort({ event_date: -1 }); // most recent first
+
+    return res.status(200).json({ proposals: systemWideProposals });
+  } catch (err) {
+    console.error("Error fetching system-wide proposals:", err);
+    return res
+      .status(500)
+      .json({ message: "Server error", error: err.message });
+  }
+};
+export const GetProposalsByOrganizationClass = async (req, res) => {
+  try {
+    const orgClass = req.params.orgClass; // e.g., "System-wide"
+
+    // First find organizations with the specified class
+    const organizations = await Organization.find({ org_class: orgClass });
+    const orgIds = organizations.map((org) => org._id);
+
+    // Then find proposals with those organization IDs
+    const proposals = await Proposal.find({ organization: { $in: orgIds } })
+      .populate("organization")
+      .sort({ event_date: -1 });
+
+    return res.status(200).json({ proposals });
+  } catch (err) {
+    console.error("Error fetching proposals by organization class:", err);
+    return res
+      .status(500)
+      .json({ message: "Server error", error: err.message });
+  }
+};
+
 // controllers/proposals.js
 export const GetProposalsbyOrganization = async (req, res) => {
   const { organizationId } = req.params;
@@ -268,9 +313,14 @@ export const GetAccomplishmentsByOrganizationsDean = async (req, res) => {
 // controller, accomplishments
 export const GetAccomplishments = async (req, res) => {
   try {
-    const InstitutionalActivity = await InstutionalAccomplisments.find(); // ← filter by org
-    const ExternalActivity = await ExternalAccomplishments.find(); // most recent first
-    const ProposedActivity = await ProposedAccomplishments.find();
+    const InstitutionalActivity =
+      await InstutionalAccomplisments.find().populate("organization"); // ← filter by org
+    const ExternalActivity = await ExternalAccomplishments.find().populate(
+      "organization"
+    ); // most recent first
+    const ProposedActivity = await ProposedAccomplishments.find().populate(
+      "organization"
+    );
 
     return res
       .status(200)
@@ -309,6 +359,45 @@ export const GetAccomplishmentsbyOrganization = async (req, res) => {
       .json({ InstitutionalActivity, ExternalActivity, ProposedActivity });
   } catch (err) {
     console.error("Error fetching proposals:", err);
+    return res
+      .status(500)
+      .json({ message: "Server error", error: err.message });
+  }
+};
+export const GetSystemWideAccomplishments = async (req, res) => {
+  try {
+    // First, find all system-wide organizations
+    const systemWideOrgs = await Organizations.find({
+      org_class: "System-wide",
+    });
+
+    // Extract the organization IDs
+    const orgIds = systemWideOrgs.map((org) => org._id);
+
+    // Query accomplishments for these organizations
+    const InstitutionalActivity = await InstutionalAccomplisments.find({
+      organization: { $in: orgIds },
+    })
+      .populate("organization")
+      .sort({ event_date: -1 });
+
+    const ExternalActivity = await ExternalAccomplishments.find({
+      organization: { $in: orgIds },
+    })
+      .populate("organization")
+      .sort({ event_date: -1 });
+
+    const ProposedActivity = await ProposedAccomplishments.find({
+      organization: { $in: orgIds },
+    })
+      .populate("organization")
+      .sort({ event_date: -1 });
+
+    return res
+      .status(200)
+      .json({ InstitutionalActivity, ExternalActivity, ProposedActivity });
+  } catch (err) {
+    console.error("Error fetching system-wide accomplishments:", err);
     return res
       .status(500)
       .json({ message: "Server error", error: err.message });

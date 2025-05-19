@@ -12,11 +12,7 @@ import OrganizationPage from "./pages/public/organization_page/organizations";
 import DeanAdminPage from "./pages/admin/dean/app_dean";
 import OSSDCoordinatorPage from "./pages/admin/ossd_coordinator/app_ossd_coordinator";
 
-<<<<<<< HEAD
 export const API_ROUTER = "http://192.168.1.16:8080/api";
-=======
-export const API_ROUTER = "http://localhost:8080/api";
->>>>>>> 983de4bd4defd90c64e0402dbe8b79f7aa758d45
 
 // Updated ProtectedRoute with allowedRoles prop
 const ProtectedRoute = ({ allowedRoles }) => {
