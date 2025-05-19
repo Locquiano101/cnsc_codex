@@ -116,11 +116,11 @@ export default function StudentLeaderPage() {
         return <StudentAdminHomePage />;
       case "proposals":
         return <StudentProposalTableView user={storedUser} />;
-      case "accreditations":
-        return <StudentAccomplishmentsTableView user={storedUser} />;
       case "documents":
         return <StudentFiles user={storedUser} />;
       case "accreditations":
+        return <StudentAccreditationView userData={storedUser} />;
+      case "accomplishments":
         return <StudentAccomplishmentsTableView user={storedUser} />;
       case "post":
         return <StudentPosting user={storedUser} />;
@@ -150,6 +150,7 @@ export default function StudentLeaderPage() {
             alt="Logo"
           />
           <div className="flex flex-col ">
+            <h1 className="text-sm italic">Welcome,</h1>
             <h2 className=" text-lg font-bold">
               {storedUser.organization.org_name}
             </h2>
@@ -160,30 +161,39 @@ export default function StudentLeaderPage() {
         <div className="flex flex-col w-1.45 text-white">
           {[
             { key: "home", icon: faHome, label: "Reports / Dashboard" },
-            { key: "accreditations", icon: faFile, label: "Accomplishments" },
+            { key: "accreditations", icon: faFile, label: "Accreditations" },
+            { key: "accomplishments", icon: faFile, label: "Accomplishments" },
             { key: "proposals", icon: faFileAlt, label: "Proposals" },
             { key: "documents", icon: faFolderOpen, label: "Documents" },
             { key: "post", icon: faPenToSquare, label: "Post" },
             { key: "settings", icon: faGears, label: "Settings" },
-          ].map(({ key, icon, label }) => (
-            <div
-              key={key}
-              onClick={() => handleClick(key)}
-              className={`flex items-center gap-3 px-6 py-3 cursor-pointer transition ${
-                activeContent === key
-                  ? "bg-cnsc-primary-color  font-semibold"
-                  : "hover:bg-gray-500 text-white"
-              }`}
-            >
-              <FontAwesomeIcon icon={icon} className="flex-1" />
-              <p className="flex-3/4">{label}</p>
-            </div>
-          ))}
+          ]
+            .filter(({ key }) => {
+              // Only allow "home" and "accreditations" if status is pending or revision
+              if (validStatuses.includes(status)) {
+                return key === "home" || key === "accreditations";
+              }
+              return true;
+            })
+            .map(({ key, icon, label }) => (
+              <div
+                key={key}
+                onClick={() => handleClick(key)}
+                className={`flex items-center gap-3 px-6 py-3 cursor-pointer transition ${
+                  activeContent === key
+                    ? "bg-[#DFE4EB] text-[#1B3A57] font-semibold"
+                    : "hover:bg-[#2E4B6B] text-white"
+                }`}
+              >
+                <FontAwesomeIcon icon={icon} className="flex-1" />
+                <p className="flex-3/4">{label}</p>
+              </div>
+            ))}
         </div>
 
         <button
           onClick={() => HandleLogout(navigate)}
-          className="mt-auto mb-4 flex justify-center items-center py-3 cursor-pointer text-white hover:bg-gray-500 transition"
+          className="mt-auto mb-4 flex justify-center items-center py-3 cursor-pointer text-white hover:bg-red-50 transition"
         >
           <FontAwesomeIcon icon={faRightFromBracket} className="mr-2" />
           <span className="font-semibold">Logout</span>
@@ -191,7 +201,7 @@ export default function StudentLeaderPage() {
       </div>
 
       <div className="w-full flex flex-col flex-3/4">
-        <div className="h-24 bg-cnsc-black-color flex items-center justify-end"></div>
+        <div className="h-24 bg-[#444444] flex items-center justify-end"></div>
         <div className=" bg-brian-blue/10 flex flex-col overflow-hidden ">
           {renderContent()}
         </div>
