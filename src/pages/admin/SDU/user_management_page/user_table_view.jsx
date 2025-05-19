@@ -299,7 +299,7 @@ function UserTableView({ onView, onEdit }) {
   return (
     <div>
       {/* Header */}
-      <div className="bg-[#1e4976] text-white p-3 flex justify-between items-center">
+      <div className="bg-[#222222] text-white p-3 flex justify-between items-center">
         <h1 className="font-medium">Users</h1>
         <button
           onClick={() => setShowAddModal(true)}

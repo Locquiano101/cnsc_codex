@@ -50,7 +50,6 @@ function ProposalView({ onAdd, onView, onEdit, user }) {
     };
   }, [organizationId]);
 
-  // Get current proposals for pagination
   const indexOfLastProposal = currentPage * itemsPerPage;
   const indexOfFirstProposal = indexOfLastProposal - itemsPerPage;
   const currentProposals = proposals.slice(
@@ -58,51 +57,47 @@ function ProposalView({ onAdd, onView, onEdit, user }) {
     indexOfLastProposal
   );
 
-  // Change page
   const goToPage = (pageNumber) => {
     if (pageNumber < 1 || pageNumber > totalPages) return;
     setCurrentPage(pageNumber);
   };
 
-  if (loading) return <p className="p-4">Loading proposals…</p>;
-  if (error) return <p className="p-4 text-red-500">{error}</p>;
+  if (loading) return <p className="p-4 font-sans">Loading proposals…</p>;
+  if (error) return <p className="p-4 text-red-500 font-sans">{error}</p>;
 
   return (
-    <div className=" h-screen flex flex-col overflow-hidden p-7">
-      <div className="bg-[#000000] text-white p-3 flex justify-between items-center">
-        <h1 className="font-medium">Proposals</h1>
+    <div className="h-screen flex flex-col overflow-hidden p-5 font-sans">
+      <div className="bg-[#222222] text-white p-3 flex justify-between items-center">
+        <h1 className="font-bold text-base">Proposals</h1>
         <button
           onClick={onAdd}
-          className="flex items-center gap-1 bg-[#fd7e14] text-white px-3 py-1 rounded"
+          className="flex items-center gap-1 bg-[#fd7e14] text-white px-3 py-1 rounded text-sm"
         >
           <FontAwesomeIcon icon={faAdd} />
-          <span className="font-medium">Add Proposal</span>
+          <span className="font-bold">Add Proposal</span>
         </button>
       </div>
 
-      {/* Table container with fixed header and scrollable body */}
       <div className="overflow-hidden border border-gray-200 rounded">
         <div className="max-h-[400px] overflow-y-auto">
           <table className="w-full table-fixed border-collapse">
-            {/* Fixed Header */}
-            <thead className="sticky top-0 bg-gray-50 z-10 text-sm">
+            <thead className="sticky top-0 bg-gray-50 z-10">
               <tr>
-                <th className="text-start text-xs p-3 font-semibold text-gray-600 uppercase border-b w-1/4">
+                <th className="text-start text-xs p-3 font-bold text-gray-600 uppercase border-b w-1/4">
                   Title
                 </th>
-                <th className="text-start text-xs p-3 font-semibold text-gray-600 uppercase border-b w-1/3">
+                <th className="text-start text-xs p-3 font-bold text-gray-600 uppercase border-b w-1/3">
                   Description
                 </th>
-                <th className="text-start text-xs p-3 font-semibold text-gray-600 uppercase border-b w-1/4">
+                <th className="text-start text-xs p-3 font-bold text-gray-600 uppercase border-b w-1/4">
                   Status
                 </th>
-                <th className="text-start text-xs p-3 font-semibold text-gray-600 uppercase border-b w-1/6">
+                <th className="text-start text-xs p-3 font-bold text-gray-600 uppercase border-b w-1/6">
                   Actions
                 </th>
               </tr>
             </thead>
 
-            {/* Scrollable Body */}
             <tbody className="divide-y divide-gray-200 bg-white">
               {currentProposals.length > 0 ? (
                 currentProposals.map((p) => (
@@ -110,11 +105,11 @@ function ProposalView({ onAdd, onView, onEdit, user }) {
                     key={p._id}
                     className="hover:bg-gray-50 transition-colors duration-150"
                   >
-                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
+                    <td className="px-4 py-4 whitespace-nowrap text-sm font-normal text-gray-800">
                       {p.title}
                     </td>
                     <td
-                      className="px-4 py-4 max-w-xs truncate text-sm text-gray-600"
+                      className="px-4 py-4 max-w-xs truncate text-sm text-gray-600 font-normal"
                       title={p.description}
                     >
                       {p.description}
@@ -132,10 +127,10 @@ function ProposalView({ onAdd, onView, onEdit, user }) {
                               : "bg-red-500"
                           }`}
                         ></span>
-                        <span>{p.approval_status}</span>
+                        <span className="font-normal">{p.approval_status}</span>
                       </span>
                     </td>
-                    <td className="py-4 px-4 text-center text-sm font-medium">
+                    <td className="py-4 px-4 text-center text-sm font-bold">
                       <div className="flex flex-start gap-2">
                         <button
                           onClick={() => onView(p)}
@@ -159,7 +154,7 @@ function ProposalView({ onAdd, onView, onEdit, user }) {
                 <tr>
                   <td
                     colSpan="4"
-                    className="px-4 py-10 text-center text-sm text-gray-500 italic"
+                    className="px-4 py-10 text-center text-sm text-gray-500 italic font-normal"
                   >
                     No proposals found.
                   </td>
@@ -170,10 +165,9 @@ function ProposalView({ onAdd, onView, onEdit, user }) {
         </div>
       </div>
 
-      {/* Pagination Controls */}
       {totalPages > 1 && (
         <div className="py-3 px-4 bg-gray-50 border-t flex items-center justify-between">
-          <div className="flex items-center gap-1 text-sm text-gray-600">
+          <div className="flex items-center gap-1 text-sm text-gray-600 font-normal">
             <span>
               Page {currentPage} of {totalPages}
             </span>
@@ -182,7 +176,7 @@ function ProposalView({ onAdd, onView, onEdit, user }) {
             <button
               onClick={() => goToPage(currentPage - 1)}
               disabled={currentPage === 1}
-              className={`px-3 py-1 rounded text-sm ${
+              className={`px-3 py-1 rounded text-sm font-bold ${
                 currentPage === 1
                   ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                   : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
@@ -193,7 +187,6 @@ function ProposalView({ onAdd, onView, onEdit, user }) {
 
             <div className="flex gap-1">
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                // Logic to show pages around current page
                 let pageNum;
                 if (totalPages <= 5) {
                   pageNum = i + 1;
@@ -209,7 +202,7 @@ function ProposalView({ onAdd, onView, onEdit, user }) {
                   <button
                     key={pageNum}
                     onClick={() => goToPage(pageNum)}
-                    className={`w-8 h-8 flex items-center justify-center rounded ${
+                    className={`w-8 h-8 flex items-center justify-center rounded text-sm font-bold ${
                       currentPage === pageNum
                         ? "bg-brian-blue text-white"
                         : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
@@ -224,7 +217,7 @@ function ProposalView({ onAdd, onView, onEdit, user }) {
             <button
               onClick={() => goToPage(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className={`px-3 py-1 rounded text-sm ${
+              className={`px-3 py-1 rounded text-sm font-bold ${
                 currentPage === totalPages
                   ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                   : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
@@ -240,7 +233,7 @@ function ProposalView({ onAdd, onView, onEdit, user }) {
 }
 
 export default function StudentProposalTableView(user) {
-  const [mode, setMode] = useState("list"); // list | view | edit | add
+  const [mode, setMode] = useState("list");
   const [selectedProposal, setSelectedProposal] = useState(null);
 
   const handleAdd = () => {
@@ -265,7 +258,6 @@ export default function StudentProposalTableView(user) {
 
   return (
     <>
-      {/* Base Table View */}
       <ProposalView
         onAdd={handleAdd}
         user={user}
@@ -273,9 +265,8 @@ export default function StudentProposalTableView(user) {
         onEdit={handleEdit}
       />
 
-      {/* Modal Popups */}
       {mode === "edit" && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center z-50">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center z-50 font-sans">
           <EditProposalStudentSection
             selectedProposal={selectedProposal}
             onBack={handleBack}
@@ -284,7 +275,7 @@ export default function StudentProposalTableView(user) {
       )}
 
       {mode === "add" && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center z-50">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center z-50 font-sans">
           <ProposalSubmissionStudentSection mode="add" onBack={handleBack} />
         </div>
       )}

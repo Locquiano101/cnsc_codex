@@ -75,7 +75,7 @@ export default function AdviserAdminPage() {
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Sidebar */}
-      <aside className="w-64 bg-[#1B3A57] flex flex-col pt-6 text-white shrink-0">
+      <aside className="w-64 bg-[#222222] flex flex-col pt-6 text-white shrink-0">
         <div className="flex items-center px-6 mb-6">
           <img
             src="/general/cnsc_codex_ver_2.png"
@@ -94,8 +94,8 @@ export default function AdviserAdminPage() {
               onClick={() => setActiveContent(key)}
               className={`flex items-center gap-3 px-6 py-3 cursor-pointer transition ${
                 activeContent === key
-                  ? "bg-[#DFE4EB] text-[#1B3A57] font-semibold"
-                  : "hover:bg-[#2E4B6B] text-white"
+                  ? "bg-cnsc-primary-color  font-semibold"
+                  : "hover:bg-gray-500 text-white"
               }`}
             >
               <FontAwesomeIcon icon={icon} />
@@ -117,7 +117,7 @@ export default function AdviserAdminPage() {
       {/* Main Content */}
 
       <div className="w-full flex flex-col flex-3/4">
-        <div className="h-24 bg-brian-blue/50 flex items-center justify-end">
+        <div className="h-24 bg-cnsc-black-color flex items-center justify-end">
           <div className="shadow-lg shadow-black mr-4 m-4 rounded-xl bg-gray-200 p-4">
             <Link
               to={`/organization/profile/${storedUser.organization.org_name}`}
@@ -130,7 +130,7 @@ export default function AdviserAdminPage() {
             </Link>
           </div>
         </div>
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1">
           <div className=" h-full">{renderContent()}</div>
         </div>
       </div>

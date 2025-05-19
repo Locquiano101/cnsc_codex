@@ -157,147 +157,150 @@ function AdviserAccomplishmentReportTable({
   ];
 
   return (
-    <div className=" border-b-cnsc-blue-color h-screen shadow-md p-7 ">
-      <div className="bg-[#1e4976] text-white p-3 flex justify-between items-center">
-        <h1 className="font-medium">Accomplishments</h1>
-        <div className="flex gap-2">
-          {/* Dropdown filter */}
-          <div ref={dropdownRef} className="relative">
-            <button
-              onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-              className="flex items-center gap-1 bg-white text-[#1e4976] px-3 py-1 rounded"
-            >
-              <FontAwesomeIcon icon={faFilter} size="sm" />
-              <span>Filter: {activityFilter}</span>
-              <FontAwesomeIcon icon={faChevronDown} size="sm" />
-            </button>
+    <div className="  h-screen shadow-2xl p-7">
+      <div className=" shadow-2xl ">
+        <div className="bg-[#222222] text-white p-3 flex justify-between items-center ">
+          <h1 className="font-medium">Accomplishments</h1>
+          <div className="flex gap-2">
+            {/* Dropdown filter */}
+            <div ref={dropdownRef} className="relative">
+              <button
+                onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+                className="flex items-center gap-1 bg-white text-[#1e4976] px-3 py-1 rounded"
+              >
+                <FontAwesomeIcon icon={faFilter} size="sm" />
+                <span>Filter: {activityFilter}</span>
+                <FontAwesomeIcon icon={faChevronDown} size="sm" />
+              </button>
 
-            {showFilterDropdown && (
-              <div className="absolute right-0 mt-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-10">
-                {filterOptions.map((type) => (
-                  <button
-                    key={type}
-                    className={`block w-full text-left px-4 py-2 text-sm ${
-                      activityFilter === type
-                        ? "bg-blue-50 text-blue-600"
-                        : "text-gray-700 hover:bg-gray-50"
-                    }`}
-                    onClick={() => {
-                      setActivityFilter(type);
-                      setShowFilterDropdown(false);
-                    }}
-                  >
-                    {type}
-                  </button>
-                ))}
-              </div>
-            )}
+              {showFilterDropdown && (
+                <div className="absolute right-0 mt-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+                  {filterOptions.map((type) => (
+                    <button
+                      key={type}
+                      className={`block w-full text-left px-4 py-2 text-sm ${
+                        activityFilter === type
+                          ? "bg-blue-50 text-blue-600"
+                          : "text-gray-700 hover:bg-gray-50"
+                      }`}
+                      onClick={() => {
+                        setActivityFilter(type);
+                        setShowFilterDropdown(false);
+                      }}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white">
-          <thead>
-            <tr className="bg-gray-50">
-              <th className="p-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
-                Event Title
-              </th>
-              <th className="p-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
-                Activity Type
-              </th>
-              <th className="p-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
-                Event Date
-              </th>
-              <th className="p-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
-                Event Description
-              </th>
-              <th className="p-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
-                Status
-              </th>
-              <th className="p-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {filteredActivities.length > 0 ? (
-              filteredActivities.map((activity, index) => (
-                <tr
-                  key={activity._id || index}
-                  className="hover:bg-gray-50 transition-colors duration-150"
-                >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
-                    {activity.event_title ?? "N/A"}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold">
-                      {activity.activity_type}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold">
-                      {activity.event_date
-                        ? LongDateFormat(new Date(activity.event_date))
-                        : "N/A"}
-                    </span>
-                  </td>
-                  <td
-                    className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate"
-                    title={activity.event_description}
+        <div className="overflow-x-auto ">
+          <table className="min-w-full bg-white">
+            <thead>
+              <tr className="bg-gray-50">
+                <th className="p-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                  Event Title
+                </th>
+                <th className="p-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                  Activity Type
+                </th>
+                <th className="p-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                  Event Date
+                </th>
+                <th className="p-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                  Event Description
+                </th>
+                <th className="p-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                  Status
+                </th>
+                <th className="p-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {filteredActivities.length > 0 ? (
+                filteredActivities.map((activity, index) => (
+                  <tr
+                    key={activity._id || index}
+                    className="hover:bg-gray-50 transition-colors duration-150"
                   >
-                    {activity.event_description ?? "N/A"}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    <span
-                      className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                        activity.over_all_status === "Approved by the Adviser"
-                          ? "bg-green-100 text-green-700"
-                          : activity.over_all_status === "Approved by the Dean"
-                          ? "bg-blue-100 text-blue-700"
-                          : activity.over_all_status ===
-                            "Approved by the OSSD Coordinator"
-                          ? "bg-blue-100 text-blue-700"
-                          : activity.over_all_status === "Pending"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
+                      {activity.event_title ?? "N/A"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold">
+                        {activity.activity_type}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold">
+                        {activity.event_date
+                          ? LongDateFormat(new Date(activity.event_date))
+                          : "N/A"}
+                      </span>
+                    </td>
+                    <td
+                      className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate"
+                      title={activity.event_description}
                     >
-                      {activity.over_all_status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                    <div className="flex justify-center space-x-2">
-                      <button
-                        className="p-1.5 bg-[#17a2b8] hover:bg-[#138496] text-white rounded-full transition-colors duration-150 shadow-sm"
-                        onClick={() => onView(activity)}
-                        title="View Details"
+                      {activity.event_description ?? "N/A"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                      <span
+                        className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                          activity.over_all_status === "Approved by the Adviser"
+                            ? "bg-green-100 text-green-700"
+                            : activity.over_all_status ===
+                              "Approved by the Dean"
+                            ? "bg-blue-100 text-blue-700"
+                            : activity.over_all_status ===
+                              "Approved by the OSSD Coordinator"
+                            ? "bg-blue-100 text-blue-700"
+                            : activity.over_all_status === "Pending"
+                            ? "bg-yellow-100 text-yellow-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
                       >
-                        <FontAwesomeIcon icon={faEye} size="sm" />
-                      </button>
-                      <button
-                        className="p-1.5 bg-[#dc3545] hover:bg-[#c82333] text-white rounded-full transition-colors duration-150 shadow-sm"
-                        onClick={() => onEdit(activity)}
-                        title="Edit"
-                      >
-                        <FontAwesomeIcon icon={faPencil} size="sm" />
-                      </button>
-                    </div>
+                        {activity.over_all_status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                      <div className="flex justify-center space-x-2">
+                        <button
+                          className="p-1.5 bg-[#17a2b8] hover:bg-[#138496] text-white rounded-full transition-colors duration-150 shadow-sm"
+                          onClick={() => onView(activity)}
+                          title="View Details"
+                        >
+                          <FontAwesomeIcon icon={faEye} size="sm" />
+                        </button>
+                        <button
+                          className="p-1.5 bg-[#dc3545] hover:bg-[#c82333] text-white rounded-full transition-colors duration-150 shadow-sm"
+                          onClick={() => onEdit(activity)}
+                          title="Edit"
+                        >
+                          <FontAwesomeIcon icon={faPencil} size="sm" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan="6"
+                    className="px-6 py-10 text-center text-sm text-gray-500 italic"
+                  >
+                    No accomplishments found matching the selected filter.
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan="6"
-                  className="px-6 py-10 text-center text-sm text-gray-500 italic"
-                >
-                  No accomplishments found matching the selected filter.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

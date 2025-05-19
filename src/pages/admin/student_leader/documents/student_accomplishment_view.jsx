@@ -20,17 +20,11 @@ function StudentAccomplishmentReportTable({
   setActivityFilter,
   filteredActivities,
   onAdd,
-  onEdit, // <-- Added here
+  onEdit,
 }) {
-  // Add state for dropdown visibility
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
-
-  console.log(filteredActivities);
-
-  // Add ref for handling outside clicks
   const dropdownRef = useRef(null);
 
-  // Add effect to close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -47,15 +41,14 @@ function StudentAccomplishmentReportTable({
   const filterOptions = ["All", "Proposed", "Institutional", "External"];
 
   return (
-    <div className=" border-b-cnsc-blue-color p-5 h-screen">
-      <div className="bg-[#000000] text-white p-3 flex justify-between items-center ">
-        <h1 className="font-medium">Accomplishments</h1>
+    <div className="font-sans border-b-cnsc-blue-color p-5 h-screen">
+      <div className="bg-[#222222] text-white p-3 flex justify-between items-center">
+        <h1 className="font-bold text-18">Accomplishments</h1>
         <div className="flex gap-2">
-          {/* Dropdown filter */}
           <div ref={dropdownRef} className="relative">
             <button
               onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-              className="flex items-center gap-1 bg-white text-[#1e4976] px-3 py-1 rounded"
+              className="flex items-center gap-1 bg-white text-[#1e4977] px-3 py-1 rounded text-sm"
             >
               <FontAwesomeIcon icon={faFilter} size="sm" />
               <span>Filter: {activityFilter}</span>
@@ -69,7 +62,7 @@ function StudentAccomplishmentReportTable({
                     key={type}
                     className={`block w-full text-left px-4 py-2 text-sm ${
                       activityFilter === type
-                        ? "bg-blue-50 text-blue-600"
+                        ? "bg-blue-50 text-blue-700"
                         : "text-gray-700 hover:bg-gray-50"
                     }`}
                     onClick={() => {
@@ -84,9 +77,8 @@ function StudentAccomplishmentReportTable({
             )}
           </div>
 
-          {/* Add button */}
           <button
-            className="flex items-center gap-1 bg-[#fd7e14] text-white px-3 py-1 rounded"
+            className="flex items-center gap-1 bg-[#fd7e14] text-white px-3 py-1 rounded text-sm"
             onClick={onAdd}
           >
             <FontAwesomeIcon icon={faPlus} size="sm" />
@@ -96,28 +88,28 @@ function StudentAccomplishmentReportTable({
       </div>
 
       <div className="overflow-x-auto">
-        <table className="min-w-full bg-white ">
+        <table className="min-w-full bg-white">
           <thead>
             <tr className="bg-gray-50">
-              <th className="p-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+              <th className="p-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b px-7">
                 Event Title
               </th>
-              <th className="p-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+              <th className="p-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b px-7">
                 Accomplishment Type
               </th>
-              <th className="p-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+              <th className="p-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b px-7">
                 Event Date
               </th>
-              <th className="p-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+              <th className="p-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b px-7">
                 Event Description
               </th>
-              <th className="p-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+              <th className="p-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b px-7">
                 Status
               </th>
-              <th className="p-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+              <th className="p-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b px-7">
                 Last Update
               </th>
-              <th className="p-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+              <th className="p-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider border-b px-7">
                 Actions
               </th>
             </tr>
@@ -129,31 +121,31 @@ function StudentAccomplishmentReportTable({
                   key={index}
                   className="hover:bg-gray-50 transition-colors duration-150"
                 >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
+                  <td className="px-7 py-4 whitespace-nowrap text-sm font-normal text-gray-800">
                     {activity.event_title ?? "N/A"}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold ">
+                  <td className="px-7 py-4 whitespace-nowrap text-sm text-gray-700">
+                    <span className="px-2 inline-flex text-xs leading-5 font-normal">
                       {activity.activity_type}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold ">
+                  <td className="px-7 py-4 whitespace-nowrap text-sm text-gray-700">
+                    <span className="px-2 inline-flex text-xs leading-5 font-normal">
                       {LongDateFormat(new Date(activity.event_date))}
                     </span>
                   </td>
                   <td
-                    className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate"
+                    className="px-7 py-4 text-sm text-gray-700 max-w-xs truncate font-normal"
                     title={activity.event_description}
                   >
                     {activity.event_description ?? "N/A"}
                   </td>
 
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                  <td className="px-7 py-4 whitespace-nowrap text-sm text-gray-700">
                     {activity.over_all_status ? (
                       <span className="flex items-center">
                         <span
-                          className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                          className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${
                             activity.over_all_status ===
                             "Approved by the Adviser"
                               ? "bg-blue-100 text-Blue-700"
@@ -174,19 +166,19 @@ function StudentAccomplishmentReportTable({
                     ) : (
                       <span className="flex items-center">
                         <span className="w-2 h-2 rounded-full bg-gray-300 mr-2"></span>
-                        <span className="text-gray-500">N/A</span>
+                        <span className="text-gray-500 font-normal">N/A</span>
                       </span>
                     )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold ">
+                  <td className="px-7 py-4 whitespace-nowrap text-sm text-gray-700">
+                    <span className="px-2 inline-flex text-xs leading-5 font-normal">
                       {LongDateFormatVer2(new Date(activity.updatedAt))}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <td className="px-7 py-4 whitespace-nowrap text-sm font-bold">
                     <div className="flex justify-center space-x-2">
                       <button
-                        className="p-1.5 bg-[#17a2b8] hover:bg-[#138496] text-white rounded-full transition-colors duration-150 shadow-sm"
+                        className="p-1.5 bg-[#17a2b8] hover:bg-[#138497] text-white rounded-full transition-colors duration-150 shadow-sm"
                         onClick={() => console.log("View", activity)}
                         title="View Details"
                       >
@@ -207,7 +199,7 @@ function StudentAccomplishmentReportTable({
               <tr>
                 <td
                   colSpan="5"
-                  className="px-6 py-10 text-center text-sm text-gray-500 italic"
+                  className="px-7 py-10 text-center text-sm text-gray-500 italic font-normal"
                 >
                   No accomplishments found matching the selected filter.
                 </td>
@@ -282,9 +274,7 @@ export default function StudentAccomplishmentsTableView({ user }) {
     e.preventDefault();
     console.log("Form Data:", formData);
     console.log("File Data:", fileData);
-    // Submit to API here
-    setIsAddModalOpen(false); // Close modal after submission
-    // Reset form data
+    setIsAddModalOpen(false);
     setFormData({});
     setFileData({});
   };
@@ -294,15 +284,12 @@ export default function StudentAccomplishmentsTableView({ user }) {
     console.log("Editing accomplishment:", editingAccomplishment);
     console.log("Updated Form Data:", formData);
     console.log("Updated File Data:", fileData);
-    // Submit to API here
-    setIsEditModalOpen(false); // Close modal after submission
+    setIsEditModalOpen(false);
     setEditingAccomplishment(null);
-    // Reset form data
     setFormData({});
     setFileData({});
   };
 
-  // Filter activities based on selected filter
   const filteredActivities =
     activityFilter === "All"
       ? accomplishmentsList || []
@@ -311,19 +298,17 @@ export default function StudentAccomplishmentsTableView({ user }) {
         );
 
   const handleAddAccomplishment = () => {
-    setFormData({}); // Reset form data
-    setFileData({}); // Reset file data
+    setFormData({});
+    setFileData({});
     setIsAddModalOpen(true);
   };
 
   const handleEditAccomplishment = (activity) => {
     setEditingAccomplishment(activity);
-    // Pre-fill form data with the selected accomplishment's data
     setFormData({
       title: activity.title || "",
       description: activity.description || "",
       activity_type: activity.activity_type || "",
-      // Add other fields as needed
     });
     setIsEditModalOpen(true);
   };
@@ -343,7 +328,7 @@ export default function StudentAccomplishmentsTableView({ user }) {
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="font-sans flex items-center justify-center h-screen">
         Loading user data...
       </div>
     );
@@ -351,7 +336,7 @@ export default function StudentAccomplishmentsTableView({ user }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="font-sans flex items-center justify-center h-screen">
         Loading accomplishments...
       </div>
     );
@@ -359,15 +344,14 @@ export default function StudentAccomplishmentsTableView({ user }) {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-screen text-red-500">
+      <div className="font-sans flex items-center justify-center h-screen text-red-500">
         {error}
       </div>
     );
   }
 
   return (
-    <div className="h-full">
-      {/* Main Table View */}
+    <div className="h-full font-sans">
       <StudentAccomplishmentReportTable
         activityFilter={activityFilter}
         setActivityFilter={setActivityFilter}
@@ -376,10 +360,9 @@ export default function StudentAccomplishmentsTableView({ user }) {
         onEdit={handleEditAccomplishment}
       />
 
-      {/* Add Accomplishment Modal */}
       {isAddModalOpen && (
         <Modal isOpen={isAddModalOpen} onClose={closeAddModal}>
-          <div className="bg-white p-4 w-full rounded-lg h-full overflow-y-auto">
+          <div className="bg-white p-4 w-full rounded-lg h-full overflow-y-auto font-sans">
             <h2 className="text-xl font-bold mb-4">Add New Accomplishment</h2>
             <AddStudentAccomplishmentReport
               user={user}
@@ -394,10 +377,9 @@ export default function StudentAccomplishmentsTableView({ user }) {
         </Modal>
       )}
 
-      {/* Edit Accomplishment Modal */}
       {isEditModalOpen && editingAccomplishment && (
         <Modal isOpen={isEditModalOpen} onClose={closeEditModal}>
-          <div className="bg-white rounded-lg w-full h-full overflow-y-auto">
+          <div className="bg-white rounded-lg w-full h-full overflow-y-auto font-sans">
             <RandomTest
               selectedAccomplishment={editingAccomplishment}
               onSubmit={handleEditSubmit}
@@ -415,12 +397,11 @@ export default function StudentAccomplishmentsTableView({ user }) {
   );
 }
 
-// Modal Component
 function Modal({ isOpen, onClose, children }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/10 backdrop-blur z-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-black/10 backdrop-blur z-50 flex items-center justify-center font-sans">
       <div className="bg-white rounded-lg shadow-xl overflow-hidden h-11/12 w-3/4">
         <button
           onClick={onClose}
@@ -428,7 +409,7 @@ function Modal({ isOpen, onClose, children }) {
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
+            className="h-7 w-7"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -437,7 +418,7 @@ function Modal({ isOpen, onClose, children }) {
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
+              d="M7 18L18 7M7 7l12 12"
             />
           </svg>
         </button>

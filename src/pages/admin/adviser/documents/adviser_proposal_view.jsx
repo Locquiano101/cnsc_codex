@@ -38,7 +38,7 @@ function ViewProposalAdviserTableSection({ onView, onEdit, user }) {
   return (
     <div className="  shadow-lg flex flex-col h-full p-7">
       {/* Header */}
-      <div className="bg-[#1e4976] text-white p-3  font-medium">Proposals</div>
+      <div className="bg-[#222222] text-white p-3  font-medium">Proposals</div>
 
       {/* Table */}
       <div className="overflow-y-auto h-full shadow-2xl">
