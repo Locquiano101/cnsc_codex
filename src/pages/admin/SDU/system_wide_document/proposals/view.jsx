@@ -47,17 +47,17 @@ function SduProposalTable({ onEditProposal }) {
       ? proposals
       : proposals.filter((p) => p.approval_status === filter);
 
-  if (loading) return <p className="p-4">Loading proposals…</p>;
+  if (loading) return <p className="p-4 font-sans">Loading proposals…</p>;
 
   return (
-    <div className="h-full border">
-      <div className="bg-[#1e4976] text-white p-3 flex justify-between items-center">
+    <div className="bg-white h-full shadow-2xl font-sans">
+      <div className="bg-[#222222] text-white p-3 flex justify-between items-center">
         <h1 className="font-medium">Proposal Submissions</h1>
 
         <div ref={dropdownRef} className="relative">
           <button
             onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-            className="flex items-center gap-2 bg-white text-[#1e4976] px-3 py-1 rounded"
+            className="flex items-center gap-2 bg-white text-[#1e4976] px-3 py-1 rounded font-sans"
           >
             <FontAwesomeIcon icon={faChevronDown} />
             Filter: {filter}
@@ -68,7 +68,7 @@ function SduProposalTable({ onEditProposal }) {
               {["All", "Pending", "Approved", "Rejected"].map((f) => (
                 <button
                   key={f}
-                  className={`block w-full text-left px-4 py-2 text-sm ${
+                  className={`block w-full text-left px-4 py-2 text-sm font-sans ${
                     filter === f
                       ? "bg-blue-50 text-blue-600"
                       : "text-gray-700 hover:bg-gray-50"
@@ -87,13 +87,13 @@ function SduProposalTable({ onEditProposal }) {
       </div>
 
       <div className="overflow-x-auto">
-        <table className="min-w-full bg-white">
+        <table className="min-w-full bg-white font-sans">
           <thead>
             <tr className="bg-gray-50">
-              <th className="p-3 text-left text-xs font-semibold text-gray-600 border-b">
+              <th className="p-3 text-left text-xs font-semibold text-gray-600 border-b px-5">
                 Title
               </th>
-              <th className="p-3 text-left text-xs font-semibold text-gray-600 border-b">
+              <th className="p-3 text-left text-xs font-semibold text-gray-600 border-b px-5">
                 Organization
               </th>
               <th className="p-3 text-left text-xs font-semibold text-gray-600 border-b">
@@ -148,7 +148,7 @@ function SduProposalTable({ onEditProposal }) {
               <tr>
                 <td
                   colSpan="5"
-                  className="text-center text-gray-500 py-8 italic"
+                  className="text-center text-gray-500 py-8 italic font-sans"
                 >
                   No proposals found.
                 </td>
@@ -165,7 +165,7 @@ function PopupModal({ isOpen, onClose, children }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-xs">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-xs font-sans">
       <div className="relative bg-white rounded-lg shadow-lg w-4/5 max-w-4xl max-h-[90vh] overflow-auto">
         <div className="absolute top-4 right-4">
           <button

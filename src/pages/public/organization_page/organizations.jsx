@@ -1,11 +1,21 @@
 import axios from "axios";
-import { React } from "react";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { API_ROUTER } from "../../../App";
 
+// Custom Skeleton Loader Component
+const SkeletonLoader = () => (
+  <div className="bg-white rounded-xl shadow-md overflow-hidden animate-pulse">
+    <div className="h-48 bg-gray-200"></div>
+    <div className="p-6">
+      <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
+      <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+      <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+    </div>
+  </div>
+);
+
 export default function OrganizationPage() {
-  const [hoveredIndex, setHoveredIndex] = useState(null);
   const [organizations, setOrganizations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -15,12 +25,11 @@ export default function OrganizationPage() {
       try {
         setLoading(true);
         const response = await axios.get(`${API_ROUTER}/get-all-organization`);
-        console.log("Fetched organizations:", response.data);
         setOrganizations(response.data);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching organizations:", error);
-        setError("Failed to load organizations");
+        setError("Failed to load organizations. Please try again later.");
         setLoading(false);
       }
     };
@@ -30,76 +39,138 @@ export default function OrganizationPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto pt-28 text-center">
-        <p className="text-lg">Loading organizations...</p>
+      <div className="relative min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 overflow-hidden">
+        <div className="fixed -left-20 -top-20 w-64 h-64 bg-blue-100 rounded-full filter blur-3xl opacity-30"></div>
+        <div className="fixed -right-20 -bottom-20 w-64 h-64 bg-indigo-100 rounded-full filter blur-3xl opacity-30"></div>
+
+        <div className="relative container mx-auto pt-28 px-4 max-w-6xl">
+          <h1 className="text-3xl font-bold text-center mb-12 text-gray-800">
+            Organizations
+          </h1>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[...Array(6)].map((_, index) => (
+              <SkeletonLoader key={index} />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto pt-28 text-center">
-        <p className="text-lg text-red-600">{error}</p>
+      <div className="relative min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 overflow-hidden">
+        <div className="fixed -left-20 -top-20 w-64 h-64 bg-blue-100 rounded-full filter blur-3xl opacity-30"></div>
+        <div className="fixed -right-20 -bottom-20 w-64 h-64 bg-indigo-100 rounded-full filter blur-3xl opacity-30"></div>
+
+        <div className="relative container mx-auto pt-28 px-4 text-center max-w-4xl">
+          <div className="bg-white/70 backdrop-blur-sm rounded-xl p-8 shadow-sm">
+            <h1 className="text-3xl font-bold text-gray-800 mb-4">
+              Organizations
+            </h1>
+            <p className="text-lg text-red-600">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto pt-28 px-4">
-      <h1 className="text-2xl font-bold text-center mb-8">Organizations</h1>
+    <div className="relative min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 overflow-hidden">
+      {/* Background blobs */}
+      <div className="fixed -left-20 -top-20 w-64 h-64 bg-blue-100 rounded-full filter blur-3xl opacity-30"></div>
+      <div className="fixed -right-20 -bottom-20 w-64 h-64 bg-indigo-100 rounded-full filter blur-3xl opacity-30"></div>
 
-      {organizations.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-lg text-gray-600">No organizations found.</p>
+      {/* Content container */}
+      <div className="relative container mx-auto pt-28 px-4 max-w-6xl">
+        <div className="text-center mb-12 bg-white/70 backdrop-blur-sm p-6 rounded-xl shadow-sm">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            Our Partner Organizations
+          </h1>
+          <p className="text-gray-600 max-w-2xl mx-auto">
+            Discover the diverse range of organizations collaborating with us to
+            make a difference.
+          </p>
         </div>
-      ) : (
-        <div className="flex flex-wrap gap-6 justify-center">
-          {organizations.map((org, index) => (
-            <Link
-              to={`/organization/profile/${org.org_name}`}
-              key={index}
-              className="group flex items-center h-48 transition-all duration-500 ease-in-out rounded-full overflow-hidden border border-gray-300 shadow cursor-pointer"
-              onMouseEnter={() => setHoveredIndex(index)}
-              onMouseLeave={() => setHoveredIndex(null)}
+
+        {organizations.length === 0 ? (
+          <div className="text-center py-12 bg-white/70 backdrop-blur-sm rounded-xl shadow-sm max-w-2xl mx-auto">
+            <svg
+              className="mx-auto h-12 w-12 text-gray-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              aria-hidden="true"
             >
-              {/* Logo Section */}
-              <div
-                className={`h-full w-48 flex justify-center items-center bg-white border-r border-gray-200 transition-all duration-500 ${
-                  hoveredIndex === index ? "rounded-l-full" : "rounded-full"
-                }`}
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+              />
+            </svg>
+            <h3 className="mt-2 text-lg font-medium text-gray-900">
+              No organizations found
+            </h3>
+            <p className="mt-1 text-gray-500">
+              There are currently no organizations registered in the system.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {organizations.map((org, index) => (
+              <Link
+                to={`/organization/profile/${org.org_name}`}
+                key={index}
+                className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
               >
-                <img
-                  src={`/${org.org_name}/Accreditation/Accreditation/photos/${org.logo}`}
-                  alt={`${org.org_name} logo`}
-                  className="w-48 h-48 rounded-full object-cover"
-                />
-              </div>
-
-              {/* Info Section */}
-              <div
-                className={`h-full flex items-center text-sm transition-all duration-500 overflow-hidden ${
-                  hoveredIndex === index
-                    ? "opacity-100 px-4 w-64"
-                    : "opacity-0 px-0 w-0"
-                }`}
-              >
-                <div className="text-gray-700 space-y-1">
-                  <p className="font-semibold">{org.org_name}</p>
-                  <p className="text-xs">Classification: {org.org_class}</p>
-                  {org.org_class === "Local" &&
-                    org.org_type?.Departments &&
-                    org.org_type.Departments.length > 0 && (
-                      <p className="text-xs">
-                        <strong>Department:</strong>{" "}
-                        {org.org_type.Departments[0].Department}
-                      </p>
-                    )}
+                <div className="relative h-48 bg-gray-100 flex items-center justify-center">
+                  <img
+                    src={`/${org.org_name}/Accreditation/Accreditation/photos/${org.logo}`}
+                    alt={`${org.org_name} logo`}
+                    className="w-32 h-32 object-contain transition-all duration-300 group-hover:scale-110"
+                    onError={(e) => {
+                      e.target.src =
+                        "https://via.placeholder.com/150?text=No+Logo";
+                    }}
+                  />
                 </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
+
+                <div className="p-6">
+                  <h3 className="text-xl font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">
+                    {org.org_name}
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    {org.org_class} Organization
+                  </p>
+
+                  <div className="mt-4 pt-4 border-t border-gray-100">
+                    {org.org_class === "Local" &&
+                      org.org_type?.Departments?.length > 0 && (
+                        <p className="text-sm text-gray-600">
+                          <span className="font-medium">Department:</span>{" "}
+                          {org.org_type.Departments[0].Department}
+                        </p>
+                      )}
+                  </div>
+
+                  <div className="mt-4 flex justify-end">
+                    <span className="text-sm font-medium text-blue-600 group-hover:text-blue-800 transition-colors">
+                      View details →
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
