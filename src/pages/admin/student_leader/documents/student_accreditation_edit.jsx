@@ -166,12 +166,12 @@ export default function StudentAccreditationDetailsView({ userData }) {
       {/* Header with org logo and main details */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-6 text-white">
         <div className="flex items-center space-x-4">
-          <div className="bg-white rounded-full p-2 h-16 w-16 flex items-center justify-center">
+          <div className="bg-white rounded-full h-16 w-16 flex items-center justify-center">
             {logo ? (
               <img
-                src={`/api/placeholder/80/80`}
-                alt={`${org_name} logo`}
-                className="h-12 w-12 object-contain rounded-full"
+                src={`/${org_name}/Accreditation/Accreditation/photos/${logo}`}
+                className="h-full rounded-full aspect-square"
+                alt="Logo"
               />
             ) : (
               <Building className="h-10 w-10 text-blue-600" />
@@ -230,7 +230,7 @@ export default function StudentAccreditationDetailsView({ userData }) {
       </div>
 
       {/* Tab Content */}
-      <div className="p-6">
+      <div className="p-6 overflow-auto">
         {activeTab === "overview" && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -405,7 +405,7 @@ export default function StudentAccreditationDetailsView({ userData }) {
 
         {activeTab === "requirements" && (
           <div>
-            <h3 className="font-semibold text-gray-700 mb-4 flex items-center">
+            <h3 className="font-semibold h-full text-gray-700 mb-4 flex items-center">
               <FileText className="w-5 h-5 mr-2 text-blue-500" />
               Accreditation Requirements
             </h3>

@@ -4,6 +4,7 @@ import {
   InstutionalAccomplisments,
   ExternalAccomplishments,
 } from "../../models/documents.js";
+import { SystemLogs } from "../../models/users.js";
 
 export const UpdateInternalAccomplishmentNotesAdviser = async (req, res) => {
   try {
@@ -35,6 +36,10 @@ export const UpdateInternalAccomplishmentNotesAdviser = async (req, res) => {
         .status(404)
         .json({ message: "Institutional accomplishment not found" });
     }
+    await Log.create({
+      organization: updated?.organization, // Assuming your accomplishment has organization reference
+      action: "",
+    });
 
     return res.status(200).json({
       message: "Accomplishment updated successfully",

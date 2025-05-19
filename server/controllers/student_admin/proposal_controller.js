@@ -1,4 +1,5 @@
 import { Proposal } from "../../models/documents.js";
+import { SystemLogs } from "../../models/users.js";
 
 export const SubmitProposalsStudent = async (req, res) => {
   console.log("Creating new post...");
@@ -18,7 +19,6 @@ export const SubmitProposalsStudent = async (req, res) => {
       resolution_document,
     } = req.body;
 
-    console.log(req.body);
     const proposal = new Proposal({
       organization: organization_id,
       title,
@@ -54,6 +54,12 @@ export const SubmitProposalsStudent = async (req, res) => {
     console.log(proposal);
 
     const savedProposal = await proposal.save();
+
+    await SystemLogs.create({
+      organization: organization_id, // Assuming your accomplishment has organization reference
+      action: `${req.body.organizationName} Added New Proposal`,
+    });
+
     return res.status(201).json({
       message: "Proposal submitted successfully",
       proposal: savedProposal,
@@ -76,6 +82,7 @@ export const UpdateProposalsStudent = async (req, res) => {
 
     const { organization_id, title, event_date, description } = req.body;
 
+    console.log("nyenye", req.body);
     // Get the list of updated fields
     const updatedFields = req.body.updated_fields
       ? Array.isArray(req.body.updated_fields)
@@ -178,6 +185,11 @@ export const UpdateProposalsStudent = async (req, res) => {
     proposal.meeting = updatedMeeting;
 
     const updatedProposal = await proposal.save();
+
+    await SystemLogs.create({
+      organization: organization_id, // Assuming your accomplishment has organization reference
+      action: `${req.body.orgFolder} Updated Proposal ${title}`,
+    });
 
     return res.status(200).json({
       message: "Proposal updated successfully",

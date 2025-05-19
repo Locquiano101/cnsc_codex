@@ -3,19 +3,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { HandleLogout } from "../../../api/login_api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faAdd,
-  faComment,
-  faCommentAlt,
+  faClockRotateLeft,
   faFile,
   faFileAlt,
   faFolderOpen,
-  faGears,
   faHome,
-  faIcons,
   faPenToSquare,
-  faPerson,
-  faPersonArrowUpFromLine,
-  faPersonRifle,
   faRightFromBracket,
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
@@ -24,8 +17,8 @@ import StudentAdminHomePage from "./student_admin_home_page";
 import StudentAccomplishmentsTableView from "./documents/student_accomplishment_view";
 import StudentPosting from "./posts/student_posts_view";
 import StudentFiles from "./file_manager/file_view";
-import StudentDevelopmentUnitPage from "../SDU/app_SDU";
 import StudentAccreditationView from "./documents/student_accreditation_edit";
+import SystemLogsUI from "./system_logs";
 
 function PendingOrRevisionUI({ status, storedUser }) {
   return (
@@ -124,6 +117,8 @@ export default function StudentLeaderPage() {
         return <StudentAccomplishmentsTableView user={storedUser} />;
       case "post":
         return <StudentPosting user={storedUser} />;
+      case "logs":
+        return <SystemLogsUI user={storedUser} />;
       default:
         return <div className="p-4">Invalid selection</div>;
     }
@@ -166,7 +161,7 @@ export default function StudentLeaderPage() {
             { key: "proposals", icon: faFileAlt, label: "Proposals" },
             { key: "documents", icon: faFolderOpen, label: "Documents" },
             { key: "post", icon: faPenToSquare, label: "Post" },
-            { key: "settings", icon: faGears, label: "Settings" },
+            { key: "logs", icon: faClockRotateLeft, label: "logs" },
           ]
             .filter(({ key }) => {
               // Only allow "home" and "accreditations" if status is pending or revision

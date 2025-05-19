@@ -28,6 +28,9 @@ import {
   GetOrganizationByOrgName,
   GetSystemWideAccomplishments,
   GetProposalsSystemWide,
+  SystemWideSystemLogs,
+  AllSystemLogs,
+  localSystemLogs,
 } from "../controllers/general.js";
 
 import { UpdateProposalsNotesAdviser } from "../controllers/adviser_admin/document_controller.js";
@@ -77,6 +80,11 @@ import {
 const upload = multer();
 
 const router = express.Router();
+
+//logs
+router.get("/logs", AllSystemLogs);
+router.get("/logs/:organizationId", localSystemLogs);
+router.get("/logs/system-wide", SystemWideSystemLogs);
 
 /* GENERAL ROUTE */
 router.post("/login", Login);

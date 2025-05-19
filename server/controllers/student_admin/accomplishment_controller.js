@@ -4,6 +4,7 @@ import {
   InstutionalAccomplisments,
   ExternalAccomplishments,
 } from "../../models/documents.js";
+import { SystemLogs } from "../../models/users.js";
 
 /**
  * Expects multer to handle:
@@ -32,6 +33,7 @@ export const SubmitProposedAccomplishments = async (req, res) => {
     } = req.body;
 
     console.log(req.body);
+
     const accomplishment = new ProposedAccomplishments({
       organization,
       over_all_status: "Pending",
@@ -70,6 +72,7 @@ export const SubmitProposedAccomplishments = async (req, res) => {
     });
 
     const saved = await accomplishment.save();
+
     return res.status(201).json({
       message: "Accomplished activity submitted successfully",
       activity: saved,
@@ -97,6 +100,7 @@ export const SubmitInstutionalAccomplisments = async (req, res) => {
       photo_documentations,
     } = req.body;
 
+    console.log(req.body);
     const docs = {
       narrative_report,
       attendance_sheet,
@@ -120,6 +124,10 @@ export const SubmitInstutionalAccomplisments = async (req, res) => {
 
     const saved = await activity.save();
 
+    await SystemLogs.create({
+      organization, // Assuming your accomplishment has organization reference
+      action: `${req.body.orgFolder} Added New Instutional Accomplishment. Title :${event_title}`,
+    });
     return res.status(201).json({
       message: "Institutional activity submitted successfully",
       activity: saved,

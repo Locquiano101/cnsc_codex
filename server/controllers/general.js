@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { Organizations, Users } from "../models/users.js";
+import { Organizations, SystemLogs, Users } from "../models/users.js";
 import dotenv from "dotenv";
 import {
   Proposal,
@@ -96,6 +96,65 @@ export const GetOrganizationByOrgName = async (req, res) => {
   } catch (error) {
     console.error("Error fetching organization:", error);
     res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+export const localSystemLogs = async (req, res) => {
+  const { organizationId } = req.params;
+
+  try {
+    const Logs = await SystemLogs.find({ organization: organizationId }) // ← filter by org
+      .populate("organization") // populate only name
+      .sort({ event_date: -1 }); // most recent first
+
+    return res.status(200).json({ "System Logs": Logs });
+  } catch (err) {
+    console.error("Error fetching proposals:", err);
+    return res
+      .status(500)
+      .json({ message: "Server error", error: err.message });
+  }
+};
+
+export const DepartmenalSystemLogs = async (req, res) => {};
+
+export const SystemWideSystemLogs = async (req, res) => {
+  try {
+    // First find all system-wide organizations
+    const systemWideOrgs = await Organizations.find({
+      org_class: "System-wide",
+    });
+    const orgIds = systemWideOrgs.map((org) => org._id);
+
+    // Then find proposals from those organizations
+    const systemWideLogs = await SystemLogs.find({
+      organization: { $in: orgIds },
+    })
+      .populate("organization")
+      .sort({ event_date: -1 }); // most recent first
+
+    return res.status(200).json({ "System Logs": systemWideLogs });
+  } catch (err) {
+    console.error("Error fetching system-wide proposals:", err);
+    return res
+      .status(500)
+      .json({ message: "Server error", error: err.message });
+  }
+};
+
+export const AllSystemLogs = async (req, res) => {
+  try {
+    // Then find proposals from those organizations
+    const systemWideLogs = await SystemLogs.find()
+      .populate("organization")
+      .sort({ event_date: -1 }); // most recent first
+
+    return res.status(200).json({ "System Logs": systemWideLogs });
+  } catch (err) {
+    console.error("Error fetching system-wide proposals:", err);
+    return res
+      .status(500)
+      .json({ message: "Server error", error: err.message });
   }
 };
 

@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { stringify } from "uuid";
 
 const AccreditationStatusSchema = new mongoose.Schema(
   {
@@ -107,7 +106,19 @@ const FileSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+const LogSchema = new mongoose.Schema(
+  {
+    organization: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "organizations",
+    },
+    action: { type: String },
+  },
+  { timestamps: true }
+);
+
 const Users = mongoose.model("user", UserSchema);
+const SystemLogs = mongoose.model("system log", LogSchema);
 const Posts = mongoose.model("Posts", PostSchema);
 const PinnedFiles = mongoose.model("Pinned Files", FileSchema);
 const Organizations = mongoose.model("organizations", OrganizationSchema);
@@ -117,4 +128,4 @@ const Accreditation = mongoose.model(
   AccreditationStatusSchema
 );
 
-export { Users, Posts, PinnedFiles, Organizations, Accreditation };
+export { Users, SystemLogs, Posts, PinnedFiles, Organizations, Accreditation };
