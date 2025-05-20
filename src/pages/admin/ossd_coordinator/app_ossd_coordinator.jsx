@@ -17,6 +17,7 @@ import DeanOverview from "./ossd_home_page";
 import OssdAccomplishmentView from "./documents/ossd_accomplishment_view";
 import ProposalsEditOSSD from "./documents/ossd_proposal_view";
 import OssdOrganizationBoard from "./ossd_organization";
+import { DepartmentalLogsUI } from "../../../components/system_logs";
 
 export default function OSSDCoordinatorPage() {
   const [storedUser, setStoredUser] = useState(null);
@@ -85,6 +86,8 @@ export default function OSSDCoordinatorPage() {
             organizations={organizations}
           />
         );
+      case "logs":
+        return <DepartmentalLogsUI organization={organizations} />;
       case "proposals":
         return <ProposalsEditOSSD organization={organizations} />;
       default:
@@ -134,7 +137,20 @@ export default function OSSDCoordinatorPage() {
             </div>
           ))}
         </nav>
-
+        <hr className="mx-4 my-2" />
+        <div key="logs" className="text-sm font-medium">
+          <div
+            onClick={() => handleClick("logs")}
+            className={`flex items-center gap-3 px-6 py-3 cursor-pointer transition ${
+              activeContent === "logs"
+                ? "bg-[#DFE4EB] text-[#1B3A57] font-semibold"
+                : "hover:bg-[#2E4B6B] text-white"
+            }`}
+          >
+            <FontAwesomeIcon icon={faClockRotateLeft} />
+            Logs
+          </div>
+        </div>
         {/* Logout */}
         <div
           onClick={handleLogout}

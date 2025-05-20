@@ -28,9 +28,10 @@ import {
   GetOrganizationByOrgName,
   GetSystemWideAccomplishments,
   GetProposalsSystemWide,
-  SystemWideSystemLogs,
   AllSystemLogs,
   localSystemLogs,
+  DepartmentalSystemLogs,
+  SystemWideSystemLogs,
 } from "../controllers/general.js";
 
 import { UpdateProposalsNotesAdviser } from "../controllers/adviser_admin/document_controller.js";
@@ -85,7 +86,8 @@ const router = express.Router();
 //logs
 router.get("/logs", AllSystemLogs);
 router.get("/logs/:organizationId", localSystemLogs);
-router.get("/logs/system-wide", SystemWideSystemLogs);
+router.post("/logs/departmental", DepartmentalSystemLogs);
+router.get("/system-wide-logs", SystemWideSystemLogs);
 
 /* GENERAL ROUTE */
 router.post("/login", Login);

@@ -13,13 +13,13 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { API_ROUTER } from "../../../App";
-import DeanOverview from "./dean_admin_home_page";
 import DeanOrganizationBoard from "./dean_organization";
 import ProposalSectionDean from "./documents/dean_proposal_view";
+import { DepartmentalLogsUI } from "../../../components/system_logs";
 
 export default function DeanAdminPage() {
   const [storedUser, setStoredUser] = useState(null);
-  const [activeContent, setActiveContent] = useState("proposals");
+  const [activeContent, setActiveContent] = useState("organizations");
   const [organizations, setOrganizations] = useState([]);
   const [showDocumentSubmenu, setShowDocumentSubmenu] = useState(false);
   const [activeDocumentSubContent, setActiveDocumentSubContent] =
@@ -75,16 +75,19 @@ export default function DeanAdminPage() {
 
   const renderContent = () => {
     switch (activeContent) {
-      case "home":
-        return <DeanOverview organizations={organizations} />;
       case "organizations":
-        return <DeanOrganizationBoard organizations={organizations} />;
+        return (
+          <DeanOrganizationBoard
+            organization={organizations}
+            user={storedUser}
+          />
+        );
       case "post":
         return <div className="p-4">Post content</div>;
       case "proposals":
         return <ProposalSectionDean organization={organizations} />;
-      case "settings":
-        return <div className="p-4">Settings content</div>;
+      case "logs":
+        return <DepartmentalLogsUI organization={organizations} />;
       default:
         return <div className="p-4">Invalid selection</div>;
     }
@@ -106,7 +109,6 @@ export default function DeanAdminPage() {
         {/* Navigation Items */}
         <nav className="flex flex-col space-y-1 text-sm font-medium">
           {[
-            { key: "home", label: "Reports / Dashboard", icon: faHome },
             { key: "organizations", label: "Organizations", icon: faUsers },
             { key: "proposals", label: "Proposals", icon: faFileAlt },
           ].map(({ key, label, icon }) => (

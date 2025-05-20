@@ -18,7 +18,7 @@ import StudentAccomplishmentsTableView from "./documents/student_accomplishment_
 import StudentPosting from "./posts/student_posts_view";
 import StudentFiles from "./file_manager/file_view";
 import StudentAccreditationView from "./documents/student_accreditation_view.jsx";
-import SystemLogsUI from "./system_logs";
+import { StudentSystemLogsUI } from "../../../components/system_logs.jsx";
 
 function PendingOrRevisionUI({ status, storedUser }) {
   return (
@@ -118,7 +118,7 @@ export default function StudentLeaderPage() {
       case "post":
         return <StudentPosting user={storedUser} />;
       case "logs":
-        return <SystemLogsUI user={storedUser} />;
+        return <StudentSystemLogsUI user={storedUser} />;
       default:
         return <div className="p-4">Invalid selection</div>;
     }

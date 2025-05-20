@@ -116,8 +116,39 @@ export const localSystemLogs = async (req, res) => {
   }
 };
 
-export const DepartmenalSystemLogs = async (req, res) => {};
+export const DepartmentalSystemLogs = async (req, res) => {
+  const { organizationIds } = req.body; // expecting an array
+  console.log(req.body);
 
+  if (!Array.isArray(organizationIds) || organizationIds.length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: "organizationIds must be a non-empty array.",
+    });
+  }
+
+  try {
+    const logs = await SystemLogs.find({
+      organization: { $in: organizationIds },
+    })
+      .populate({
+        path: "organization",
+        select: "name", // only populate the name field of the organization
+      })
+      .sort({ event_date: -1 }); // most recent first
+
+    return res.status(200).json({
+      data: logs,
+    });
+  } catch (err) {
+    console.error("Error fetching system logs:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch system logs",
+      error: err.message,
+    });
+  }
+};
 export const SystemWideSystemLogs = async (req, res) => {
   try {
     // First find all system-wide organizations
@@ -145,11 +176,11 @@ export const SystemWideSystemLogs = async (req, res) => {
 export const AllSystemLogs = async (req, res) => {
   try {
     // Then find proposals from those organizations
-    const systemWideLogs = await SystemLogs.find()
+    const Logs = await SystemLogs.find()
       .populate("organization")
       .sort({ event_date: -1 }); // most recent first
 
-    return res.status(200).json({ "System Logs": systemWideLogs });
+    return res.status(200).json(Logs);
   } catch (err) {
     console.error("Error fetching system-wide proposals:", err);
     return res

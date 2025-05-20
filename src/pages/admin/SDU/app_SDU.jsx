@@ -21,6 +21,11 @@ import SDUAccomplishmentMain from "./accomplishments/accomplishment_main";
 import AddStudentAccomplishmentReport from "../student_leader/documents/student_accomplishment_add";
 import SDUSystemAccomplishmentTableApproval from "./system_wide_document/accomplishments/view";
 import SduAdminProposalApproval from "./system_wide_document/proposals/view";
+import {
+  DepartmentalLogsUI,
+  StudentSystemLogsUI,
+  SystemWideLogsUI,
+} from "../../../components/system_logs";
 
 export default function StudentDevelopmentUnitPage() {
   const navigate = useNavigate();
@@ -66,7 +71,7 @@ export default function StudentDevelopmentUnitPage() {
       case "users":
         return <SDUAdminUserTableView />;
       case "logs":
-        return <>This is system logs</>;
+        return <SystemWideLogsUI />;
       case "settings":
         return <>This is settings content</>;
       default:
